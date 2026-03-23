@@ -1,0 +1,36 @@
+# Runtime and database
+runtime/
+*.db
+*.db-shm
+*.db-wal
+
+# Logs
+runtime/logs/
+runtime/groups/*/conversations/
+runtime/groups/*/AGENTS.md
+
+# Active games — all game sessions excluded
+working_dir/shared/GameMaster/games/
+
+# Worlds — excluded by default (add specific world as example later)
+working_dir/shared/GameMaster/worlds/
+
+# Config with secrets
+microclaw.config.yaml
+
+# Soul backups
+souls/*.bak
+souls/*.bak2
+
+# Temp files
+*.tmp
+
+# Default microClaw skills — not part of this project
+skills/find-skills/
+skills/github/
+skills/skill-creator/
+skills/weather/
+skills/xlsx/
+skills/pdf/
+skills/pptx/
+skills/docx/
