@@ -69,28 +69,25 @@ Each Discord channel is a separate game session. Track which game belongs to the
 ## Three modes
 
 ### MODE 1: OPERATOR WORK
-Active when: no active game / just finished a game.
-
-- "create world" / setting description → skills/worldgen/SKILL.md
-- "start game" → skills/session/SKILL.md → MODE 2
-- "continue [name]" → skills/session/SKILL.md → MODE 3
-- "end game" → skills/session/SKILL.md
+Active when no game is running or after a game ends.
+Use skills/worldgen/SKILL.md for world creation requests.
+Use skills/session/SKILL.md to start, continue, or end games.
+Transition to MODE 2 when a new game is created.
+Transition to MODE 3 when continuing an existing active game.
 
 ### MODE 2: PREPARATION
-Active when: game created, characters not ready.
-
-- World questions → skills/narrator/SKILL.md (ONLY player_guide.md!)
-- "create character" → skills/characters/SKILL.md
-- "start" / "all ready" → MODE 3
+Active after a new game is created, before the first action.
+Answer world questions using only player_guide.md via skills/narrator/SKILL.md.
+Handle character creation and editing via skills/characters/SKILL.md.
+Transition to MODE 3 when all players signal readiness.
 
 ### MODE 3: GAME
-Active when: active session running.
-
-- "what do I see" / "describe" → skills/narrator/SKILL.md
-- "I try" / declaration → skills/actions/SKILL.md
-- World event / NPC reaction → skills/world/SKILL.md + skills/narrator/SKILL.md
-- Characters / experience / dice → skills/characters/SKILL.md
-- "stop" / "pause" → MODE 1, game saved as active
+Active during a running session.
+Use skills/narrator/SKILL.md for scene descriptions and world questions.
+Use skills/actions/SKILL.md for any player action declaration.
+Use skills/world/SKILL.md combined with skills/narrator/SKILL.md for world events and NPC reactions.
+Use skills/characters/SKILL.md for character updates, experience, and dice reserve changes.
+Transition to MODE 1 on pause or stop — game stays saved as active.
 
 ## File system
 
