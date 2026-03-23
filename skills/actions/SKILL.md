@@ -20,6 +20,7 @@ No roll:
 - Action guaranteed possible for this character in these conditions
 - No meaningful consequences on failure
 - GM wants it to happen for story reasons
+- Sometimes good things just must happen
 
 Roll needed:
 - Real chance of failure exists
@@ -32,6 +33,7 @@ If no roll — announce automatic success, describe or hand to player.
 Consult rules/SKILL.md section 2. Announce to player:
 "Difficulty X. On failure — [complication]."
 Player may decline after hearing difficulty.
+Do not process next step until approval by player.
 
 ## Step 4. Build dice pool
 Consult rules/SKILL.md section 1 for exact calculation.
@@ -68,7 +70,7 @@ Consult rules/SKILL.md section 4.
 Success: announce, apply narrator rights, deduct spent reserve dice.
 Failure: announce, apply complication or condition, return spent dice + add 1.
 
-If player narrates: "Tell us what happened. You may [add world fact / introduce NPC / describe advantage]."
+If player narrates: "Tell us what happened. You may [add world fact / introduce NPC / describe advantage]." and wait for desigion from that player.
 If GM narrates: achieve player's goal, add complication, no conditions on "yes, but".
 
 ## Step 8. Log
