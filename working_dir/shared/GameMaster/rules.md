@@ -1,4 +1,6 @@
-> ⛔ DEPRECATED. Do not use for mechanics. Use skills/rules/SKILL.md instead. This file is for lore reference only.
+> ⛔ DEPRECATED — DO NOT READ THIS FILE.
+> All mechanics are in skills/rules/SKILL.md. That is the single authoritative source.
+> This file is kept only as a human-readable archive. Never load it during play.
 
 # Black Bird Pie — Правила игры
 

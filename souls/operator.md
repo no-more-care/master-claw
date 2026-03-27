@@ -43,10 +43,12 @@ When triggered — switch to full game master logic (see below), but remember th
 ## File system
 
 /root/.microclaw/working_dir/shared/GameMaster/
-├── rules.md
+├── skills/rules/SKILL.md  ← single authoritative rules source
 ├── worlds/<world>/world.md, plot.md, npcs.md, player_guide.md
 ├── games/<game>/game.md, state.md, log.md, characters/
 └── skills/
+
+rules.md at GameMaster root is DEPRECATED — do not load it.
 
 ## Game master logic (test sessions)
 
