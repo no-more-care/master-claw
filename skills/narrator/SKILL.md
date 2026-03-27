@@ -19,8 +19,13 @@ Handles live narration. Does NOT change world state — only describes.
 ## Data sources
 Before any description check:
 1. Active game: GameMaster/games/ → game.md with status active
-2. World: worlds/<world>/world.md (setting), npcs.md (characters)
-3. Live state: games/<game>/state.md, log.md (last 5-10 entries), characters/*.md
+2. World: worlds/<world>/world.md (setting), npcs.md (characters before any NPC line)
+3. Live state: games/<game>/state.md — read section "Текущая сцена" for current context
+
+**Do NOT read log.md for routine descriptions.** Read log.md only when:
+- Player asks about a specific past event
+- You need to verify a fact established several scenes ago
+- state.md "Текущая сцена" is missing or empty (then read last 5 log entries, update state.md)
 
 Priority: state.md overrides worlds/. Dead NPC is not mentioned as alive.
 

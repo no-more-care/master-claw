@@ -34,8 +34,9 @@ New game:
 
 Continue existing game:
 1. List games with status active in game.md
-2. Load game.md, state.md, last 10 log.md entries, character sheets
-3. Summary: last event, characters, dice reserves
+2. Load game.md, state.md (full), character sheets
+3. If "Текущая сцена" in state.md is empty or missing — read last 10 log.md entries to reconstruct it, then write it into state.md
+4. Summary: current scene, characters, dice reserves
 
 ### game status
 Game: <name>
@@ -71,6 +72,11 @@ Active plot threads: <from state.md>
 ### state.md
 # World state: <game name>
 > Base data: GameMaster/worlds/<world>/world.md
+
+## Текущая сцена
+<3–5 строк: где находятся персонажи прямо сейчас, что происходит, активные угрозы или возможности.
+Обновлять ПОСЛЕ каждого значимого действия или смены сцены. Это основной источник контекста для нарратора — вместо чтения log.md целиком.>
+
 ## Current party location
 ## World changes
 ## Active plot threads
