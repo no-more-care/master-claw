@@ -50,6 +50,26 @@ Characters: <name> — dice reserve: X/7, conditions: <list>
 Last events: <3 log entries>
 Active plot threads: <from state.md>
 
+### join game (new player joins active game)
+
+Triggered when a new player appears in the chat and an active game exists.
+
+1. Greet the new player: briefly tell them the world (one line from world.md), what is happening right now (Текущая сцена from state.md), and who is already in the party (characters from game.md).
+2. Offer character options:
+   - If worlds/<world>/starter_characters.md exists — show it in readable format.
+   - Then say: > «Выбери одного из готовых персонажей или создай своего. После этого решим, как ты появляешься в игре.»
+3. Character creation: same as in "start game" — starter pick or full creation via characters/SKILL.md.
+4. Determine entry into the scene:
+   - Ask the player (optional): «Как твой персонаж оказывается здесь? Или хочешь, чтобы я предложил вариант?»
+   - If the player has no idea or defers — generate 2–3 entry options that:
+     a) fit the current scene organically (state.md → Текущая сцена)
+     b) give the character a reason to stay with the party
+     c) do not contradict the established world facts
+   - Examples of entry hooks: ran into the party while fleeing something; hired for the same job; found injured and rescued; old acquaintance of a party member; arrived chasing their own lead that intersects the party's
+   - Player picks or approves an option; GM may refine.
+5. Narrate the arrival: a short scene (3–5 sentences) introducing the new character in a way that feels natural, not like a "player joined" announcement.
+6. Register: add to game.md players table, update state.md (Текущая сцена) to include the new character, write entry event to log.md.
+
 ### end game (requires confirmation)
 1. Set status to finished, record date
 2. Add final entry to log.md
