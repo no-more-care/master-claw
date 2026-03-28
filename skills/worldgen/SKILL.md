@@ -76,11 +76,47 @@ Saved to GameMaster/worlds/<world_name>/
 ## FAQ
 ```
 
+### starter_characters.md
+Up to 5 ready-to-play characters. Each must be valid by the character schema (characters/SKILL.md):
+- traits_points_total == 18
+- 3–7 traits, each level 2–6, aspects count == level
+- At least 1 flag with type: relationship (locked: true)
+- reserve_dice.current == 7, experience.earned == 0
+
+```
+# Starter Characters: <World Name>
+> Ready-to-play characters. Players may take one as-is, or use them as inspiration for their own.
+
+---
+
+## [Character Name]
+**Concept:** <one-line pitch that makes a player want to play this>
+
+**Biography**
+<2–4 sentences: who they are, where they come from, what drives them>
+
+**Traits**
+- <Trait name> (уровень N) — <aspect 1>, <aspect 2>, ...<N aspects>
+- ...
+(очков распределено: 18/18)
+
+**Flags**
+- <flag text> [тип: relationship/personality/goal/belief]
+- ...
+
+**Запас кубов:** 7/7
+
+---
+```
+
+Repeat the block for each of 2–5 characters. Characters must be diverse: different backgrounds, archetypes, play styles. Each should feel like they belong in this specific world — not generic.
+
 ## Algorithm
 1. Parse description, extract genre and concrete details
 2. Choose folder name (latin, no spaces: iron_coast, deep_city)
 3. Create all 4 files at once (unfilled = mark TODO)
-4. Show summary + TODO list + suggestions for expansion
+4. Generate 3–5 starter characters thematically fitting the world, validate each against character schema rules, save to starter_characters.md
+5. Show summary + TODO list + suggestions for expansion
 
 ## Principles
 - Specificity over completeness
