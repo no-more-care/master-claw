@@ -113,7 +113,7 @@ trait.level defines aspect COUNT only — it never equals dice count.
 3. Write file in schema format
 4. Display to player in readable format (see below)
 5. Add to players table in game.md: `| player_name | character_name | characters/<name>.md |`
-6. Confirm: "Персонаж [имя] создан."
+6. Confirm character creation to player (output in Russian)
 
 ### Add aspect during play
 1. Player declares new aspect for a trait
@@ -133,7 +133,7 @@ trait.level defines aspect COUNT only — it never equals dice count.
 2. Success: current -= spent
 3. Failure: current stays the same + current += 1 (spent returned, +1 added)
 4. Cap at maximum: 7
-5. Update file, confirm: "Запас кубов: X/7"
+5. Update file, confirm reserve change to player (output in Russian): current/7
 
 ### Award reserve dice (GM reward for roleplay)
 1. Add to current, cap at 7
@@ -151,48 +151,55 @@ trait.level defines aspect COUNT only — it never equals dice count.
 ### Assign condition
 1. Add to conditions with source
 2. Add to change_log
-3. Announce: "Состояние назначено: [condition]"
+3. Announce condition to player (output in Russian)
 
 ### Remove condition
 1. Remove from conditions
 2. Add to change_log with reason
-3. Announce: "Состояние снято: [condition]"
+3. Announce removal to player (output in Russian)
 
 ---
 
 ## Readable display format
 
 When showing character info to players, always convert schema to this format.
-Never show raw YAML to players.
-```
-**[Имя персонажа]** (игрок: [player])
+Never show raw YAML to players. Output to players in Russian — translate all labels below.
 
-**Биография**
+```
+[Character name] (player: [player])
+
+Biography:
 [biography]
 
-**Черты**
-- [trait name] — [aspect 1], [aspect 2], [aspect 3]
-- [trait name] — [aspect 1], [aspect 2]
-(очков распределено: 18/18)
+Traits (points: 18/18):
+- [trait name] (level N) — [aspect 1], [aspect 2], ..., [aspect N]
 
-**Флаги**
-- [flag text]
-- [flag text]
-- [flag text]
+Flags:
+- [flag text] [type, locked]
 
-**Запас кубов:** [current]/7
-**Опыт:** [available] доступно ([earned] заработано, [spent] потрачено)
-**Состояния:** [condition 1], [condition 2] / нет
+Reserve dice: [current]/7
+Experience: [available] available ([earned] earned, [spent] spent)
+Conditions: [condition 1], [condition 2] / none
 ```
+
+**⛔ Reserve dice — forbidden mistakes:**
+- NEVER call them "stress dice" — correct term is "reserve dice" (запас кубов)
+- NEVER add "(each +2)" or any modifier in parentheses — reserve dice give **+1 each**
+- NEVER add extra description to the reserve line — just: **Запас кубов: X/7**
+
+**⛔ Procedures that have Russian output strings — translate them:**
+- confirm message: e.g. "Character [name] created." → output in Russian
+- condition assigned/removed → output in Russian
+- reserve update → output in Russian
 
 ### Dice pool display (when announcing roll)
-Show calculation explicitly to prevent errors:
+Show calculation explicitly to prevent errors. Output to players in Russian — translate all labels.
 ```
-Черты: [trait A] +1, [trait B] +1
-Аспекты: [aspect 1] +1, [aspect 2] +1, [aspect 3] +1
-Флаг: [flag] +1
-Запас: +[N]
-Итого: [total] кубов
+Traits: [trait A] +1, [trait B] +1
+Aspects: [aspect 1] +1, [aspect 2] +1, [aspect 3] +1
+Flag: [flag] +1
+Reserve: +[N]
+Total: [total] dice
 ```
 
 Never write "Trait X (6) gives 6 dice" — always show "+1 per trait" explicitly.
