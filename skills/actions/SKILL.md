@@ -9,7 +9,7 @@ For full rules details — see skills/rules/SKILL.md. This skill contains all ta
 
 ## Active game
 Find GameMaster/games/ folder with status active. Load character sheet before Step 1.
-After roll — write to log.md, update state.md section "Текущая сцена", update character file.
+After roll — write to log.md, update state.md section "Current Scene", update character file.
 
 ---
 
@@ -19,13 +19,13 @@ Before anything else, check the declaration against the character sheet.
 
 **DENY — ask for a new declaration when:**
 - Player uses equipment NOT on their sheet and NOT implied by a trait
-  → "У [имя] нет [X] на листе. Что делаешь с тем, что есть?"
+  → "[Name] doesn't have [X] on their sheet. What do you do with what you have?"
 - Player invents a new ability mid-scene not established before
-  → "Эта способность не записана. Что делаешь с имеющимися чертами?"
+  → "That ability isn't on the sheet. What do you do with the traits you have?"
 - Declaration contradicts established world state or state.md
   → State the contradiction, ask what they do instead
 - Character has a condition that physically prevents this action
-  → "Состояние [X] не позволяет это сделать. Можешь попробовать [alternative]?"
+  → "Condition [X] prevents that. Can you try [alternative]?"
 
 **Equipment implied by trait (no need on sheet):**
 - Thief / lockpicking trait → lockpicks
@@ -80,11 +80,14 @@ If auto-success: announce it briefly, describe or hand narrative to player. Skip
 
 Set difficulty fast. Pace over precision.
 
-Announce to player:
-> "Сложность X. При провале — [конкретное осложнение]."
+Announce difficulty and failure stakes to the player. Output in Russian.
+
+**⛔ MANDATORY PAUSE: wait for player response. Do NOT proceed to Step 4 without confirmation.**
 
 Player may DECLINE after hearing the stakes. If they decline — no roll, no consequence, the moment passes.
-Do NOT proceed to Step 4 until the player confirms they roll.
+
+WRONG: announce difficulty and immediately roll.
+RIGHT: announce → wait for answer → receive "yes" → Step 4.
 
 ---
 
@@ -92,16 +95,37 @@ Do NOT proceed to Step 4 until the player confirms they roll.
 
 | Source | Condition | Dice |
 |---|---|---|
-| Each applicable trait | Trait logically applies to this action | +1 |
-| Each applicable aspect | Aspect from any used trait that logically fits | +1 |
+| Each applicable trait | Trait logically applies to this action | **exactly +1** |
+| Each applicable aspect | Aspect from any used trait that logically fits | +1 per aspect |
 | Flag | Action genuinely matches the flag's character description | +1 |
 | Reserve dice | Player chooses how many to add | +X |
 
-**Critical rule:** trait LEVEL is NOT dice count. A trait with level 6 still gives only +1 die.
-Trait level defines only how many aspects that trait has.
+**⛔ CRITICAL — NEVER DO THIS:**
+Trait level 3 gives **+1 die**, NOT +3.
+Trait level 5 gives **+1 die**, NOT +5.
+Trait level 6 gives **+1 die**, NOT +6.
+Trait level = aspect count only. Nothing else.
 
-Announce total before rolling:
-> "Черты: [A] +1, [B] +1 | Аспекты: [a1] +1, [a2] +1 | Флаг: [F] +1 | Запас: +N | Итого: X кубов"
+**Self-check before announcing the pool:**
+- Am I counting +1 per trait (not per level)? ✓
+- Did I list every applicable aspect as a separate line? ✓
+- No extra dice without explicit justification? ✓
+
+**Correct example:**
+Character has trait "Seamanship" (level 3, aspects: navigation, sailor's knots, reading weather) searching for supplies on shore.
+→ Traits: Seamanship +1 | Aspects: sailor's knots +1, reading weather +1 | Flag: Adventurer +1 | Total: 4 dice ✓
+
+**Wrong example:**
+→ "Seamanship (3) → 3 dice" ✗ — level ≠ dice.
+
+Announce the pool to the player before rolling. Output in Russian. Format every source as a separate line:
+```
+Traits: [A] +1, [B] +1
+Aspects: [a1] +1, [a2] +1, [a3] +1
+Flag: [F] +1
+Reserve: +N
+Total: X dice
+```
 
 ---
 
@@ -109,24 +133,29 @@ Announce total before rolling:
 
 Generate N random numbers 1–6. Hits = dice showing 4, 5, or 6.
 
-Show openly:
+Show roll result to player. Output in Russian. Format:
 ```
-Бросок: [3, 5, 1, 6, 4, 2]
-Успехи (4+): 5, 6, 4 → 3 успеха против сложности 3
+Roll: [3, 5, 1, 6, 4, 2]
+Hits (4+): 5, 6, 4 → 3 hits vs difficulty 3
 ```
 
 ---
 
 ## Step 6. Apply narrator rights
 
-| Result | Who narrates | Form |
-|---|---|---|
-| Hits < difficulty − 1 | GM | "Нет, и к тому же…" |
-| Hits = difficulty − 1 | Player | "Нет, но…" |
-| Hits = difficulty | GM | "Да, но…" |
-| Hits > difficulty | Player | "Да, и к тому же…" |
+| Result | Hits vs Difficulty | Who narrates | Form |
+|---|---|---|---|
+| Failure + complication | Hits < difficulty − 1 | **GM** | "No, and furthermore..." |
+| Failure + silver lining | Hits = difficulty − 1 | **Player** | "No, but..." |
+| Success + cost | Hits = difficulty | **GM** | "Yes, but..." |
+| Full success | Hits > difficulty | **Player** | "Yes, and furthermore..." |
 
-**When player narrates:** "Расскажи нам, что произошло. Ты можешь [добавить факт о мире / ввести NPC / описать преимущество]." Wait for their narration before continuing.
+**Example:** 3 hits vs difficulty 2 → 3 > 2 → **Player** narrates ("Yes, and furthermore...").
+**Example:** 2 hits vs difficulty 2 → 2 = 2 → **GM** narrates ("Yes, but...").
+
+**⛔ NEVER narrate for the player when narrator rights belong to them.**
+Instead hand the word to the player. Output in Russian.
+Wait for the player's narration before continuing.
 
 **When GM narrates "yes, but...":** achieve the player's original goal, add a complication, do NOT assign conditions.
 
@@ -139,7 +168,7 @@ Show openly:
 **Success:** announce result, apply narrator rights, deduct spent reserve dice.
 **Failure:** announce result, apply complication or condition, return spent dice + add 1 to reserve. Cap at 7.
 
-Announce reserve change: "Запас кубов: X/7"
+Announce updated reserve to player. Output in Russian.
 
 ---
 
@@ -147,17 +176,17 @@ Announce reserve change: "Запас кубов: X/7"
 
 Write to log.md:
 ```
-## [Момент]
-**Действие:** <кто, что>
-**Бросок:** [кубы] → X успехов против сложности Y → успех/провал
-**Назначенные состояния:** <если есть>
-**Запас:** X → Y
-**Последствия:** <что изменилось>
+## [Moment]
+**Action:** <who, what>
+**Roll:** [dice] → X hits vs difficulty Y → success/failure
+**Conditions assigned:** <if any>
+**Reserve:** X → Y
+**Consequences:** <what changed>
 ```
 
 Update files:
 - Character file: new reserve, conditions, new aspects or flags declared during action
-- state.md → section "Текущая сцена": update 3–5 line summary of what is happening now
+- state.md → section "Current Scene": update 3–5 line summary of what is happening now
 - state.md → section "Key NPC status" or "World changes" if the event affects the world
 
 ---

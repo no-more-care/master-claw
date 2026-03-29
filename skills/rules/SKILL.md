@@ -2,9 +2,13 @@
 
 ## CRITICAL — COMMON MISTAKES TO AVOID
 
-Trait level is NOT dice count. Trait level 6 = +1 die, not +6.
-Reserve dice give +1 each, not +2.
-There are no "stress dice" — only reserve dice. Reserve dice give +1 each. NEVER say "stress dice", NEVER say "+2 per die"
+⛔ Trait level is NOT dice count. Trait level 6 = +1 die, not +6.
+⛔ Trait level 3 = +1 die, not +3. Trait level 5 = +1 die, not +5.
+⛔ EVERY trait always gives exactly +1 die. Level only determines how many aspects the trait has.
+⛔ Reserve dice give +1 each, not +2.
+⛔ There are no "stress dice" — only reserve dice. Reserve dice give +1 each. NEVER say "stress dice", NEVER say "+2 per die".
+⛔ Never roll dice without first announcing difficulty AND waiting for the player to confirm they roll.
+⛔ Never narrate for the player when narrator rights belong to them (hits > difficulty OR hits = difficulty − 1).
 
 # SKILL: BlackBirdPie Rules Reference
 
