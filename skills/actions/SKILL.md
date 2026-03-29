@@ -143,15 +143,20 @@ Hits (4+): 5, 6, 4 → 3 hits vs difficulty 3
 
 ## Step 6. Apply narrator rights
 
-| Result | Hits vs Difficulty | Who narrates | Form |
+| Result | Comparison | Who narrates | Form |
 |---|---|---|---|
-| Failure + complication | Hits < difficulty − 1 | **GM** | "No, and furthermore..." |
-| Failure + silver lining | Hits = difficulty − 1 | **Player** | "No, but..." |
-| Success + cost | Hits = difficulty | **GM** | "Yes, but..." |
-| Full success | Hits > difficulty | **Player** | "Yes, and furthermore..." |
+| Failure + complication | Hits **<** difficulty − 1 | **GM** | "No, and furthermore..." |
+| Failure + silver lining | Hits **=** difficulty − 1 | **Player** | "No, but..." |
+| Success + cost | Hits **=** difficulty | **GM** | "Yes, but..." |
+| Full success | Hits **>** difficulty | **Player** | "Yes, and furthermore..." |
 
-**Example:** 3 hits vs difficulty 2 → 3 > 2 → **Player** narrates ("Yes, and furthermore...").
-**Example:** 2 hits vs difficulty 2 → 2 = 2 → **GM** narrates ("Yes, but...").
+**⛔ CRITICAL CHECK before assigning narrator rights:**
+Is hits strictly GREATER THAN difficulty? → Player narrates.
+Is hits EQUAL TO difficulty? → GM narrates. This is NOT a full success.
+
+**Example:** 3 hits vs difficulty 3 → 3 = 3 → **GM** narrates "Yes, but..." ← common mistake zone.
+**Example:** 4 hits vs difficulty 3 → 4 > 3 → **Player** narrates "Yes, and furthermore...".
+**Example:** 2 hits vs difficulty 3 → 2 = 3−1 → **Player** narrates "No, but...".
 
 **⛔ NEVER narrate for the player when narrator rights belong to them.**
 Instead hand the word to the player. Output in Russian.
