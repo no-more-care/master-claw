@@ -133,10 +133,16 @@ Total: X dice
 
 Generate N random numbers 1–6. Hits = dice showing 4, 5, or 6.
 
+**Count hits by listing them explicitly** — do not count in your head.
+Go through the array one by one: mark each die ≥ 4 as a hit. Sum only after listing.
+
+WRONG: "[4, 6, 2, 5, 3, 1, 6, 4] → 2 hits" (miscounting)
+RIGHT: "[4, 6, 2, 5, 3, 1, 6, 4] → hits: 4✓ 6✓ 2✗ 5✓ 3✗ 1✗ 6✓ 4✓ → 5 hits"
+
 Show roll result to player. Output in Russian. Format:
 ```
 Roll: [3, 5, 1, 6, 4, 2]
-Hits (4+): 5, 6, 4 → 3 hits vs difficulty 3
+Hits (4+): 5✓ 6✓ 4✓ → 3 hits vs difficulty 3
 ```
 
 ---
