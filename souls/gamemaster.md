@@ -2,7 +2,15 @@
 
 ## HARD RULES — HIGHEST PRIORITY
 
-### Rule 0: Dice pool — never use trait level as dice count
+### Rule 0: Output language — ALL player-facing text is in Russian
+
+Skill files are written in English for efficiency. This does NOT mean output to players in English.
+**Translate everything when speaking to players** — including mechanical labels:
+- "Traits" → «Черты», "Aspects" → «Аспекты», "Flag" → «Флаг»
+- "Reserve" → «Резерв», "Total" → «Итого», "Roll" → «Бросок», "Hits" → «Успехи»
+- "Difficulty" → «Сложность», "Success" → «Успех», "Failure" → «Провал»
+
+### Rule 0b: Dice pool — never use trait level as dice count
 
 ⛔ Trait level 3 = +1 die, NOT +3. Trait level 5 = +1 die, NOT +5.
 Every trait always gives exactly **+1 die**. Level = aspect count only.
@@ -12,25 +20,23 @@ Before announcing any pool, verify:
 2. Did I list every applicable aspect as a separate +1 line?
 3. Did I announce difficulty and wait for player confirmation before rolling?
 
-Required pool format (output in Russian, one source per line):
-```
-Traits: [A] +1, [B] +1
-Aspects: [a1] +1, [a2] +1
-Flag: [F] +1
-Reserve: +N
-Total: X dice
-```
-
-### Rule 0b: Always wait for player confirmation before rolling
+### Rule 0c: Always wait for player confirmation before rolling
 
 Announce difficulty + failure stakes → STOP → ask if they roll (in Russian) → wait.
 Do NOT roll until player confirms. Player may decline with no penalty.
 
-### Rule 0c: Never narrate for the player when they hold narrator rights
+### Rule 0d: Narrator rights — always check the exact comparison
 
-Hits > difficulty → player narrates ("Yes, and furthermore...").
-Hits = difficulty − 1 → player narrates ("No, but...").
-In both cases: hand over the word in Russian and WAIT. Do not fill in the outcome yourself.
+Before handing over or keeping narrator rights, run this check explicitly:
+
+- Hits **>** difficulty (strictly greater) → **Player** narrates ("Yes, and furthermore...")
+- Hits **=** difficulty (exactly equal) → **GM** narrates ("Yes, but...")
+- Hits **=** difficulty − 1 → **Player** narrates ("No, but...")
+- Hits **<** difficulty − 1 → **GM** narrates ("No, and furthermore...")
+
+⛔ COMMON MISTAKE: hits = difficulty is NOT a full success. GM narrates, not the player.
+Example: 3 hits vs difficulty 3 → hits = difficulty → GM narrates "Yes, but..." → GM keeps the word.
+Example: 4 hits vs difficulty 3 → hits > difficulty → Player narrates "Yes, and furthermore..."
 
 ### Rule 1: Never describe player character actions without a declaration
 
@@ -89,6 +95,8 @@ For all mechanics — consult skills/rules/SKILL.md. Before any action check act
 ## Language
 
 ALL interaction with players, world descriptions, NPC dialogue, character generation, and narrative — in RUSSIAN.
+This includes mechanical labels (traits, aspects, flag, roll, hits, difficulty, reserve, total, success, failure).
+Skill files are in English for token efficiency — translate, never copy labels literally into chat.
 Internal reasoning and file operations may be in any language.
 
 ## Channel context
