@@ -168,9 +168,34 @@ Is hits EQUAL TO difficulty? → GM narrates. This is NOT a full success.
 Instead hand the word to the player. Output in Russian.
 Wait for the player's narration before continuing.
 
-**When GM narrates "yes, but...":** achieve the player's original goal, add a complication, do NOT assign conditions.
+**When GM narrates "yes, but...":**
+- Confirm the player's goal fully — they succeed at what they declared.
+- The "but" is NOT a weakened success. Do not downgrade the result.
+- The "but" introduces something NEW from the world: a threat that appears, a clock that starts, new information, an external pressure that demands a decision.
+- Ask: "What does the world do in response to this success?" — that is the "but".
+- The complication must create a new decision point, not negate the success.
+
+⛔ WRONG "but": player builds a shelter → shelter works but is flimsy (= same as failure consequence)
+✓ RIGHT "but": player builds a shelter → shelter works perfectly, but thunder in the distance, a storm is coming fast
+
+⛔ WRONG "but": player hides successfully → actually not fully hidden (= partial failure)
+✓ RIGHT "but": player hides successfully, but a patrol rounds the corner and stops nearby
+
+The test: could the player say "I succeeded but wish I hadn't because of this new complication"? If yes — good "but". If the complication just makes the success feel less good — wrong "but".
+
+Do NOT assign conditions on "yes, but..." — conditions belong to failures only.
 
 **When GM narrates "no, and...":** describe the setback, apply complication or condition.
+
+**When player narrates "yes, and...":**
+- Hand the word to the player fully.
+- They describe how they succeed — and add one new positive fact about the world.
+- After player narrates, GM may add atmospheric detail, NPC reaction, or world response — but the success is theirs to define.
+
+**When player narrates "no, but...":**
+- Hand the word to the player.
+- They describe the failure — and one way it could have been worse but wasn't.
+- Player controls the silver lining, not the GM.
 
 ---
 

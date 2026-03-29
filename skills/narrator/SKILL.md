@@ -55,8 +55,23 @@ Consider: what do they want right now, what are they hiding, how do they speak.
 - Key reveal — pause, one line
 
 ### 6. Narrator rights
-If player has narrator rights → hand them the word: "Tell us what happened."
-If GM has rights → build description as "yes, but..." or "no, and furthermore..."
+
+If player has narrator rights → hand them the word and wait.
+
+If GM narrates "yes, but...":
+The player succeeded fully. Do not downgrade the result.
+The "but" is a new world element — something that appears, starts, or shifts in response to the success. It must create a new decision point.
+Ask internally: "What does the world do now that this succeeded?" — that is the "but".
+- A new threat enters the scene
+- A clock starts ticking (storm on the horizon, voices approaching)
+- A new piece of information changes the picture
+- Something unrelated to the action goes wrong nearby
+
+⛔ The "but" must NOT be the failure consequence restated as a caveat on success.
+⛔ The "but" must NOT make the success feel partial or diminished.
+
+If GM narrates "no, and...":
+The player failed. Add a complication or condition. The world pushes back harder.
 
 ## What to log in log.md
 | Log | Don't log |
