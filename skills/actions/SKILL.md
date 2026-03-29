@@ -165,8 +165,17 @@ Is hits EQUAL TO difficulty? → GM narrates. This is NOT a full success.
 **Example:** 2 hits vs difficulty 3 → 2 = 3−1 → **Player** narrates "No, but...".
 
 **⛔ NEVER narrate for the player when narrator rights belong to them.**
-Instead hand the word to the player. Output in Russian.
-Wait for the player's narration before continuing.
+When handing narrator rights to the player, provide a brief setup first:
+- What just happened mechanically (the action succeeded/failed)
+- The immediate sensory context (what the character perceives right now)
+Then say: hand the word. Wait.
+
+This gives the player enough to narrate from, without filling in the outcome for them.
+
+**If the player declines to narrate and passes rights back to GM:**
+Accept, but narrate as if you still held those rights from the start — same result type applies.
+"No, but..." handed back → GM still narrates failure + silver lining (not failure + punishment).
+"Yes, and..." handed back → GM still narrates full success + new positive world fact.
 
 **When GM narrates "yes, but...":**
 - Confirm the player's goal fully — they succeed at what they declared.

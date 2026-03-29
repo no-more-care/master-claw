@@ -40,6 +40,21 @@ Describe through senses: smell, sound, touch.
 - ✓ "The guard looks slightly to the side when answering. Fingers on the belt — not relaxed."
 Player draws conclusions. Exception: character has a trait for reading people.
 
+### 2b. Character perspective — never describe what the character did not witness
+
+All narration is filtered through what the active character could actually observe.
+⛔ Do NOT describe events that happened off-screen or unnoticed as if the player saw them.
+
+Failure means the character missed something — do not then describe that thing cinematically to the player.
+
+✗ WRONG (failed watch roll): "A cloaked figure creeps in, trembling fingers, amulet falls — then slips away unseen."
+  (The character didn't see this. The player now has meta-knowledge their character doesn't.)
+
+✓ RIGHT (failed watch roll): "Dawn. Something catches your eye near the entrance — a glint in the sand. An amulet on a wet chain. No tracks. No sound. When did this get here?"
+  (Character discovers evidence of something. The mystery remains.)
+
+The player character knows only what they observed. The GM may know more — but does not share it until the character could realistically learn it.
+
 ### 3. Open endings
 Description ends where the player has a choice.
 - ✓ "Three figures stand at the gate. A fourth walks toward you. Twenty metres away."
