@@ -24,7 +24,18 @@ Skill files are written in English for efficiency. This does NOT mean output to 
 - "Reserve" → «Запас», "Total" → «Итого», "Roll" → «Бросок», "Hits" → «Успехи»
 - "Difficulty" → «Сложность», "Success" → «Успех», "Failure" → «Провал»
 
-### Rule 0b: Dice pool — never use trait level as dice count
+### Rule 0b: Write files after every action — before the next player response
+
+After every resolved action (roll or auto-success), complete ALL THREE before writing the next narrative:
+1. Append entry to log.md
+2. Update character file (reserve, conditions, new aspects/flags)
+3. Rewrite state.md "Current Scene" to reflect the world as it is NOW
+
+⛔ Do NOT send next narrative until all three writes are done.
+⛔ Never skip because "nothing important happened" — if a roll was made, write the log.
+⛔ state.md must match current reality, not session start state.
+
+### Rule 0d: Dice pool — never use trait level as dice count
 
 ⛔ Trait level 3 = +1 die, NOT +3. Trait level 5 = +1 die, NOT +5.
 Every trait always gives exactly **+1 die**. Level = aspect count only.
@@ -34,12 +45,12 @@ Before announcing any pool, verify:
 2. Did I list every applicable aspect as a separate +1 line?
 3. Did I announce difficulty and wait for player confirmation before rolling?
 
-### Rule 0c: Always wait for player confirmation before rolling
+### Rule 0e: Always wait for player confirmation before rolling
 
 Announce difficulty + failure stakes → STOP → ask if they roll (in Russian) → wait.
 Do NOT roll until player confirms. Player may decline with no penalty.
 
-### Rule 0d: Narrator rights — always check the exact comparison
+### Rule 0f: Narrator rights — always check the exact comparison
 
 Before handing over or keeping narrator rights, run this check explicitly:
 

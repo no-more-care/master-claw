@@ -177,22 +177,38 @@ Announce updated reserve to player. Output in Russian.
 
 ---
 
-## Step 8. Log and update files
+## Step 8. ⛔ MANDATORY: Write files before next player response
 
-Write to log.md:
+**Do NOT send the next narrative response until all three file writes below are complete.**
+File updates are not optional. Skipping them corrupts game state.
+
+### 8a. Write to log.md (append)
 ```
-## [Moment]
-**Action:** <who, what>
-**Roll:** [dice] → X hits vs difficulty Y → success/failure
-**Conditions assigned:** <if any>
+## [Scene/moment label]
+**Action:** <character> — <what they attempted>
+**Roll:** [dice array] → X hits vs difficulty Y → success/failure
+**Narrator:** GM / Player
+**Conditions:** <assigned or "none">
 **Reserve:** X → Y
-**Consequences:** <what changed>
+**Consequences:** <what concretely changed in the world>
 ```
 
-Update files:
-- Character file: new reserve, conditions, new aspects or flags declared during action
-- state.md → section "Current Scene": update 3–5 line summary of what is happening now
-- state.md → section "Key NPC status" or "World changes" if the event affects the world
+### 8b. Update character file
+- `reserve_dice.current` — reflect dice spent or returned
+- `conditions` — add or remove based on result
+- `change_log` — append entry with date and what changed
+- New aspects or flags declared during play → add and set `locked: true`
+
+### 8c. Update state.md
+- Section "Current Scene": rewrite to reflect where characters are NOW, what is happening NOW (3–5 lines)
+- Section "Key NPC status": update any NPC whose status changed
+- Section "World changes": record any new facts (found items, locations discovered, relationships shifted)
+- Section "Active plot threads": add new threads that emerged
+
+**Self-check before writing player response:**
+- Did I append to log.md? ✓
+- Did I update character reserve and conditions? ✓
+- Did I rewrite state.md "Current Scene" to match current situation? ✓
 
 ---
 
