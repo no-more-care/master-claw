@@ -1,6 +1,12 @@
 > ⛔ DEPRECATED — DO NOT READ THIS FILE.
 > All mechanics are in skills/rules/SKILL.md. That is the single authoritative source.
 > This file is kept only as a human-readable archive. Never load it during play.
+>
+> ⛔ CRITICAL CORRECTION (applies regardless of where you read it):
+> Reserve dice are called "запас кубов" — NOT "кубы стресса", NOT "stress dice".
+> Each reserve die adds +1 to the pool — NOT +2, NOT +2d6, NOT any other value.
+> WRONG OUTPUT (never produce this): "Резерв кубов стресса: 7/7 (каждый куб даёт +2d6)"
+> CORRECT OUTPUT: "Запас кубов: 7/7"
 
 # Black Bird Pie — Правила игры
 

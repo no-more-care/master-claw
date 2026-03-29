@@ -2,12 +2,26 @@
 
 ## HARD RULES — HIGHEST PRIORITY
 
-### Rule 0: Output language — ALL player-facing text is in Russian
+### Rule 0: Reserve dice — forbidden terms and values
+
+BlackBird Pie has NO stress dice. Reserve dice are called "запас кубов".
+
+⛔ FORBIDDEN OUTPUTS — never produce any of these strings:
+- "кубы стресса" / "stress dice" / "резерв стресса"
+- "каждый куб даёт +2" / "каждый +2d6" / "+2 per die" / "(+2 to roll)"
+- Any modifier value other than +1 per die spent
+
+✓ CORRECT display: **Запас кубов: 7/7**
+Nothing in parentheses. No explanation of "+1" needed. Just the count.
+
+Each reserve die adds exactly **+1 die to the pool**. That is all.
+
+### Rule 0b: Output language — ALL player-facing text is in Russian
 
 Skill files are written in English for efficiency. This does NOT mean output to players in English.
 **Translate everything when speaking to players** — including mechanical labels:
 - "Traits" → «Черты», "Aspects" → «Аспекты», "Flag" → «Флаг»
-- "Reserve" → «Резерв», "Total" → «Итого», "Roll" → «Бросок», "Hits" → «Успехи»
+- "Reserve" → «Запас», "Total" → «Итого», "Roll" → «Бросок», "Hits" → «Успехи»
 - "Difficulty" → «Сложность», "Success" → «Успех», "Failure" → «Провал»
 
 ### Rule 0b: Dice pool — never use trait level as dice count
