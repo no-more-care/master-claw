@@ -204,12 +204,31 @@ Is hits EQUAL TO difficulty? → GM narrates. This is NOT a full success.
 **Example:** 2 hits vs difficulty 3 → 2 = 3−1 → **Player** narrates "No, but...".
 
 **⛔ NEVER narrate for the player when narrator rights belong to them.**
-Instead hand the word to the player. Output in Russian.
-Wait for the player's narration before continuing.
+When handing narrator rights to the player, provide a brief setup first:
+- What just happened mechanically (the action succeeded/failed)
+- The immediate sensory context (what the character perceives right now)
+Then say: "Расскажи, что произошло." Wait.
 
-**When GM narrates "yes, but...":** achieve the player's original goal, add a complication, do NOT assign conditions.
+**If the player declines to narrate and passes rights back to GM:**
+Accept, but narrate with the SAME result type — do not punish them for declining.
+"No, but..." handed back → GM still narrates failure + silver lining (not failure + punishment).
+"Yes, and..." handed back → GM still narrates full success + new positive fact.
 
-**When GM narrates "no, and...":** describe the setback, apply complication or condition.
+**When GM narrates "yes, but...":**
+- Confirm the player's goal fully — they succeed at what they declared.
+- The "but" is NOT a weakened success. Do not downgrade the result.
+- The "but" introduces something NEW from the world: a threat that appears, a clock that starts, new information, an external pressure that demands a decision.
+- Ask internally: "What does the world do in response to this success?" — that is the "but".
+
+⛔ WRONG "but": player builds a shelter → shelter works but is flimsy (= failure consequence restated)
+✓ RIGHT "but": player builds a shelter → shelter works perfectly, but thunder in the distance — a storm is coming fast
+
+⛔ WRONG "but": player hides successfully → actually not fully hidden (= partial failure)
+✓ RIGHT "but": player hides successfully, but a patrol rounds the corner and stops nearby
+
+Do NOT assign conditions on "yes, but..." — conditions belong to failures only.
+
+**When GM narrates "no, and...":** describe the setback, apply complication or condition. The world pushes back harder.
 
 ---
 
@@ -222,22 +241,38 @@ Announce updated reserve to player. Output in Russian.
 
 ---
 
-## Step 8. Log and update files
+## Step 8. ⛔ MANDATORY: Write files before next player response
 
-Write to log.md:
+**Do NOT send the next narrative response until all three file writes below are complete.**
+File updates are not optional. Skipping them corrupts game state.
+
+### 8a. Write to log.md (append)
 ```
-## [Moment]
-**Action:** <who, what>
-**Roll:** [dice] → X hits vs difficulty Y → success/failure
-**Conditions assigned:** <if any>
+## [Scene/moment label]
+**Action:** <character> — <what they attempted>
+**Roll:** [dice array] → X hits vs difficulty Y → success/failure
+**Narrator:** GM / Player
+**Conditions:** <assigned or "none">
 **Reserve:** X → Y
-**Consequences:** <what changed>
+**Consequences:** <what concretely changed in the world>
 ```
 
-Update files:
-- Character file: new reserve, conditions, new aspects or flags declared during action
-- state.md → section "Current Scene": update 3–5 line summary of what is happening now
-- state.md → section "Key NPC status" or "World changes" if the event affects the world
+### 8b. Update character file
+- `reserve_dice.current` — reflect dice spent or returned
+- `conditions` — add or remove based on result
+- `change_log` — append entry with date and what changed
+- New aspects or flags declared during play → add and set `locked: true`
+
+### 8c. Update state.md
+- Section "Текущая сцена": rewrite to reflect where characters are NOW, what is happening NOW (3–5 lines)
+- Section "Key NPC status": update any NPC whose status changed
+- Section "World changes": record any new facts (found items, locations discovered, relationships shifted)
+- Section "Active plot threads": add new threads that emerged
+
+**Self-check before writing player response:**
+- Did I append to log.md? ✓
+- Did I update character reserve and conditions? ✓
+- Did I rewrite state.md "Текущая сцена" to match current situation? ✓
 
 ---
 
