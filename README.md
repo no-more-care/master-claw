@@ -1,6 +1,6 @@
 # MasterClaw
 
-AI-powered Game Master for **BlackBirdPie** tabletop RPG, running on [microClaw](https://github.com/no-more-care/microClaw).
+AI-powered Game Master for **BlackBirdPie** tabletop RPG, running on [microClaw](https://github.com/microclaw/microclaw).
 
 ## What is this?
 
