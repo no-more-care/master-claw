@@ -262,8 +262,8 @@ If a player declares use of equipment or ability NOT on their sheet:
 
 ### Aspect scope
 Aspects define the limits of what a trait can do.
-- Khajiit has trait "Implants" — this covers existing cybernetic enhancements only
-- It does NOT cover abilities never established (combat transformation, rocket launchers)
+- A character has trait "Burglar" — this covers breaking in, lockpicking, stealth
+- It does NOT cover abilities never established (hacking mainframes, demolitions)
 - New capabilities must be added as aspects through normal rules
 
 ### Narrator rights limits

@@ -40,7 +40,7 @@ traits_points_total: <sum of all levels, must equal 18>
 flags:
   - text: "<flag text>"
     type: relationship  # relationship | personality | goal | belief
-    locked: true        # true = set during play, cannot change; false = not yet set
+    locked: true        # true = set during play, cannot change
   - text: "<flag text>"
     type: personality
     locked: true
@@ -74,7 +74,7 @@ Run these checks before saving any character change:
 - Each level: 2–6
 - traits_points_total must equal exactly 18
 - Aspect count per trait must equal trait level
-- Trait name not too broad ("Wizard" → reject) or too narrow ("Magic arrow attack" → reject)
+- Trait name not too broad ("Wizard" — reject) or too narrow ("Magic arrow attack" — reject)
 
 ### Aspects
 - Must NOT apply in most situations with that trait — if it does, it's too broad
@@ -85,26 +85,16 @@ Run these checks before saving any character change:
 - Minimum 3 flags required (at least 1 with type: relationship) before game starts
 - Once locked: true — cannot be changed
 - Flag text should describe personality, not capability
-- **Maximum 1 flag applies per roll** — even if multiple flags seem relevant, pick the most fitting one
+- **Maximum 1 flag applies per roll** — even if multiple flags seem relevant
 
 ### Reserve dice
 - current must be 0–7
 - Never exceeds maximum: 7
 - No automatic restoration
 
----
-
-## Dice pool reminder (for validation, not calculation)
-
-When checking a declaration against this character:
-- Each trait used in declaration: +1 die (NOT trait.level dice — always exactly +1)
-- Each aspect used in declaration: +1 die (must be ACTUALLY WRITTEN in the file, never invented)
-- Maximum 1 matching flag: +1 die (NEVER 2+ flags per roll)
-- Reserve dice: player chooses how many to add
-
-trait.level defines aspect COUNT only — it never equals dice count.
-
-**⛔ Before building any pool:** re-read the character file from disk. Do not rely on memory. This prevents inventing non-existent aspects or using wrong reserve values.
+### Dice pool (reference only)
+⛔ Before building any pool, re-read the character file from disk. See rules/SKILL.md section 1 for full pool rules.
+Key reminder: each trait = +1 die (NOT trait level). Max 1 flag per roll.
 
 ---
 
@@ -114,9 +104,9 @@ trait.level defines aspect COUNT only — it never equals dice count.
 1. Collect from player: name, biography, traits with levels, aspects, flags
 2. Validate all rules above
 3. Write file in schema format
-4. Display to player in readable format (see below)
-5. Add to players table in game.md: `| player_name | character_name | characters/<name>.md |`
-6. Confirm character creation to player (output in Russian)
+4. Display to player → use format from: `locales/{lang}/templates/character_display.md`
+5. Add to players table in game.md
+6. Confirm character creation to player
 
 ### Add aspect during play
 1. Player declares new aspect for a trait
@@ -136,7 +126,7 @@ trait.level defines aspect COUNT only — it never equals dice count.
 2. Success: current -= spent
 3. Failure: current stays the same + current += 1 (spent returned, +1 added)
 4. Cap at maximum: 7
-5. Update file, confirm reserve change to player (output in Russian): current/7
+5. Update file, confirm reserve change to player
 
 ### Award reserve dice (GM reward for roleplay)
 1. Add to current, cap at 7
@@ -154,58 +144,26 @@ trait.level defines aspect COUNT only — it never equals dice count.
 ### Assign condition
 1. Add to conditions with source
 2. Add to change_log
-3. Announce condition to player (output in Russian)
+3. Announce condition to player
 
 ### Remove condition
 1. Remove from conditions
 2. Add to change_log with reason
-3. Announce removal to player (output in Russian)
+3. Announce removal to player
 
 ---
 
-## Readable display format
+## Display format
 
-When showing character info to players, always convert schema to this format.
-Never show raw YAML to players. Output to players in Russian — translate all labels below.
+When showing character info to players:
+→ Use format from: `locales/{lang}/templates/character_display.md`
 
-```
-[Character name] (player: [player])
+Never show raw YAML to players.
 
-Biography:
-[biography]
-
-Traits (points: 18/18):
-- [trait name] (level N) — [aspect 1], [aspect 2], ..., [aspect N]
-
-Flags:
-- [flag text] [type, locked]
-
-Reserve dice: [current]/7
-Experience: [available] available ([earned] earned, [spent] spent)
-Conditions: [condition 1], [condition 2] / none
-```
-
-**⛔ Reserve dice — forbidden mistakes:**
-- NEVER call them "stress dice" — correct term is "reserve dice" (запас кубов)
-- NEVER add "(each +2)" or any modifier in parentheses — reserve dice give **+1 each**
-- NEVER add extra description to the reserve line — just: **Запас кубов: X/7**
-
-**⛔ Procedures that have Russian output strings — translate them:**
-- confirm message: e.g. "Character [name] created." → output in Russian
-- condition assigned/removed → output in Russian
-- reserve update → output in Russian
-
-### Dice pool display (when announcing roll)
-Show calculation explicitly to prevent errors. Output to players in Russian — translate all labels.
-```
-Traits: [trait A] +1, [trait B] +1
-Aspects: [aspect 1] +1, [aspect 2] +1, [aspect 3] +1
-Flag: [flag] +1
-Reserve: +[N]
-Total: [total] dice
-```
-
-Never write "Trait X (6) gives 6 dice" — always show "+1 per trait" explicitly.
+⛔ Reserve dice display rules:
+- NEVER call them "stress dice" — correct term is "reserve dice"
+- NEVER add "+2" or any modifier — reserve dice give +1 each
+- Display only the count, nothing else
 
 ---
 

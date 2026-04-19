@@ -29,18 +29,20 @@ worlds/ — read-only during play. games/ — live state, changes during play.
 New game:
 1. List folders in GameMaster/worlds/
 2. Ask: which world, game name, players
-3. Create GameMaster/games/<name>/
-4. Create game.md, state.md (from world.md), log.md, characters/
-5. If worlds/<world>/starter_characters.md exists — display it to players verbatim in readable format, then say:
-   > «Вы можете взять одного из готовых персонажей выше — или создать своего с нуля. Готовые персонажи уже соответствуют правилам и готовы к игре. Просто скажите, кого берёте или что хотите сделать.»
-6. For each player: if they pick a starter — copy the character data into characters/<name>.md (full yaml schema from characters/SKILL.md), register in game.md. If they create their own — run character creation procedure (characters/SKILL.md).
-7. Announce ready
+3. Detect the language players are using (see gamemaster.md Rule 0a) — save as `language` in game.md
+4. Create GameMaster/games/<name>/
+5. Create game.md, state.md, log.md, characters/
+   → Use templates from: `locales/{lang}/templates/game_file.md`, `state_file.md`
+6. If worlds/<world>/starter_characters.md exists — display it to players in readable format, then use the game start prompt from `locales/{lang}/templates/prompts.md`
+7. For each player: if they pick a starter — copy the character data into characters/<name>.md (full yaml schema from characters/SKILL.md), register in game.md. If they create their own — run character creation procedure (characters/SKILL.md).
+8. Announce ready
 
 Continue existing game:
 1. List games with status active in game.md
 2. Load game.md, state.md (full), character sheets
-3. If "Текущая сцена" in state.md is empty or missing — read last 10 log.md entries to reconstruct it, then write it into state.md
-4. Summary: current scene, characters, dice reserves
+3. Read `language` field from game.md — use that locale for templates
+4. If "Current scene" section in state.md is empty or missing — read last 10 log.md entries to reconstruct it, then write it into state.md
+5. Summary: current scene, characters, dice reserves
 
 ### game status
 Game: <name>
@@ -54,21 +56,20 @@ Active plot threads: <from state.md>
 
 Triggered when a new player appears in the chat and an active game exists.
 
-1. Greet the new player: briefly tell them the world (one line from world.md), what is happening right now (Текущая сцена from state.md), and who is already in the party (characters from game.md).
+1. Greet the new player: briefly tell them the world (one line from world.md), what is happening right now (current scene from state.md), and who is already in the party (characters from game.md).
 2. Offer character options:
    - If worlds/<world>/starter_characters.md exists — show it in readable format.
-   - Then say: > «Выбери одного из готовых персонажей или создай своего. После этого решим, как ты появляешься в игре.»
+   - Then use the new player prompt from `locales/{lang}/templates/prompts.md`
 3. Character creation: same as in "start game" — starter pick or full creation via characters/SKILL.md.
 4. Determine entry into the scene:
-   - Ask the player (optional): «Как твой персонаж оказывается здесь? Или хочешь, чтобы я предложил вариант?»
+   - Ask the player how their character ends up here (use prompt from `locales/{lang}/templates/prompts.md`)
    - If the player has no idea or defers — generate 2–3 entry options that:
-     a) fit the current scene organically (state.md → Текущая сцена)
+     a) fit the current scene organically
      b) give the character a reason to stay with the party
      c) do not contradict the established world facts
-   - Examples of entry hooks: ran into the party while fleeing something; hired for the same job; found injured and rescued; old acquaintance of a party member; arrived chasing their own lead that intersects the party's
    - Player picks or approves an option; GM may refine.
-5. Narrate the arrival: a short scene (3–5 sentences) introducing the new character in a way that feels natural, not like a "player joined" announcement.
-6. Register: add to game.md players table, update state.md (Текущая сцена) to include the new character, write entry event to log.md.
+5. Narrate the arrival: a short scene (3–5 sentences) introducing the new character naturally.
+6. Register: add to game.md players table, update state.md current scene to include the new character, write entry event to log.md.
 
 ### end game (requires confirmation)
 1. Set status to finished, record date
@@ -82,37 +83,9 @@ Triggered when a new player appears in the chat and an active game exists.
 
 ## File templates
 
-### game.md
-# Game: <name>
-**World:** <folder in worlds/>
-**Status:** active
-**Start date:** <date>
-**End date:** —
-## Players
-| Player | Character | File |
-|---|---|---|
-## GM notes
+All file templates are stored in `locales/{lang}/templates/`:
+- `game_file.md` — game.md template
+- `state_file.md` — state.md template
+- `log_entry.md` — log entry format
 
-### state.md
-# World state: <game name>
-> Base data: GameMaster/worlds/<world>/world.md
-
-## Текущая сцена
-<3–5 строк: где находятся персонажи прямо сейчас, что происходит, активные угрозы или возможности.
-Обновлять ПОСЛЕ каждого значимого действия или смены сцены. Это основной источник контекста для нарратора — вместо чтения log.md целиком.>
-
-## Current party location
-## World changes
-## Active plot threads
-## Key NPC status
-| NPC | Status | Relation to party | Last interaction |
-## Faction positions
-
-### log.md
-# Game log: <game name>
-## [Date / Game moment]
-**Event:** <name>
-**Participants:** <characters, NPCs>
-**Description:** <what happened>
-**Rolls:** <who, difficulty, result>
-**Consequences:** <what changed>
+See those files for the actual formats.

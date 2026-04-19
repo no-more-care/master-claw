@@ -39,11 +39,4 @@ Priority: state.md always overrides worlds/.
 6. Update state.md if event changes the world
 
 ## Log format
-```
-## [Game moment]
-**Event:** <name>
-**Description:** <what happened>
-**Participants:** <characters, NPCs>
-**Consequences:** <what changed>
-**Flags triggered:** <if applicable>
-```
+→ Use world event log entry format from: `locales/{lang}/templates/log_entry.md`

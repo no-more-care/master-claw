@@ -83,31 +83,7 @@ Up to 5 ready-to-play characters. Each must be valid by the character schema (ch
 - At least 1 flag with type: relationship (locked: true)
 - reserve_dice.current == 7, experience.earned == 0
 
-```
-# Starter Characters: <World Name>
-> Ready-to-play characters. Players may take one as-is, or use them as inspiration for their own.
-
----
-
-## [Character Name]
-**Concept:** <one-line pitch that makes a player want to play this>
-
-**Biography**
-<2–4 sentences: who they are, where they come from, what drives them>
-
-**Traits**
-- <Trait name> (уровень N) — <aspect 1>, <aspect 2>, ...<N aspects>
-- ...
-(очков распределено: 18/18)
-
-**Flags**
-- <flag text> [тип: relationship/personality/goal/belief]
-- ...
-
-**Запас кубов:** 7/7
-
----
-```
+→ Use display format from: `locales/{lang}/templates/starter_character.md`
 
 Repeat the block for each of 2–5 characters. Characters must be diverse: different backgrounds, archetypes, play styles. Each should feel like they belong in this specific world — not generic.
 
