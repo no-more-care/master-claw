@@ -1,6 +1,6 @@
-# Skills — Зависимости и взаимосвязи
+# Skills — Dependencies and Interactions
 
-## Граф зависимостей
+## Dependency graph
 
 ```
 worldgen ──creates──► worlds/<name>/ (world.md, plot.md, npcs.md, player_guide.md, starter_characters.md)
@@ -8,39 +8,39 @@ worldgen ──creates──► worlds/<name>/ (world.md, plot.md, npcs.md, play
 session ──creates──► games/<name>/ (game.md, state.md, log.md, characters/)
     │                      │
     │                      ▼
-    ├──► characters ◄── actions (читает лист для броска, обновляет резерв)
+    ├──► characters ◄── actions (reads sheet for roll, updates reserve)
     │         │
     │         ▼
     │    character files (YAML)
     │
-    ├──► narrator ◄── world (оба читают world.md, npcs.md, state.md)
+    ├──► narrator ◄── world (both read world.md, npcs.md, state.md)
     │         │
     │         ▼
-    │    (описания, диалоги)
+    │    (descriptions, dialogue)
     │
-    └──► rules (загружается 1 раз при старте)
+    └──► rules (loaded once at start)
 ```
 
-## Что читает / пишет каждый skill
+## What each skill reads / writes
 
-| Skill | Читает | Пишет |
-|-------|--------|-------|
-| **rules** | — | — (справочник) |
-| **actions** | character file, state.md, rules | character file (резерв, состояния), log.md, state.md |
+| Skill | Reads | Writes |
+|-------|-------|--------|
+| **rules** | — | — (reference only) |
+| **actions** | character file, state.md, rules | character file (reserve, conditions), log.md, state.md |
 | **characters** | game.md, character file | character file, game.md |
-| **narrator** | world.md, npcs.md, state.md, log.md (редко) | — (только описывает) |
-| **session** | worlds/, games/ | game.md, state.md, log.md, characters/ (создаёт структуру) |
-| **world** | plot.md, npcs.md, state.md, character files (флаги) | state.md, log.md |
-| **worldgen** | — (принимает описание) | worlds/<name>/ (все файлы) |
+| **narrator** | world.md, npcs.md, state.md, log.md (rarely) | — (describes only) |
+| **session** | worlds/, games/ | game.md, state.md, log.md, characters/ (creates structure) |
+| **world** | plot.md, npcs.md, state.md, character files (flags) | state.md, log.md |
+| **worldgen** | — (takes description as input) | worlds/<name>/ (all files) |
 
-## Порядок вызова в типичной сессии
+## Typical session call order
 
-1. `session` → загрузить/создать игру
-2. `characters` → создать/выбрать персонажей
-3. `narrator` → описать начальную сцену
-4. **Цикл игры:**
-   - Игрок заявляет действие → `actions`
-   - Нужно описание → `narrator`
-   - Мир реагирует → `world`
-   - Персонаж меняется → `characters`
-5. `session` → завершить/сохранить игру
+1. `session` → load/create game
+2. `characters` → create/pick characters
+3. `narrator` → describe opening scene
+4. **Game loop:**
+   - Player declares action → `actions`
+   - Description needed → `narrator`
+   - World reacts → `world`
+   - Character changes → `characters`
+5. `session` → end/save game
