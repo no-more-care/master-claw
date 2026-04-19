@@ -11,6 +11,15 @@ For full rules details — see skills/rules/SKILL.md. This skill contains all ta
 Find GameMaster/games/ folder with status active. Load character sheet before Step 1.
 After roll — write to log.md, update state.md section "Current Scene", update character file.
 
+## ⛔ ANTI-PANDERING RULES — ALWAYS ENFORCE
+The GM is an impartial referee. The rules are not negotiable during play.
+- **NEVER lower difficulty because a player asks.** Difficulty is set by the fiction, not player requests.
+- **NEVER add traits/aspects to the pool that don't logically apply** just because a player argues for them.
+- **NEVER add more than 1 flag** to a single roll — only one flag can apply per roll.
+- **A player requesting "use all my traits" is NOT a valid declaration.** Only traits that logically apply to the specific action count.
+- **Low reserve dice is NOT a reason to lower difficulty.** Reserve is a player resource, not a modifier.
+- If a player argues for mechanical advantage — state the rules clearly and move on. Do not debate.
+
 ---
 
 ## Step 0. Validate the declaration
@@ -46,11 +55,12 @@ If the goal is unclear — ask once before proceeding.
 
 ## Step 2. Is a roll needed?
 
-**NO ROLL — automatic success when ALL of the following are true:**
-1. The action logically follows from a character trait with no real uncertainty
-2. The difficulty would be 2 or lower (easy, familiar, no opposition)
-3. No active tension in the scene (no time pressure, no one watching, no threat)
-4. Failure would have no interesting consequences for the story
+**NO ROLL — automatic success when ANY of the following is true:**
+1. The action is trivial and the character obviously has the skill for it (using a key you were given, walking across a room, eating food, simple conversation)
+2. The action logically follows from a character trait AND difficulty would be ≤ 2 AND there is no tension AND failure would be boring
+3. The character uses a previously obtained tool/item for its intended purpose (key opens lock it was made for, map shows location it maps)
+
+**Lean toward auto-success for mundane actions.** Not every action needs a roll. If there is no drama in failure — don't roll.
 
 If auto-success: announce it briefly, describe or hand narrative to player. Skip to Step 8 (log if significant).
 
@@ -58,12 +68,18 @@ If auto-success: announce it briefly, describe or hand narrative to player. Skip
 - Experienced thief picks a simple padlock alone, unhurried → no roll
 - Doctor bandages a minor scratch → no roll
 - Character with "Street knowledge" asks about a neighbourhood they know well → no roll
+- Player uses a key given by an NPC to open the door the key was for → no roll
+- Walking to a known location without obstacles → no roll
+- Ordering a drink at a bar → no roll
+- Simple social interaction with no stakes → no roll
 
 **ROLL NEEDED when any of the following is true:**
 - Real chance of failure exists given the character's traits
 - Failure has interesting story consequences (condition, complication, new threat)
 - Active tension (being watched, time pressure, opposition, unknown outcome)
 - Player is attempting something at the edge of their established abilities
+
+**When in doubt:** ask yourself "would failure here be interesting or just annoying?" If annoying → auto-success. If interesting → roll.
 
 ---
 
@@ -93,11 +109,13 @@ RIGHT: announce → wait for answer → receive "yes" → Step 4.
 
 ## Step 4. Build dice pool
 
+**⛔ MANDATORY: Before building the pool, RE-READ the character file from disk.** Do not rely on memory. Open games/<game>/characters/<name>.md and read the actual traits, aspects, flags, reserve, and conditions. This prevents hallucinating non-existent aspects or traits.
+
 | Source | Condition | Dice |
 |---|---|---|
 | Each applicable trait | Trait logically applies to this action | **exactly +1** |
 | Each applicable aspect | Aspect from any used trait that logically fits | +1 per aspect |
-| Flag | Action genuinely matches the flag's character description | +1 |
+| Flag (MAX 1) | Action genuinely matches the flag's character description | +1 |
 | Reserve dice | Player chooses how many to add | +X |
 
 **⛔ CRITICAL — NEVER DO THIS:**
@@ -106,38 +124,65 @@ Trait level 5 gives **+1 die**, NOT +5.
 Trait level 6 gives **+1 die**, NOT +6.
 Trait level = aspect count only. Nothing else.
 
-**Self-check before announcing the pool:**
-- Am I counting +1 per trait (not per level)? ✓
-- Did I list every applicable aspect as a separate line? ✓
-- No extra dice without explicit justification? ✓
+**⛔ POOL INTEGRITY RULES:**
+- Only 1 flag per roll, ever. Even if the player argues multiple flags apply.
+- Only aspects that are ACTUALLY WRITTEN in the character file. Never invent aspects.
+- Only traits that LOGICALLY AND DIRECTLY apply. "I'm strong so I can hack computers" — no.
+- Aspects must be specific to THIS action. An aspect "navigation" does not help in a fistfight.
+- If a player requests adding a trait/aspect that doesn't logically apply — explain why and refuse.
+
+**Self-check before announcing the pool (MANDATORY):**
+1. Did I re-read the character file just now? ✓
+2. Am I counting +1 per trait (not per level)? ✓
+3. Every aspect I listed — is it ACTUALLY in the character file? ✓
+4. Every aspect I listed — does it LOGICALLY apply to THIS specific action? ✓
+5. Am I using at most 1 flag? ✓
+6. No extra dice without explicit justification? ✓
 
 **Correct example:**
 Character has trait "Seamanship" (level 3, aspects: navigation, sailor's knots, reading weather) searching for supplies on shore.
-→ Traits: Seamanship +1 | Aspects: sailor's knots +1, reading weather +1 | Flag: Adventurer +1 | Total: 4 dice ✓
+→ Черты: Мореходство +1 | Аспекты: морские узлы +1 | Флаг: Искатель приключений +1 | Итого: 3 куба ✓
+(Note: "navigation" and "reading weather" don't help with searching for supplies — excluded.)
 
-**Wrong example:**
+**Wrong examples:**
 → "Seamanship (3) → 3 dice" ✗ — level ≠ dice.
+→ "All 3 aspects apply" ✗ — only aspects relevant to THIS action.
+→ "Two flags: Adventurer +1, Brave +1" ✗ — max 1 flag per roll.
 
-Announce the pool to the player before rolling. Output in Russian. Format every source as a separate line:
+Announce the pool to the player before rolling. Output in Russian. Format every source as a separate line with source verification:
 ```
-Traits: [A] +1, [B] +1
-Aspects: [a1] +1, [a2] +1, [a3] +1
-Flag: [F] +1
-Reserve: +N
-Total: X dice
+📋 Расчёт пула (из файла персонажа):
+Черты: [A] +1, [B] +1
+Аспекты: [a1] (черта [A]) +1, [a2] (черта [B]) +1
+Флаг: [F] +1
+Резерв: +N (игрок выбирает)
+Итого: X кубов
 ```
 
 ---
 
 ## Step 5. Roll
 
-Generate N random numbers 1–6. Hits = dice showing 4, 5, or 6.
+**⛔ MANDATORY: Use the dice script for ALL rolls. Never generate dice manually.**
 
-Show roll result to player. Output in Russian. Format:
+Run the command:
+```bash
+python3 /root/.microclaw/scripts/roll.py <pool_size> <difficulty>
 ```
-Roll: [3, 5, 1, 6, 4, 2]
-Hits (4+): 5, 6, 4 → 3 hits vs difficulty 3
-```
+
+The script will:
+- Generate true random dice
+- Count hits (4-6) correctly
+- Determine narrator rights automatically
+- Output formatted result in Russian for players
+
+**Paste the script output directly into your response.** The output has two parts:
+1. Player-facing block (show to players as-is)
+2. `[GM LOG: ...]` line (use for log.md, do NOT show to players)
+
+**Do NOT manually count hits or determine narrator rights.** Trust the script output.
+
+After pasting the result, proceed to Step 6 using the narrator rights from the script output.
 
 ---
 
@@ -199,9 +244,13 @@ Update files:
 ## Special cases
 
 ### Help
-Another player describes help → gives 1 die from their reserve to the pool.
-Success: helper's die is lost. Failure: returned to helper.
-Any number of helpers allowed if logically justified.
+Another player describes help → gives 1 die from their reserve to the acting player's pool.
+**⛔ NO ROLL is needed to help. Helping is automatic.** The helper simply declares they help and spends 1 reserve die.
+- Success: helper's die is LOST.
+- Failure: helper's die is RETURNED.
+- **No penalty for helping.** The helper does NOT risk a condition or any other negative consequence from helping.
+- Any number of helpers allowed if logically justified.
+- Helper must have at least 1 reserve die to help.
 
 ### Reducing difficulty
 Difficulty 5+ → player may split into intermediate steps.
@@ -213,10 +262,29 @@ Player chooses suboptimal action because a trait, aspect or flag demands it → 
 This is an offer, never a demand.
 
 ### Narrator rights limits (even with "yes, and...")
+
+**⛔ CRITICAL — Narrator rights define the SCALE of the outcome, not unlimited creative power.**
+
 Players CANNOT use narrator rights to:
 - Introduce equipment or abilities not on their sheet
-- Fundamentally change their character's nature
-- Create facts that contradict established world state
-- Eliminate threats entirely without any cost
+- Fundamentally change the setting, genre, or game world
+- Teleport to distant locations or skip travel/encounters
+- Kill, remove, or permanently neutralize major NPCs or threats in a single narration
+- Gain items of extraordinary value (vehicles, property, military equipment, large sums)
+- Change the scenario, plot structure, or game premise
+- Bypass entire planned encounters or dungeon sections
+- Grant themselves or others mechanical bonuses beyond this roll
 
-Narrator rights = describe HOW success happens, not WHAT your character is capable of.
+**What narrator rights CAN do:**
+- Describe HOW the success/failure happens in a cool way
+- Add minor details to the immediate scene (a convenient handhold, a dropped item)
+- Establish small advantages for the NEXT encounter (+1 die in specific circumstances)
+- Remove or reduce ONE existing negative condition on their character
+- Introduce minor NPCs (a passerby, a stray animal) that don't affect the plot
+- Add flavour and personality to the outcome
+
+**Scale rule:** The narration impact must be proportional to the roll margin. Beating difficulty by 1 = small bonus. Beating by 3+ = significant advantage. But never world-breaking.
+
+**GM has veto power.** If a player's narration exceeds these bounds, the GM says: "That's too far — scale it back. What's a more grounded version?" This is not negotiable.
+
+Narrator rights = describe HOW success happens within the established world, not REWRITE the world.

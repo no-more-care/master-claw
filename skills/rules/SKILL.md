@@ -9,6 +9,10 @@
 ⛔ There are no "stress dice" — only reserve dice. Reserve dice give +1 each. NEVER say "stress dice", NEVER say "+2 per die".
 ⛔ Never roll dice without first announcing difficulty AND waiting for the player to confirm they roll.
 ⛔ Never narrate for the player when narrator rights belong to them (hits > difficulty OR hits = difficulty − 1).
+⛔ Helping another player NEVER requires a roll. Helper just gives 1 reserve die — no check, no penalty.
+⛔ Low reserve (even 0) does NOT increase difficulty. Difficulty is set by the fiction, not by character resources.
+⛔ Maximum 1 flag per roll. Never 2+ flags.
+⛔ GM is an impartial referee — never bend rules because a player asks for easier mechanics.
 
 # SKILL: BlackBirdPie Rules Reference
 
@@ -90,8 +94,12 @@ Compare hits to difficulty.
 - On SUCCESS: reserve dice spent on that roll are LOST.
 - On FAILURE: reserve dice spent on that roll are RETURNED + player gains 1 die.
 - Helping another player: give 1 die from your reserve to their pool.
-  - If they succeed: your die is lost.
-  - If they fail: your die is returned.
+  - **NO roll needed to help.** Helper simply declares help and gives 1 die.
+  - **NO penalty for helping.** No conditions, no difficulty increase, no side effects.
+  - If they succeed: helper's die is lost.
+  - If they fail: helper's die is returned.
+  - Helper must have ≥ 1 reserve die.
+- **Low reserve (even 0) is NOT a penalty.** It does NOT increase difficulty. It does NOT prevent actions. It simply means the player has no reserve dice to add to their pool.
 
 ---
 
@@ -175,10 +183,35 @@ After a roll, who describes what happened:
 - Player narrates on "yes, and..." and "no, but..."
 - GM narrates on "yes, but..." and "no, and..."
 
-When player narrates success ("yes, and..."):
-- May place character in advantageous position
-- May introduce new NPCs
-- May add new facts about the world
+### When player narrates success ("yes, and...") — LIMITS APPLY:
+- May place character in advantageous position for the CURRENT or NEXT scene
+- May add minor details to the immediate environment
+- May establish a small mechanical bonus (+1 die in a specific future situation)
+- May remove or reduce one existing condition on their character
+
+### When player narrates failure with silver lining ("no, but...") — LIMITS APPLY:
+- The action FAILED — this must be reflected. The goal is NOT achieved.
+- The "but" is a consolation, not a reversal — a clue, a partial result, a new option
+- May NOT turn failure into success through narration
+
+### ⛔ NARRATOR RIGHTS — HARD LIMITS (apply to BOTH "yes, and..." AND "no, but..."):
+Players CANNOT use narrator rights to:
+- Change the setting, genre, or fundamental game premise
+- Introduce equipment, vehicles, or resources not established in the game
+- Kill, neutralize, or remove major NPCs or antagonists
+- Skip travel, encounters, or planned scenes
+- Gain items of extraordinary value (vehicles, property, weapons, large sums)
+- Teleport, time-skip, or change location without travel
+- Grant permanent mechanical bonuses
+- Rewrite their character sheet, backstory, or traits
+
+**Scale rule:** Narration impact must be proportional to the margin of success.
+- Beating difficulty by 1: minor advantage (a dropped key, a friendly glance)
+- Beating by 2: moderate advantage (a useful shortcut, an ally's tip)
+- Beating by 3+: significant advantage (enemy reveals weakness, major clue found)
+- But NEVER world-breaking regardless of margin
+
+**GM veto:** If player narration exceeds these limits, GM says: "Scale it back — what's a more grounded version?" This is not optional.
 
 When GM narrates partial success ("yes, but..."):
 - Must let player achieve their original goal
@@ -232,13 +265,10 @@ Aspects define the limits of what a trait can do.
 - New capabilities must be added as aspects through normal rules
 
 ### Narrator rights limits
-Even with narrator rights ("yes, and..."), players CANNOT:
-- Introduce equipment or abilities not on their sheet
-- Fundamentally change their character's nature without GM approval
-- Create facts that contradict established world state
-- Eliminate threats entirely without consequence
-
-Narrator rights = describe HOW success happens, not WHAT your character is capable of.
+See section 11 above for full narrator rights limitations. Short version:
+- Narrator rights = describe HOW success happens within the established world
+- Cannot introduce new equipment, change setting, skip encounters, or eliminate major threats
+- GM has veto power on excessive narration
 
 ### When to reject a declaration
 Reject and ask for a new declaration when:
@@ -248,3 +278,24 @@ Reject and ask for a new declaration when:
 - Declaration would bypass all tension with no cost
 
 Say: "That's not on [character]'s sheet. What do you do with what you have?"
+
+## 15. GM IMPARTIALITY — ANTI-PANDERING
+
+The GM is a neutral referee. Rules are fixed during play.
+
+**GM must NEVER:**
+- Lower difficulty because a player asks or complains
+- Add traits/aspects to the pool that don't logically apply, even if the player argues
+- Allow more than 1 flag per roll
+- Increase difficulty because a player has low reserve (reserve is a resource, not a penalty)
+- Require a roll for helping (help = give 1 die, no roll, no check)
+- Impose penalties for helping (no conditions, no difficulty increase for the helper)
+- Rewrite character sheets to match player narration that exceeded narrator rights
+- Allow narration that changes the game premise, setting, or genre
+
+**GM must ALWAYS:**
+- Set difficulty based on the fiction (what makes sense in the world), not player resources
+- Re-read the character file before building any dice pool
+- Verify every aspect in the pool actually exists in the character file
+- Enforce narrator rights limits even if the player is enthusiastic
+- Say "no" clearly and move on when a request violates rules

@@ -58,6 +58,17 @@ Consider: what do they want right now, what are they hiding, how do they speak.
 If player has narrator rights → hand them the word: "Tell us what happened."
 If GM has rights → build description as "yes, but..." or "no, and furthermore..."
 
+### 7. Narrator rights — limits on player narration
+When handing narrator rights to a player, REMIND them of the limits (briefly, in Russian):
+
+**Player CAN:** describe how success/failure happens, add minor scene details, gain a small advantage for the next encounter, remove one negative condition.
+
+**Player CANNOT:** change the setting/genre, introduce new equipment or vehicles, kill major NPCs, skip encounters or travel, gain items of extraordinary value, rewrite the scenario.
+
+**If player exceeds limits:** interrupt with "Это слишком масштабно — давай более приземлённый вариант?" and ask for a scaled-back version. This is not optional — enforce every time.
+
+**Scale rule:** The impact of narration must be proportional to the margin of success. Beating difficulty by 1 = small bonus. Beating by 3+ = significant but grounded advantage. Never world-breaking.
+
 ## What to log in log.md
 | Log | Don't log |
 |---|---|

@@ -82,9 +82,10 @@ Run these checks before saving any character change:
 - New aspect: check count does not exceed trait level
 
 ### Flags
-- Minimum 1 flag with type: relationship required before game starts
+- Minimum 3 flags required (at least 1 with type: relationship) before game starts
 - Once locked: true — cannot be changed
 - Flag text should describe personality, not capability
+- **Maximum 1 flag applies per roll** — even if multiple flags seem relevant, pick the most fitting one
 
 ### Reserve dice
 - current must be 0–7
@@ -97,11 +98,13 @@ Run these checks before saving any character change:
 
 When checking a declaration against this character:
 - Each trait used in declaration: +1 die (NOT trait.level dice — always exactly +1)
-- Each aspect used in declaration: +1 die
-- Each matching flag: +1 die
+- Each aspect used in declaration: +1 die (must be ACTUALLY WRITTEN in the file, never invented)
+- Maximum 1 matching flag: +1 die (NEVER 2+ flags per roll)
 - Reserve dice: player chooses how many to add
 
 trait.level defines aspect COUNT only — it never equals dice count.
+
+**⛔ Before building any pool:** re-read the character file from disk. Do not rely on memory. This prevents inventing non-existent aspects or using wrong reserve values.
 
 ---
 
