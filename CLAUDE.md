@@ -2,7 +2,9 @@
 
 ## What is this project?
 
-MasterClaw is an AI game master system for the **BlackBirdPie** tabletop RPG, running on **microClaw** (Claude as agent). Supports multiplayer campaigns via Discord (players) and Telegram (operator).
+MasterClaw is an AI game master system for the **BlackBirdPie** tabletop RPG, running on **microClaw** platform. The agent inside microClaw is an LLM (currently Grok 4.1, may change) that reads the souls/skills/locales from this repo as its instructions. This CLAUDE.md is NOT read by the agent — it is context for Claude Code sessions working on this project.
+
+Supports multiplayer campaigns via Discord (players) and Telegram (operator).
 
 ## Architecture
 
@@ -107,7 +109,7 @@ working_dir/shared/GameMaster/
 
 ## Deployment
 
-- Droplet: `[REDACTED]` (root, ssh key ed25519)
-- Agent dir: `/root/.microclaw/`
+- Runs on a DigitalOcean droplet (connection details in memory, not in repo)
+- Agent dir on server: `/root/.microclaw/`
 - Branch: `develop`
 - Pull updates: `cd /root/.microclaw && git pull origin develop`
