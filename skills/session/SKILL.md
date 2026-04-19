@@ -30,19 +30,21 @@ New game:
 1. List folders in GameMaster/worlds/
 2. Ask: which world, game name, players
 3. Detect the language players are using (see gamemaster.md Rule 0a) — save as `language` in game.md
-4. Create GameMaster/games/<name>/
-5. Create game.md, state.md, log.md, characters/
+4. Ask if there is a dedicated narrative channel. If yes, save the channel ID as `narrative_channel` in game.md. If no, set to "none".
+5. Create GameMaster/games/<name>/
+6. Create game.md, state.md, log.md, characters/
    → Use templates from: `locales/{lang}/templates/game_file.md`, `state_file.md`
-6. If worlds/<world>/starter_characters.md exists — display it to players in readable format, then use the game start prompt from `locales/{lang}/templates/prompts.md`
-7. For each player: if they pick a starter — copy the character data into characters/<name>.md (full yaml schema from characters/SKILL.md), register in game.md. If they create their own — run character creation procedure (characters/SKILL.md).
-8. Announce ready
+7. If worlds/<world>/starter_characters.md exists — display it to players in readable format, then use the game start prompt from `locales/{lang}/templates/prompts.md`
+8. For each player: if they pick a starter — copy the character data into characters/<name>.md (full yaml schema from characters/SKILL.md), register in game.md. If they create their own — run character creation procedure (characters/SKILL.md).
+9. Announce ready
 
 Continue existing game:
 1. List games with status active in game.md
 2. Load game.md, state.md (full), character sheets
 3. Read `language` field from game.md — use that locale for templates
-4. If "Current scene" section in state.md is empty or missing — read last 10 log.md entries to reconstruct it, then write it into state.md
-5. Summary: current scene, characters, dice reserves
+4. Read `narrative_channel` from game.md — if set, enable dual-channel mode (see skills/narrative/SKILL.md)
+5. If "Current scene" section in state.md is empty or missing — read last 10 log.md entries to reconstruct it, then write it into state.md
+6. Summary: current scene, characters, dice reserves
 
 ### game status
 Game: <name>

@@ -141,6 +141,11 @@ Accept and narrate with the SAME result type — do not punish for declining.
 
 ⛔ Narrator rights limits: see rules/SKILL.md section 11 for hard limits on what players can/cannot narrate.
 
+## Step 6b. Send narrative to narrative channel
+
+If `narrative_channel` is set in game.md → use `skills/narrative/SKILL.md`:
+Send the narrative outcome (scene description, action result prose) to the narrative channel via `send_message`. Do NOT include dice numbers, pool breakdown, or reserve info — only the story.
+
 ---
 
 ## Step 7. Apply result and update reserve

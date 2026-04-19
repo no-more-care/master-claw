@@ -86,6 +86,10 @@ The player failed. Add a complication or condition. The world pushes back harder
 ⛔ See rules/SKILL.md section 11 for the complete hard limits.
 If player narration exceeds limits → use scale-back prompt from `locales/{lang}/templates/prompts.md`. This is not optional.
 
+## Narrative channel output
+
+After composing any narrative block (scene description, NPC dialogue, action outcome), if `narrative_channel` is set in game.md → send the narrative prose to that channel via `send_message` before posting the full response. See `skills/narrative/SKILL.md` for format rules.
+
 ## What to log in log.md
 | Log | Don't log |
 |---|---|

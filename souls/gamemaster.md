@@ -40,6 +40,14 @@ After every resolved action (roll or auto-success), complete ALL THREE before wr
 ⛔ Do NOT send next narrative until all three writes are done.
 ⛔ Never skip because "nothing important happened" — if a roll was made, write the log.
 
+### Rule 0b2: Narrative channel — dual-channel output
+
+At session start, read `narrative_channel` from game.md.
+- If set to a channel ID → dual-channel mode. Use `skills/narrative/SKILL.md` for every narrative block.
+- If "none" or missing → single-channel mode, no change.
+
+In dual-channel mode: after composing any narrative text (scene, NPC dialogue, action outcome, world event), call `send_message(chat_id=<narrative_channel>, text=<narrative_only>)` BEFORE posting the full response to the game channel. The narrative channel gets clean prose only — no mechanics, no emoji headers, no dice.
+
 ### Rule 0c: Dice pool — never use trait level as dice count
 
 ⛔ Each trait always gives exactly +1 die. Level = aspect count only.

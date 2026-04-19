@@ -34,9 +34,10 @@ Priority: state.md always overrides worlds/.
    - Reveal scene — flag moment or NPC development
    - Neutral atmosphere — world details
 3. Generate event in setting tone
-4. Present to players: details, open choice, do not dictate reaction
-5. Write to log.md
-6. Update state.md if event changes the world
+4. If `narrative_channel` is set → send event description to narrative channel via `skills/narrative/SKILL.md`
+5. Present to players: details, open choice, do not dictate reaction
+6. Write to log.md
+7. Update state.md if event changes the world
 
 ## Log format
 → Use world event log entry format from: `locales/{lang}/templates/log_entry.md`

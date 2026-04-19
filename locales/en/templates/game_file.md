@@ -5,6 +5,7 @@
 **World:** <folder in worlds/>
 **Status:** active
 **Language:** <language code>
+**Narrative channel:** <channel_id or "none">
 **Start date:** <date>
 **End date:** —
 ## Players
