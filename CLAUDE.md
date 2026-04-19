@@ -2,39 +2,78 @@
 
 ## What is this project?
 
-MasterClaw — система AI-гейммастера для настольной RPG **BlackBirdPie**, работающая на платформе **microClaw** (Claude как агент). Поддерживает мультиплеерные кампании через Discord (игроки) и Telegram (оператор).
+MasterClaw is an AI game master system for the **BlackBirdPie** tabletop RPG, running on **microClaw** (Claude as agent). Supports multiplayer campaigns via Discord (players) and Telegram (operator).
 
 ## Architecture
 
-Три слоя:
-- **Souls** (`souls/`) — личности AI: `gamemaster.md` (Discord, для игроков) и `operator.md` (Telegram, для оператора)
-- **Skills** (`skills/`) — модульные процедуры механик (7 скиллов)
-- **Working directory** (`working_dir/`) — живые данные игр (миры, персонажи, логи, состояние)
+Four layers:
+- **Souls** (`souls/`) — AI personalities: `gamemaster.md` (Discord, players) and `operator.md` (Telegram, operator)
+- **Skills** (`skills/`) — modular procedure files (7 skills)
+- **Locales** (`locales/`) — display templates and GM phrases per language (`ru/`, `en/`)
+- **Working directory** (`working_dir/`) — live game data (worlds, characters, logs, state)
 
 ## Key files
 
 ```
-souls/gamemaster.md      — личность ГМ, 3 режима работы, жёсткие правила
-souls/operator.md        — личность оператора/менеджера
-skills/rules/SKILL.md    — ЕДИНСТВЕННЫЙ АВТОРИТЕТНЫЙ источник правил BlackBirdPie
-skills/actions/SKILL.md  — обработка заявок игроков (бросок, сложность, права рассказчика)
-skills/characters/SKILL.md — создание/управление персонажами (YAML-схема)
-skills/narrator/SKILL.md — нарративные описания, диалоги NPC
-skills/session/SKILL.md  — управление сессиями (старт, продолжение, архивация)
-skills/world/SKILL.md    — генерация событий мира, реакции NPC
-skills/worldgen/SKILL.md — генерация миров из описания (world.md, plot.md, npcs.md, player_guide.md)
-working_dir/shared/GameMaster/rules.md — DEPRECATED, не использовать
+souls/gamemaster.md        — GM personality, hard rules checklist, 3 operating modes
+souls/operator.md          — operator/manager personality
+
+skills/rules/SKILL.md      — SINGLE AUTHORITATIVE source for all BlackBirdPie rules
+skills/actions/SKILL.md    — procedure for processing player declarations (Steps 0-8)
+skills/characters/SKILL.md — character creation/management (YAML schema, validation)
+skills/narrator/SKILL.md   — narration principles, NPC dialogue, character perspective
+skills/session/SKILL.md    — session management (start, continue, join, end)
+skills/world/SKILL.md      — world event generation, NPC reactions
+skills/worldgen/SKILL.md   — world generation from description
+
+scripts/roll.py            — dice rolling script (true random, auto narrator rights)
+
+locales/{lang}/templates/  — display formats and GM phrases per language
+  character_display.md     — readable character format for players
+  dice_pool.md             — pool calculation display
+  starter_character.md     — starter character card
+  game_file.md             — game.md template
+  state_file.md            — state.md template
+  log_entry.md             — log entry format
+  prompts.md               — ready-to-use GM phrases
+
+working_dir/shared/GameMaster/rules.md — DEPRECATED, never use
 ```
 
-## Critical rules (repeat everywhere intentionally)
+## Design principles
 
-1. **Уровень черты != количество кубов.** Каждая подходящая черта = +1 куб, НЕ +уровень.
-2. **18 очков** — всегда сумма уровней черт персонажа.
-3. **7 кубов** — максимум резерва.
-4. **4-6 на d6** — это успех (hit).
-5. **Права рассказчика:** hits > diff → игрок ("Да, и..."), hits = diff → ГМ ("Да, но..."), hits = diff-1 → игрок ("Нет, но..."), hits < diff-1 → ГМ ("Нет, и...").
-6. **Всегда ждать подтверждения** игрока перед броском.
-7. **Весь текст для игроков — на русском.**
+### Single source of truth
+- `rules/SKILL.md` is the ONLY canonical source for game mechanics
+- Other skills reference rules, never duplicate them with full explanations
+- Character YAML schema lives only in `characters/SKILL.md`
+
+### Locale system
+- All display formats and GM phrases live in `locales/{lang}/templates/`
+- Skills reference templates via `locales/{lang}/templates/<name>.md`
+- Language auto-detected from players, persisted in `game.md` as `language: <code>`
+- Missing locale → translate English templates on the fly
+
+### Instruction files are English-only
+- All skill and soul files are written in English
+- No Russian/Cyrillic in instructions (except forbidden-string patterns in rules for detection)
+- No hardcoded character names — use generic `[Character A]`, `[Player B]`
+
+### Dice rolling
+- All rolls via `scripts/roll.py <pool_size> <difficulty>`
+- GM never generates dice manually — script handles random, hit counting, narrator rights
+- Script output has player-facing block + `[GM LOG: ...]` for internal logging
+
+## Critical rules (key numbers)
+
+1. **Trait level != dice count.** Each applicable trait = +1 die, NOT +level.
+2. **18 points** — always the sum of trait levels per character.
+3. **7 dice** — maximum reserve.
+4. **4-6 on d6** = hit.
+5. **Narrator rights:** hits > diff → player, hits = diff → GM, hits = diff-1 → player, hits < diff-1 → GM.
+6. **Always wait** for player confirmation before rolling.
+7. **Max 1 flag** per roll.
+8. **Help = give 1 die** from reserve, no roll needed, no penalty for helper.
+9. **GM is impartial** — never lower difficulty on request, never add non-applicable traits.
 
 ## File structure for games
 
@@ -43,21 +82,32 @@ working_dir/shared/GameMaster/
 ├── worlds/<world>/
 │   ├── world.md, npcs.md, plot.md, player_guide.md, starter_characters.md
 └── games/<game>/
-    ├── game.md, state.md, log.md
+    ├── game.md (includes language field), state.md, log.md
     └── characters/<character>.md
 ```
 
 ## Conventions
 
-- Skills написаны на английском (экономия токенов), вывод игрокам — на русском
-- plot.md — НИКОГДА не показывать игрокам
-- state.md переопределяет worlds/ (убитый NPC остаётся мёртвым)
-- Лист персонажа — закон (нельзя использовать то, чего нет в листе)
-- Резерв: успех = потеря потраченных кубов; провал = возврат + 1 (макс 7)
+- plot.md — NEVER show to players
+- state.md overrides worlds/ (dead NPC stays dead)
+- Character sheet is law (cannot use what's not on sheet)
+- Reserve: success = lose spent dice; failure = return + 1 (cap 7)
+- Mandatory file writes after every action: log.md, character file, state.md
+- Re-read character file before every pool calculation (prevents hallucinated aspects)
+- Re-read state.md + character files every 10-15 messages (prevents context drift)
 
 ## When editing skills
 
-- Не ломать YAML-схему персонажей в `characters/SKILL.md`
-- Сохранять паттерн повторения критических правил во всех файлах
-- Все процедуры — пошаговые, с валидацией на каждом шаге
-- Скиллы взаимосвязаны: actions использует characters, narrator читает world, session создаёт файлы для всех остальных
+- Do not break the YAML character schema in `characters/SKILL.md`
+- `rules/SKILL.md` is canonical — add rule details there, reference from other files
+- Keep procedures step-by-step with validation at each step
+- Skills are interdependent: actions uses characters, narrator reads world, session creates files for all others
+- Templates go in `locales/`, not inline in skill files
+- Examples must be generic (no real character/game names)
+
+## Deployment
+
+- Droplet: `[REDACTED]` (root, ssh key ed25519)
+- Agent dir: `/root/.microclaw/`
+- Branch: `develop`
+- Pull updates: `cd /root/.microclaw && git pull origin develop`
