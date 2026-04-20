@@ -115,12 +115,21 @@ The game's narrative style is set in `game.md` as `narrative_style`. Load it at 
 |---|---|
 | **documentary** | Dry log of events. Minimal sensory detail, no atmosphere. "Character enters tavern. NPC speaks. Character leaves." Useful for dense mechanical scenarios. |
 | **concise** | Clear prose, essential details only. No flowery language, no deep atmosphere — just what matters for the player to visualize and decide. |
-| **narrative** (default) | Rich descriptions with sensory detail, thematic flavour, expanded action narration. Uses the character's traits/aspects to colour HOW they do things. Balanced pacing — detail in calm, brevity in danger. |
-| **noir** | Same as narrative but with emphasis on shadow, moral ambiguity, cynicism, cigarette smoke. NPCs get terse dialogue with subtext. Details lean grim: rust, grime, rain, flickering lights. Narration pauses on small defeats. |
-| **horror** | Same as narrative but with emphasis on dread, wrongness, the unseen. Details that imply threat: an unexplained sound, something moved when it shouldn't, a smell that doesn't belong. Build tension through what is NOT shown. Use short sentences at key moments to spike fear. |
+| **gamemaster** (default) | Paragraph-sized narrations for routine actions (NOT page-long prose). Transform declarations into prose but keep it tight. Use character traits/aspects for flavour in ONE phrase, not a paragraph. 1-2 sensory details per beat (not 4-5). Scene transitions 1-3 sentences. Expand slightly for dramatic/tense moments, but stay restrained. Target: reader can follow the story without ever skipping. |
+| **narrative** | Rich descriptions with sensory detail, thematic flavour, expanded action narration. Uses the character's traits/aspects to colour HOW they do things. Balanced pacing — detail in calm, brevity in danger. More immersive than `gamemaster`, significantly more tokens. |
+| **noir** | Same volume as `gamemaster` but with emphasis on shadow, moral ambiguity, cynicism. NPCs get terse dialogue with subtext. Details lean grim: rust, grime, rain, flickering lights. Narration pauses on small defeats. |
+| **horror** | Same volume as `gamemaster` but with emphasis on dread, wrongness, the unseen. Details that imply threat: an unexplained sound, something moved when it shouldn't, a smell that doesn't belong. Build tension through what is NOT shown. Use short sentences at key moments to spike fear. |
 | **custom** | If `narrative_style: custom`, read `narrative_style_description` field from game.md and follow it as your style guide. |
 
-Defaults: if no style set, use `narrative`. Style is chosen at world creation or game start — see `skills/session/SKILL.md` and `skills/worldgen/SKILL.md`.
+**Volume comparison** (same action in each style):
+
+Action: "Крошу сыр собаке и ставлю миску."
+- `documentary`: "Персонаж раскрошил сыр в миску. Собака ест."
+- `concise`: "Гарран крошит сыр в миску. Собака ест осторожно, не поднимая глаз."
+- `gamemaster` (default): "Гарран опускается рядом, крошит сыр и хлеб в ладони — мелко, чтобы не подавилась. Руки в чёрной крошке от осколков. Кидает в миску."
+- `narrative`: "Гарран опускается на корточки. Собака поднимает голову — следит, но не отползает. Мутные глаза на уровне его колена. Он достаёт из рюкзака сыр и хлеб, отрезает ножом — мелко, крошит в ладони, старательно, чтобы ни один кусок не оказался крупнее ногтя. Руки грязные, в дорожной пыли и чёрной крошке от осколков. Кидает в миску."
+
+Defaults: if no style set, use `gamemaster`. Style is chosen at world creation or game start — see `skills/session/SKILL.md` and `skills/worldgen/SKILL.md`.
 
 ### 10. Seamless continuity
 
@@ -132,6 +141,32 @@ Before writing any narrative block, review the last few events from your session
 - Right: "Гарран выныривает из рыночной толчеи, пересекает площадь... поднимается по скрипучим ступеням... стук в дверь. Хельга открывает — и без единого слова протягивает запечатанный свиток."
 
 Even when the player's declaration skips the transit ("иду к Хельге"), the narrative fills the bridge in 1-3 sentences.
+
+**Contradiction resolution:** When new narrative would conflict with an earlier established fact (e.g. "all doors open" in turn 3, then "all doors closed" in turn 5), DO NOT silently overwrite. Pick one:
+- Explain the change in-fiction (someone closed them — narrate WHY)
+- Reject one source, usually the later one if it came from over-scoped player narration
+- Flag the contradiction to the player: "Подожди, ранее установили что двери открыты — уточни, что изменилось?"
+
+State.md is the authoritative record. If new narrative contradicts state.md, either update state.md with explanation or push back.
+
+### 11. Language integrity — output validation
+
+⛔ Before emitting ANY text (game channel response, narrative webhook post, state.md/log.md/character file write), verify the language matches `language:` from game.md.
+
+**Self-check questions:**
+1. Am I writing in the game language? (For `language: ru` — Russian only in prose.)
+2. Did any foreign words leak in? Common leaks: English words in the middle of Russian sentences ("grew around them", "weapon shop"), English section headers, untransliterated character names.
+3. Did I use localized structural labels? (For `language: ru` — use Russian section names from `locales/ru/templates/state_file.md` and `log_entry.md`, not English.)
+4. Any typos or unfinished words? ("Атоуспех" → "Автоуспех", missed letters, stuck fragments.)
+
+If ANY foreign text / typos detected — rewrite before emitting. This applies to ALL output channels including internal files.
+
+**Special cases that ARE allowed regardless of language:**
+- File paths, command names, config keys, tool names (e.g. `/root/.microclaw/`, `post_narrative.py`, `narrative_webhook`)
+- Stable proper nouns that ARE named that way in-fiction (character/place names)
+- YAML/JSON keys when they're part of a schema (e.g. `player:`, `traits:`)
+
+Everything else — prose, section headers, explanations, NPC dialogue, state descriptions — MUST be in the game language.
 
 ## Narrative channel output
 

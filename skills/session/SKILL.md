@@ -40,16 +40,17 @@ New game:
 
 4b. **⛔ MANDATORY — ASK the player about narrative style.** If the world (worlds/<world>/world.md) has a `default_narrative_style` field, use it as default and only confirm briefly. Otherwise, send this prompt:
    > "Какой стиль рассказа предпочитаете? Варианты:
+   > • `gamemaster` — компактный нарратив, абзац текста на обычное действие, подходит для большинства игр (по умолчанию)
    > • `documentary` — сухой лог событий
    > • `concise` — просто и по делу, без воды
-   > • `narrative` — развёрнуто, с атмосферой и деталями (по умолчанию)
+   > • `narrative` — развёрнуто, с атмосферой и деталями (дороже по токенам)
    > • `noir` — мрачный, циничный, с акцентом на тени и сомнения
    > • `horror` — напряжение, дурные предчувствия, неназванная угроза
    > • `custom` — опишите свой стиль словами
    >
-   > Выберите или опишите свой."
+   > Выберите или опишите свой (или просто `default` для gamemaster)."
 
-   Save the choice as `narrative_style` in game.md. If "custom", also save the player's description as `narrative_style_description`.
+   Save the choice as `narrative_style` in game.md. If "custom", also save the player's description as `narrative_style_description`. Default if unclear: `gamemaster`.
 5. Create GameMaster/games/<name>/
 6. Create game.md, state.md, log.md, characters/
    → Use templates from: `locales/{lang}/templates/game_file.md`, `state_file.md`

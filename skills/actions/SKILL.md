@@ -33,6 +33,32 @@ If declaration passes — proceed to Step 1.
 
 ---
 
+## Step 0b. Multi-part player message (narration + new declaration)
+
+Discord player messages often combine:
+- Resolution of PENDING narrator rights (player's narration of a previous roll)
+- AND a NEW action declaration
+
+⛔ When you detect both in one message, process them SEQUENTIALLY — do not discard or merge.
+
+**Detection heuristics:**
+- Pending narrator rights are active if the last resolved roll gave the player "Yes, and..." or "No, but..." AND they haven't narrated yet
+- Player's narration usually comes first as descriptive prose ("Я нахожу пару золотых слитков в песке")
+- New declaration follows as intent ("потом иду дальше / направляюсь к Хельге / осматриваю следующее")
+
+**Procedure:**
+1. **Process the narration first:**
+   - Validate against narrator rights limits (rules/SKILL.md section 11)
+   - If accepted: post player's narration to narrative webhook, append to log.md, update state.md current scene + world changes, update character file if relevant (new items, conditions).
+   - If rejected (over-scoped): respond with scale-back prompt in game channel, DO NOT process the new declaration yet — wait for player to revise
+2. **Then process the new declaration** — restart from Step 0 with the new intent.
+
+If unclear whether the message is a single narration or narration+declaration — ask: "Это часть наррации или уже новое действие? Если и то, и то — разделю."
+
+Never silently drop pending narration to jump to the next roll.
+
+---
+
 ## Step 1. Receive declaration
 
 Any player message describing an action = a declaration. Narrative style counts.

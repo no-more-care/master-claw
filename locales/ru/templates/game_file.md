@@ -6,7 +6,7 @@
 **Статус:** active
 **Язык:** <код языка>
 **Вебхук нарратива:** <Discord webhook URL или "none">
-**Стиль нарратива:** <documentary | concise | narrative | noir | horror | custom>
+**Стиль нарратива:** <gamemaster | documentary | concise | narrative | noir | horror | custom>  # по умолчанию: gamemaster
 **Описание стиля:** <произвольный текст, только если style = "custom">
 **Дата начала:** <дата>
 **Дата конца:** —

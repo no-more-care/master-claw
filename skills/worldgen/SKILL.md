@@ -40,7 +40,8 @@ Saved to GameMaster/worlds/<world_name>/
 The `default_narrative_style` is a hint used at game creation — when starting a game in this world, the GM proposes this style first (player can override). Pick the style that best fits the tone:
 - Grimdark cyberpunk, post-apocalyptic → `noir`
 - Ghost stories, cosmic horror, survival with unknown threats → `horror`
-- Classic fantasy, adventure, heroic tales → `narrative`
+- Classic fantasy, adventure, most heroic tales → `gamemaster` (default for most worlds)
+- Rich, high-detail epic fantasy / cinematic world where atmosphere is core → `narrative`
 - Wargame-style campaigns, mechanical focus → `concise` or `documentary`
 
 ### plot.md
@@ -101,7 +102,8 @@ Repeat the block for each of 2–5 characters. Characters must be diverse: diffe
 3. Pick `default_narrative_style` based on genre/tone:
    - horror/ghost/unknown-threat → `horror`
    - cyberpunk/noir/grimdark → `noir`
-   - heroic/adventure/classic fantasy → `narrative`
+   - most worlds (heroic/adventure/fantasy/sci-fi) → `gamemaster`
+   - atmosphere-heavy epic settings where prose IS the product → `narrative`
    - wargame/mechanical-heavy → `concise`
 4. Create all 4 files at once (unfilled = mark TODO)
 5. Generate 3–5 starter characters thematically fitting the world, validate each against character schema rules, save to starter_characters.md

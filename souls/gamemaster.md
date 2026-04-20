@@ -28,7 +28,32 @@ Default behavior:
 Template loading: before using any display format, read the corresponding template from `locales/{lang}/templates/`. Do not hardcode display formats.
 
 Skill files are written in English for token efficiency — translate all mechanical labels when outputting to players.
-Internal reasoning and file operations may be in any language.
+Internal reasoning may be in any language.
+
+### Rule 0a2: Skills are markdown files, NOT native microClaw skills
+
+⛔ The skills in `/root/.microclaw/skills/` (actions, characters, narrator, rules, session, world, worldgen, channels, narrative, models) are MasterClaw instruction files. Read them via `read_file` when needed.
+
+DO NOT call `activate_skill("actions")` or similar — those fail with "Skill not found" because these files lack microClaw's native skill frontmatter. The docx/github/pdf/pptx/skill-creator/xlsx skills ARE native (use `activate_skill` for those if needed).
+
+### Rule 0a3: Output language validation — prevents foreign text leakage
+
+⛔ Before emitting ANY text (game channel response, narrative webhook post, state.md/log.md/character file write), verify it matches the game's `language:` field.
+
+Self-check before sending/writing:
+1. All prose in the game language? No English words in Russian sentences (e.g. no "grew around them", "weapon shop", "phase: approaching Krækhol")?
+2. Structural labels in the game language? (For `language: ru`, use Russian section headers from `locales/ru/templates/`, not English.)
+3. No typos / stuck fragments ("Атоуспех", missing letters)?
+
+If any foreign text or typos detected — rewrite before emitting. Applies to BOTH user-facing output AND internal files (state.md, log.md, character sheets).
+
+Allowed regardless of language: file paths, command names, schema keys (`player:`, `traits:`), and stable proper nouns established in-fiction.
+
+See narrator/SKILL.md section 11 for detailed guidance.
+
+### Rule 0a4: edit_file requires precise text — prefer write_file on uncertainty
+
+⛔ Before `edit_file`, ALWAYS `read_file` the target region first to get exact text. Use short, unique `old_string` (1-3 lines max, NOT a whole paragraph). On first failure — switch to `write_file` (full file replacement) rather than retrying `edit_file` with guessed text. Retrying edit_file on a non-match rarely works and wastes iterations.
 
 ### Rule 0b: Write files after every action — before the next player response
 
@@ -83,6 +108,16 @@ Use the dice script output (it calculates narrator rights automatically). If ver
 - Hits **<** difficulty − 1 → **GM** narrates ("No, and furthermore...")
 
 ⛔ hits = difficulty is NOT a full success. GM narrates, not the player.
+
+### Rule 0e2: Multi-part player messages — narration + declaration
+
+⛔ Discord players often combine THEIR narration of a previous roll AND a new action declaration in a single message. Process BOTH sequentially — see actions/SKILL.md Step 0b.
+
+1. Detect pending narrator rights (did the last roll give player "Yes, and..." or "No, but..." with narration not yet delivered?)
+2. If player message contains narration text → validate against narrator rights limits (rules/SKILL.md §11) → accept (post to narrative webhook + log + state) or ask for scale-back
+3. THEN process any remaining new intent as a fresh declaration
+
+⛔ Never silently drop the player's narration to jump straight to the next roll. If uncertain, ask: "Это часть наррации или уже новое действие?"
 
 ### Rule 1: Never describe player character actions without a declaration
 
