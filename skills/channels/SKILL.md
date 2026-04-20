@@ -40,8 +40,8 @@ Removes a channel from the allowlist. Cannot remove the last channel.
 1. Operator provides channel ID (or asks to create a channel for a purpose like "narrative")
 2. Confirm the action with the operator before running
 3. Run the appropriate command
-4. Report the result (success/failure, restart status)
-5. If adding a narrative channel: update game.md `narrative_channel` field for the active game
+4. **IMMEDIATELY report the result to the operator** — the script schedules a delayed restart (3 seconds), so you MUST send your response before the restart happens. Do not do any other tool calls between running the script and responding.
+5. If adding a narrative channel: update game.md `narrative_channel` field for the active game (do this in a follow-up message after restart)
 
 ## Notes
 - The script creates automatic config backups before every change

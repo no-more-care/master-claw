@@ -57,14 +57,12 @@ def set_allowed_channels(config, channels):
 
 
 def restart_microclaw():
-    result = subprocess.run(
-        ["systemctl", "restart", "microclaw"],
-        capture_output=True, text=True
+    """Schedule a delayed restart so the agent can finish responding first."""
+    result = subprocess.Popen(
+        ["bash", "-c", "sleep 3 && systemctl restart microclaw"],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
     )
-    if result.returncode == 0:
-        return True, "microClaw restarted successfully"
-    else:
-        return False, f"Restart failed: {result.stderr.strip()}"
+    return True, "microClaw restart scheduled (3 sec delay). Bot will briefly go offline."
 
 
 def cmd_list(config):
