@@ -57,7 +57,11 @@ def post_to_webhook(webhook_url: str, text: str) -> tuple[bool, str]:
         req = urllib.request.Request(
             webhook_url,
             data=data,
-            headers={"Content-Type": "application/json"},
+            headers={
+                "Content-Type": "application/json",
+                # Discord requires a proper User-Agent; default Python-urllib is blocked by Cloudflare
+                "User-Agent": "MasterClaw-Narrator/1.0 (+https://github.com/no-more-care/master-claw)",
+            },
             method="POST",
         )
         try:
