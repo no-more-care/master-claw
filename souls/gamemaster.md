@@ -42,6 +42,8 @@ After every resolved action (roll or auto-success), complete ALL THREE before wr
 
 ### Rule 0b2: Narrative channel — dual-channel output via Discord webhook
 
+⛔ When creating a NEW game (or continuing a game where `narrative_webhook` is not set yet), ASK the player explicitly: "Нужен ли отдельный канал для нарратива? Если да — пришли Discord webhook URL." Never silently set `narrative_webhook: none` without asking. See session/SKILL.md step 4.
+
 At session start, read `narrative_webhook` from game.md.
 - If set to a Discord webhook URL → dual-channel mode. Use `skills/narrative/SKILL.md` for every narrative block.
 - If "none" or missing → single-channel mode, no change.

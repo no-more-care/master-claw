@@ -30,7 +30,13 @@ New game:
 1. List folders in GameMaster/worlds/
 2. Ask: which world, game name, players
 3. Detect the language players are using (see gamemaster.md Rule 0a) — save as `language` in game.md
-4. Ask if there is a dedicated narrative channel with a webhook URL. If yes, save the Discord webhook URL as `narrative_webhook` in game.md. If no, set to "none". (To create a webhook: in Discord, right-click the channel → Integrations → Webhooks → New Webhook → Copy URL.)
+4. **⛔ MANDATORY — ASK the player explicitly about narrative webhook.** Never assume "none" silently. Send this exact prompt to the player (translated to current language):
+   > "Нужен ли отдельный канал для чистого нарратива? Если да — пришли Discord webhook URL (ПКМ на канале → Edit Channel → Integrations → Webhooks → New Webhook → Copy URL). Если нет — скажи 'нет'."
+
+   Wait for the player's response. Then:
+   - If they provide a URL starting with `https://discord.com/api/webhooks/` or `https://discordapp.com/api/webhooks/` → save it as `narrative_webhook` in game.md
+   - If they say "no" / "нет" / "none" → set `narrative_webhook: none` in game.md
+   - If the URL doesn't match webhook format → ask again
 5. Create GameMaster/games/<name>/
 6. Create game.md, state.md, log.md, characters/
    → Use templates from: `locales/{lang}/templates/game_file.md`, `state_file.md`
@@ -42,7 +48,9 @@ Continue existing game:
 1. List games with status active in game.md
 2. Load game.md, state.md (full), character sheets
 3. Read `language` field from game.md — use that locale for templates
-4. Read `narrative_webhook` from game.md — if set, enable dual-channel mode (see skills/narrative/SKILL.md)
+4. Read `narrative_webhook` from game.md:
+   - If set to a valid webhook URL → enable dual-channel mode (see skills/narrative/SKILL.md)
+   - If "none" or missing → ask the player if they want to enable narrative channel NOW (same prompt as new game step 4). Update game.md with their answer before continuing.
 5. If "Current scene" section in state.md is empty or missing — read last 10 log.md entries to reconstruct it, then write it into state.md
 6. Summary: current scene, characters, dice reserves
 
