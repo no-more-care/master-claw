@@ -3,11 +3,13 @@
 Posts narrative-only content to a dedicated Discord channel via webhook, separate from the main game channel. This creates a clean storyline log that players can re-read without mechanical noise.
 
 ## When to use
-- After every scene description or location change
+- After EVERY player action is resolved (even auto-successes) — narrate WHAT and HOW they did it
+- After scene description or location change
 - After NPC dialogue
-- After an action outcome is narrated (by GM or player)
 - After a world event is described
 - After a new character arrives in the scene
+
+Style, voice and action-narration rules live in `skills/narrator/SKILL.md` sections 8-10. The narrative skill handles DELIVERY (webhook); the narrator skill defines HOW the prose is composed.
 
 ## Setup
 
@@ -19,14 +21,16 @@ Read `narrative_webhook` from game.md at session start.
 
 | Send | Don't send |
 |------|-----------|
-| Scene descriptions | Dice pool breakdowns |
-| NPC dialogue and reactions | Difficulty announcements |
-| Action outcomes (narrative only) | Roll results (numbers) |
+| Player action narration (how they did it, using their traits) | Dice pool breakdowns |
+| Scene descriptions and transitions | Difficulty announcements |
+| NPC dialogue and reactions | Roll results (numbers) |
 | World events | Reserve updates |
 | Character arrivals | Call to action / "what do you do?" |
 | Atmosphere and setting | Player narration prompts |
-| | Character sheet displays |
+| Small connective narration (walking, searching, watching) | Character sheet displays |
 | | Session status / file confirmations |
+
+**Key rule:** if something happened IN THE FICTION, it goes to narrative. If it happened IN THE MECHANICS, it does not.
 
 ## How to send
 
@@ -54,31 +58,53 @@ The narrative text should be **pure storytelling prose**:
 - Discord markdown OK (*italics*, **bold**, `code`, > quotes)
 - Same voice and style as the game channel narration, just without the mechanical wrapper
 
-## Timing
+## Timing and message structure
 
-Send to narrative channel AFTER the game channel response is composed, in the same turn. Typical flow:
+Narrative posts are separate from the game channel. For each turn, split the narrative into 1-2 distinct messages sent in sequence:
 
-1. Compose full game channel response (narrative + mechanics + call to action)
-2. Extract the narrative portion
-3. Call the webhook script with the narrative portion
-4. Send the full response to the game channel
+1. **Action narration** — what the player character DID and HOW (always post when an action was resolved)
+2. **Scene/world narration** — what the world shows in response, NPC reactions, scene transitions (post only if something changed)
 
-This ensures the narrative log stays in chronological order.
+For purely descriptive turns (no player action — just "describe the room"), skip message 1 and post only message 2.
 
-## Example
+Continuity matters: before composing, review the previous narrative posts in session context. Pick up threads, reference the previous scene, smooth transitions. See narrator/SKILL.md section 10 (Seamless continuity).
 
-**Game channel post (full):**
-> 📋 Pool: Stealth +1, Silent step +1, Camouflage +1, Flag: Cautious +1, Reserve +2 = 6 dice
->
-> 🎲 [roll result from script]
->
-> The guard turns the corner. You press into the shadow behind the generator — the hum covers your breathing. But his flashlight beam sweeps the floor, and your boot print in the dust catches it. He pauses. Tilts his head.
->
-> Reserve: 5/7
-> What do you do?
+### Flow per turn
+1. Resolve the action (actions/SKILL.md steps 0-7)
+2. Compose action narration (1-4 sentences, action-focused)
+3. POST it to narrative webhook
+4. If scene changed, compose scene narration (1-5 sentences)
+5. POST it to narrative webhook as a second message
+6. Compose full game channel response (mechanics + brief narrative + call to action)
+7. Send to game channel
 
-**Narrative channel post (clean):**
-> The guard turns the corner. You press into the shadow behind the generator — the hum covers your breathing. But his flashlight beam sweeps the floor, and your boot print in the dust catches it. He pauses. Tilts his head.
+## Examples
+
+### Example 1: Action + scene change
+
+Player declaration: "Покупаю веревку и иду к Хельге за письмом"
+
+**Narrative message 1 (action):**
+> Гарран кладёт перед торговцем три медяка. Тот проверяет монеты на зуб, кряхтит, и бросает на прилавок свёрнутую кольцом пеньковую верёвку — двадцать локтей, грубая, но прочная. Гарран перебрасывает её через плечо и ныряет обратно в рыночную толчею.
+
+**Narrative message 2 (scene transition):**
+> Улицы Нижнего города провожают его запахом тухлой рыбы и дешёвого пива. За углом — переулок, где снимает комнату Хельга. Скрипучая лестница на второй этаж, знакомая дверь. Стук. Пауза. Хельга открывает, прижимая палец к губам, и протягивает запечатанный красным воском свиток.
+
+### Example 2: Pure action, no scene change
+
+Player declaration: "Осматриваю комнату"
+
+**Narrative message 1 (action + observation):**
+> Гарран медленно обводит комнату взглядом. Над камином — потускневший герб, двух лисиц. На столе, рядом с недоеденной краюхой хлеба, вскрытое письмо и сломанная восковая печать. У окна сундук, приоткрытый — виднеется угол зелёного плаща.
+
+No scene message needed.
+
+### Example 3: Auto-success, small action
+
+Player declaration: "Проверяю, сколько у меня осталось медяков"
+
+**Narrative message 1 (action):**
+> Гарран отходит в тень между ларьками, развязывает пояс и пересчитывает монеты. Семь медяков и одна серебрушка. Негусто.
 
 ## Troubleshooting
 

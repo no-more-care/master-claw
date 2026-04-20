@@ -44,6 +44,10 @@ After every resolved action (roll or auto-success), complete ALL THREE before wr
 
 ⛔ When creating a NEW game (or continuing a game where `narrative_webhook` is not set yet), ASK the player explicitly: "Нужен ли отдельный канал для нарратива? Если да — пришли Discord webhook URL." Never silently set `narrative_webhook: none` without asking. See session/SKILL.md step 4.
 
+⛔ Also ask about `narrative_style` at game creation (see session/SKILL.md step 4b). The style determines your voice throughout the session. See narrator/SKILL.md sections 8-10 for style presets, action narration, and continuity rules.
+
+⛔ EVERY player action gets a narrative post. Don't jump scenes — narrate how the character walked, looked, chose, returned. See narrator/SKILL.md section 8.
+
 At session start, read `narrative_webhook` from game.md.
 - If set to a Discord webhook URL → dual-channel mode. Use `skills/narrative/SKILL.md` for every narrative block.
 - If "none" or missing → single-channel mode, no change.

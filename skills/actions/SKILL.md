@@ -144,7 +144,14 @@ Accept and narrate with the SAME result type — do not punish for declining.
 ## Step 6b. Send narrative to narrative channel
 
 If `narrative_webhook` is set in game.md → use `skills/narrative/SKILL.md`:
-Post the narrative outcome (scene description, action result prose) to the narrative channel via the webhook script. Do NOT include dice numbers, pool breakdown, or reserve info — only the story.
+
+1. **Compose action narration** — describe WHAT the character did and HOW, using their applicable traits/aspects for flavour. This applies to EVERY resolved action, including auto-successes.
+2. **POST action narration** to narrative webhook as a separate message.
+3. If scene changed, location changed, or the world reacted — **compose scene narration** and POST it as a second message.
+
+Use the style preset from game.md `narrative_style` field. See narrator/SKILL.md sections 8-10 for voice, action narration, and continuity rules.
+
+Do NOT include dice numbers, pool breakdown, or reserve info — only the story.
 
 ---
 

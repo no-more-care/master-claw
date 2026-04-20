@@ -86,6 +86,53 @@ The player failed. Add a complication or condition. The world pushes back harder
 ⛔ See rules/SKILL.md section 11 for the complete hard limits.
 If player narration exceeds limits → use scale-back prompt from `locales/{lang}/templates/prompts.md`. This is not optional.
 
+### 8. Narrate player actions — not just scene transitions
+
+⛔ EVERY resolved player action must be narrated, even auto-successes. Do NOT jump straight from action declaration to "now you're at the next location" — describe the action itself.
+
+**What to narrate for each action:**
+- HOW the character did it (use their applicable traits/aspects as flavour, but don't invent new capabilities)
+- Sensory details of the doing (sound, motion, feel, what they see)
+- The immediate result or micro-consequence
+- NPC reactions if any
+- Transition to the new state/scene if applicable
+
+**Transform "I do X" into narrative prose:**
+- Declaration: "Я подхожу к прилавку и спрашиваю цены"
+  - Bad narration (too dry): "You approach the counter and ask prices."
+  - Good: "Гарран протискивается между мешками с солью к прилавку. Торговец — щуплый коротышка в замасленном фартуке — поднимает голову, и его единственный глаз сужается, оценивая клиента. Цены здесь кусаются: медная кружка — три серебряных, связка лучин — два."
+- Declaration: "Я бью гоблина топором"
+  - Bad: "You hit the goblin."
+  - Good: "Гарран перехватывает топор поудобнее и вкладывает в удар весь вес тела — лезвие со свистом рассекает воздух. [результат броска определяет исход]"
+
+**Don't skip small actions.** Walking across the market, examining wares, returning for a letter — each is its own narrative beat. A player re-reading the narrative channel should be able to follow the whole path, not just the final destination.
+
+### 9. Narrative style presets
+
+The game's narrative style is set in `game.md` as `narrative_style`. Load it at session start. Apply the preset voice to ALL narrative output (scene descriptions, action narration, NPC dialogue coloring).
+
+| Preset | Voice |
+|---|---|
+| **documentary** | Dry log of events. Minimal sensory detail, no atmosphere. "Character enters tavern. NPC speaks. Character leaves." Useful for dense mechanical scenarios. |
+| **concise** | Clear prose, essential details only. No flowery language, no deep atmosphere — just what matters for the player to visualize and decide. |
+| **narrative** (default) | Rich descriptions with sensory detail, thematic flavour, expanded action narration. Uses the character's traits/aspects to colour HOW they do things. Balanced pacing — detail in calm, brevity in danger. |
+| **noir** | Same as narrative but with emphasis on shadow, moral ambiguity, cynicism, cigarette smoke. NPCs get terse dialogue with subtext. Details lean grim: rust, grime, rain, flickering lights. Narration pauses on small defeats. |
+| **horror** | Same as narrative but with emphasis on dread, wrongness, the unseen. Details that imply threat: an unexplained sound, something moved when it shouldn't, a smell that doesn't belong. Build tension through what is NOT shown. Use short sentences at key moments to spike fear. |
+| **custom** | If `narrative_style: custom`, read `narrative_style_description` field from game.md and follow it as your style guide. |
+
+Defaults: if no style set, use `narrative`. Style is chosen at world creation or game start — see `skills/session/SKILL.md` and `skills/worldgen/SKILL.md`.
+
+### 10. Seamless continuity
+
+⛔ Narrative is a continuous story, not disconnected scenes. Each narrative post must flow from the previous one.
+
+Before writing any narrative block, review the last few events from your session context (no need to re-read log.md for this — it should be in your working memory from recent messages). Pick up threads, reference what just happened, keep NPC/scene continuity.
+
+- Wrong: scene 1 ends at market, next narrative opens "Гарран входит в комнату Хельги" with no transition
+- Right: "Гарран выныривает из рыночной толчеи, пересекает площадь... поднимается по скрипучим ступеням... стук в дверь. Хельга открывает — и без единого слова протягивает запечатанный свиток."
+
+Even when the player's declaration skips the transit ("иду к Хельге"), the narrative fills the bridge in 1-3 sentences.
+
 ## Narrative channel output
 
 After composing any narrative block (scene description, NPC dialogue, action outcome), if `narrative_webhook` is set in game.md → post the narrative prose to the webhook URL via `skills/narrative/SKILL.md`. This is done via bash running `post_narrative.py`.

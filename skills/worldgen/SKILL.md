@@ -17,6 +17,8 @@ Saved to GameMaster/worlds/<world_name>/
 ### world.md
 ```
 # World: <Name>
+**Default narrative style:** <documentary | concise | narrative | noir | horror | custom>
+
 ## In one line
 ## Setting
 ## Starting location
@@ -34,6 +36,12 @@ Saved to GameMaster/worlds/<world_name>/
 ## Atmosphere and tone
 ## World details (for immersion)
 ```
+
+The `default_narrative_style` is a hint used at game creation — when starting a game in this world, the GM proposes this style first (player can override). Pick the style that best fits the tone:
+- Grimdark cyberpunk, post-apocalyptic → `noir`
+- Ghost stories, cosmic horror, survival with unknown threats → `horror`
+- Classic fantasy, adventure, heroic tales → `narrative`
+- Wargame-style campaigns, mechanical focus → `concise` or `documentary`
 
 ### plot.md
 ```
@@ -90,9 +98,14 @@ Repeat the block for each of 2–5 characters. Characters must be diverse: diffe
 ## Algorithm
 1. Parse description, extract genre and concrete details
 2. Choose folder name (latin, no spaces: iron_coast, deep_city)
-3. Create all 4 files at once (unfilled = mark TODO)
-4. Generate 3–5 starter characters thematically fitting the world, validate each against character schema rules, save to starter_characters.md
-5. Show summary + TODO list + suggestions for expansion
+3. Pick `default_narrative_style` based on genre/tone:
+   - horror/ghost/unknown-threat → `horror`
+   - cyberpunk/noir/grimdark → `noir`
+   - heroic/adventure/classic fantasy → `narrative`
+   - wargame/mechanical-heavy → `concise`
+4. Create all 4 files at once (unfilled = mark TODO)
+5. Generate 3–5 starter characters thematically fitting the world, validate each against character schema rules, save to starter_characters.md
+6. Show summary including chosen default style + TODO list + suggestions for expansion
 
 ## Principles
 - Specificity over completeness

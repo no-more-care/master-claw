@@ -37,6 +37,19 @@ New game:
    - If they provide a URL starting with `https://discord.com/api/webhooks/` or `https://discordapp.com/api/webhooks/` → save it as `narrative_webhook` in game.md
    - If they say "no" / "нет" / "none" → set `narrative_webhook: none` in game.md
    - If the URL doesn't match webhook format → ask again
+
+4b. **⛔ MANDATORY — ASK the player about narrative style.** If the world (worlds/<world>/world.md) has a `default_narrative_style` field, use it as default and only confirm briefly. Otherwise, send this prompt:
+   > "Какой стиль рассказа предпочитаете? Варианты:
+   > • `documentary` — сухой лог событий
+   > • `concise` — просто и по делу, без воды
+   > • `narrative` — развёрнуто, с атмосферой и деталями (по умолчанию)
+   > • `noir` — мрачный, циничный, с акцентом на тени и сомнения
+   > • `horror` — напряжение, дурные предчувствия, неназванная угроза
+   > • `custom` — опишите свой стиль словами
+   >
+   > Выберите или опишите свой."
+
+   Save the choice as `narrative_style` in game.md. If "custom", also save the player's description as `narrative_style_description`.
 5. Create GameMaster/games/<name>/
 6. Create game.md, state.md, log.md, characters/
    → Use templates from: `locales/{lang}/templates/game_file.md`, `state_file.md`
@@ -51,6 +64,7 @@ Continue existing game:
 4. Read `narrative_webhook` from game.md:
    - If set to a valid webhook URL → enable dual-channel mode (see skills/narrative/SKILL.md)
    - If "none" or missing → ask the player if they want to enable narrative channel NOW (same prompt as new game step 4). Update game.md with their answer before continuing.
+4b. Read `narrative_style` from game.md. If missing, ask the player (same prompt as new game step 4b) and save to game.md. If set, use it for all narrative output (see narrator/SKILL.md section 9).
 5. If "Current scene" section in state.md is empty or missing — read last 10 log.md entries to reconstruct it, then write it into state.md
 6. Summary: current scene, characters, dice reserves
 
