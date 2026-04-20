@@ -154,10 +154,16 @@ journalctl -u microclaw -f
 
 ## Adding a Narrative Channel (optional)
 
-1. Create a `#narrative` channel in Discord
+1. Create a `#narrative` channel in Discord, copy its channel ID
 2. From Telegram, tell the operator: "Add Discord channel <CHANNEL_ID>"
    - This runs `manage_channels.py` which updates config and restarts microClaw
-3. When starting a game, provide the narrative channel ID when asked
+3. Add the **game channel** ID to `control_chat_ids` in config — this allows cross-channel messaging:
+   ```yaml
+   control_chat_ids:
+   - <YOUR_GAME_CHANNEL_ID>
+   ```
+4. Restart microClaw: `systemctl restart microclaw`
+5. When starting a game, provide the narrative channel ID when asked
 
 ## Updating MasterClaw
 

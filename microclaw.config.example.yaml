@@ -61,6 +61,11 @@ subagents:
   announce_relay_interval_secs: 15
   max_tokens_per_run: 400000
 
+# Control chats — elevated permissions (cross-channel send_message, global memory, etc.)
+# Add game channel IDs here to enable narrative channel feature
+control_chat_ids:
+# - 000000000000000000    # Uncomment and replace with your game channel ID
+
 # Data directories
 data_dir: "/root/.microclaw"
 working_dir: "/root/.microclaw/working_dir"
