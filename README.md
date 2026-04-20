@@ -17,14 +17,30 @@ Designed for the **BlackBirdPie** RPG system — a narrative-focused d6 system w
 
 The LLM reads these files as its instruction set, manages persistent game state (worlds, characters, logs), and runs live multiplayer sessions.
 
+## Quick start
+
+**Prerequisites:** Linux server, [microClaw](https://github.com/microclaw/microclaw) installed, Discord bot token, LLM API key.
+
+```bash
+git clone https://github.com/no-more-care/master-claw.git /root/.microclaw
+cd /root/.microclaw && git checkout develop
+cp microclaw.config.example.yaml /root/microclaw.config.yaml
+# Edit config: add your Discord/Telegram tokens and LLM API key
+mkdir -p working_dir/shared/GameMaster/{worlds,games}
+pip3 install pyyaml
+systemctl restart microclaw
+```
+
+See **[Full Setup Guide](docs/setup.md)** for detailed step-by-step instructions including Discord bot creation, Telegram setup, and troubleshooting.
+
 ## Project structure
 
 ```
 souls/           — AI personality definitions
 skills/          — Modular game mechanic procedures
 locales/         — Display templates per language (ru, en)
-scripts/         — Utility scripts (dice roller)
-docs/            — Architecture and mechanics documentation
+scripts/         — Utility scripts (dice roller, channel manager)
+docs/            — Architecture, mechanics, and setup documentation
 working_dir/     — Runtime game data (worlds, games, characters)
 ```
 
@@ -40,9 +56,11 @@ working_dir/     — Runtime game data (worlds, games, characters)
 
 ## Documentation
 
+- [Setup Guide](docs/setup.md) — installation, configuration, first game
 - [Architecture](docs/architecture.md) — system layers, data flow, operating modes
 - [Mechanics Reference](docs/mechanics-reference.md) — BlackBirdPie rules cheat sheet
 - [Skill Dependencies](docs/skill-dependencies.md) — how skills interact
+- [Config Example](microclaw.config.example.yaml) — annotated configuration template
 
 ## License
 
