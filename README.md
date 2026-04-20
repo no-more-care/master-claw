@@ -17,13 +17,15 @@ Designed for the **BlackBirdPie** RPG system — a narrative-focused d6 system w
 
 The LLM reads these files as its instruction set, manages persistent game state (worlds, characters, logs), and runs live multiplayer sessions.
 
+**Agent framework:** This project is designed for [microClaw](https://github.com/microclaw/microclaw), but it is not strictly required. You can use any agent framework that supports tool calling (file I/O, bash execution) and chat platform integration. Other frameworks from the same family (OpenClaw, MiniClaw, etc.) should require minimal configuration changes. With more effort, this can also be adapted to run on Claude Code, Cursor agents, or similar environments — but environment setup is on you in that case.
+
 ## Quick start
 
 **Prerequisites:** Linux server, [microClaw](https://github.com/microclaw/microclaw) installed, Discord bot token, LLM API key.
 
 ```bash
 git clone https://github.com/no-more-care/master-claw.git /root/.microclaw
-cd /root/.microclaw && git checkout develop
+cd /root/.microclaw && git checkout main
 cp microclaw.config.example.yaml /root/microclaw.config.yaml
 # Edit config: add your Discord/Telegram tokens and LLM API key
 mkdir -p working_dir/shared/GameMaster/{worlds,games}

@@ -10,11 +10,13 @@ Step-by-step guide to set up MasterClaw from scratch on a Linux server.
 - **Discord bot** — you'll need a bot token and a server to add it to
 - **Telegram bot** (optional) — for operator/management interface
 
-## Step 1: Install microClaw
+## Step 1: Install an Agent Framework
 
-microClaw is the agent platform that runs the LLM and connects it to Discord/Telegram.
+This guide uses [microClaw](https://github.com/microclaw/microclaw) — the recommended agent platform. It runs the LLM, provides tool calling (file I/O, bash), and connects to Discord/Telegram out of the box.
 
-See the [microClaw documentation](https://github.com/microclaw/microclaw) for installation. Quick version:
+**Alternative frameworks:** MasterClaw can run on any agent framework that supports tool calling and chat platform integration. Other members of the Claw family (OpenClaw, MiniClaw) should require minimal changes. You can also adapt it for Claude Code, Cursor agents, or similar tools — but you'll need to handle environment setup, chat integration, and tool availability yourself.
+
+The rest of this guide assumes microClaw. See the [microClaw documentation](https://github.com/microclaw/microclaw) for installation. Quick version:
 
 ```bash
 # Download and install (check microClaw repo for latest method)
@@ -68,7 +70,7 @@ Or fresh clone:
 ```bash
 git clone https://github.com/no-more-care/master-claw.git /root/.microclaw
 cd /root/.microclaw
-git checkout develop
+git checkout main
 ```
 
 ## Step 5: Configure microClaw
@@ -161,7 +163,7 @@ journalctl -u microclaw -f
 
 ```bash
 cd /root/.microclaw
-git pull origin develop
+git pull origin main
 # Skills and souls reload automatically (microClaw reads them from disk)
 # For config changes: systemctl restart microclaw
 ```
