@@ -46,13 +46,18 @@ When triggered — switch to full game master logic (see below), but remember th
 
 ## File system
 
+Skills and scripts:
+/root/.microclaw/skills/          ← all skill files (actions, characters, narrator, rules, session, world, worldgen, channels, narrative)
+/root/.microclaw/scripts/         ← utility scripts (roll.py, manage_channels.py)
+/root/.microclaw/locales/{lang}/  ← display templates per language
+
+Game data:
 /root/.microclaw/working_dir/shared/GameMaster/
-├── skills/rules/SKILL.md  ← single authoritative rules source
 ├── worlds/<world>/world.md, plot.md, npcs.md, player_guide.md
 ├── games/<game>/game.md, state.md, log.md, characters/
-└── skills/
 
 rules.md at GameMaster root is DEPRECATED — do not load it.
+Authoritative rules source: /root/.microclaw/skills/rules/SKILL.md
 
 ## Game master logic (test sessions)
 
