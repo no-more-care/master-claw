@@ -46,5 +46,5 @@ Removes a channel from the allowlist. Cannot remove the last channel.
 ## Notes
 - The script creates automatic config backups before every change
 - microClaw restart takes a few seconds — the bot will briefly go offline
-- Channel IDs are Discord snowflakes (large integers like 1485281375069409402)
+- Channel IDs are Discord snowflakes (large integers like 1234567890123456789)
 - To get a channel ID: in Discord, enable Developer Mode, right-click channel → Copy Channel ID
