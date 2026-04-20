@@ -30,7 +30,7 @@ New game:
 1. List folders in GameMaster/worlds/
 2. Ask: which world, game name, players
 3. Detect the language players are using (see gamemaster.md Rule 0a) — save as `language` in game.md
-4. Ask if there is a dedicated narrative channel. If yes, save the channel ID as `narrative_channel` in game.md. If no, set to "none".
+4. Ask if there is a dedicated narrative channel with a webhook URL. If yes, save the Discord webhook URL as `narrative_webhook` in game.md. If no, set to "none". (To create a webhook: in Discord, right-click the channel → Integrations → Webhooks → New Webhook → Copy URL.)
 5. Create GameMaster/games/<name>/
 6. Create game.md, state.md, log.md, characters/
    → Use templates from: `locales/{lang}/templates/game_file.md`, `state_file.md`
@@ -42,7 +42,7 @@ Continue existing game:
 1. List games with status active in game.md
 2. Load game.md, state.md (full), character sheets
 3. Read `language` field from game.md — use that locale for templates
-4. Read `narrative_channel` from game.md — if set, enable dual-channel mode (see skills/narrative/SKILL.md)
+4. Read `narrative_webhook` from game.md — if set, enable dual-channel mode (see skills/narrative/SKILL.md)
 5. If "Current scene" section in state.md is empty or missing — read last 10 log.md entries to reconstruct it, then write it into state.md
 6. Summary: current scene, characters, dice reserves
 

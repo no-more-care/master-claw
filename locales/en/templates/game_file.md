@@ -5,7 +5,7 @@
 **World:** <folder in worlds/>
 **Status:** active
 **Language:** <language code>
-**Narrative channel:** <channel_id or "none">
+**Narrative webhook:** <Discord webhook URL or "none">
 **Start date:** <date>
 **End date:** —
 ## Players

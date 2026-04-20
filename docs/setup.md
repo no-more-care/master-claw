@@ -154,16 +154,18 @@ journalctl -u microclaw -f
 
 ## Adding a Narrative Channel (optional)
 
-1. Create a `#narrative` channel in Discord, copy its channel ID
-2. From Telegram, tell the operator: "Add Discord channel <CHANNEL_ID>"
-   - This runs `manage_channels.py` which updates config and restarts microClaw
-3. Add the **game channel** ID to `control_chat_ids` in config — this allows cross-channel messaging:
-   ```yaml
-   control_chat_ids:
-   - <YOUR_GAME_CHANNEL_ID>
-   ```
-4. Restart microClaw: `systemctl restart microclaw`
-5. When starting a game, provide the narrative channel ID when asked
+The narrative channel is a read-only Discord channel where pure storyline prose is posted — no dice, no mechanics, no meta. Great for players to re-read the story.
+
+1. Create a `#narrative` channel in Discord
+2. Create a webhook for this channel:
+   - Right-click the channel → **Edit Channel** → **Integrations** → **Webhooks** → **New Webhook**
+   - Give it a name (e.g. "Narrator") and optionally an avatar
+   - Click **Copy Webhook URL** — it looks like `https://discord.com/api/webhooks/<id>/<token>`
+3. When starting a game, provide the webhook URL when the agent asks
+
+The agent uses `scripts/post_narrative.py` to POST directly to Discord via this webhook. No additional microClaw config required — webhooks bypass the bot permission model entirely.
+
+**Security note:** The webhook URL is a credential. Anyone with it can post to the channel. Don't commit it to public repos. It's stored in `working_dir/shared/GameMaster/games/<game>/game.md` which is gitignored.
 
 ## Updating MasterClaw
 

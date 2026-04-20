@@ -34,7 +34,7 @@ Priority: state.md always overrides worlds/.
    - Reveal scene — flag moment or NPC development
    - Neutral atmosphere — world details
 3. Generate event in setting tone
-4. If `narrative_channel` is set → send event description to narrative channel via `skills/narrative/SKILL.md`
+4. If `narrative_webhook` is set → post event description to narrative channel via `skills/narrative/SKILL.md`
 5. Present to players: details, open choice, do not dictate reaction
 6. Write to log.md
 7. Update state.md if event changes the world

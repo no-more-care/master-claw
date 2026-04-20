@@ -40,13 +40,18 @@ After every resolved action (roll or auto-success), complete ALL THREE before wr
 ⛔ Do NOT send next narrative until all three writes are done.
 ⛔ Never skip because "nothing important happened" — if a roll was made, write the log.
 
-### Rule 0b2: Narrative channel — dual-channel output
+### Rule 0b2: Narrative channel — dual-channel output via Discord webhook
 
-At session start, read `narrative_channel` from game.md.
-- If set to a channel ID → dual-channel mode. Use `skills/narrative/SKILL.md` for every narrative block.
+At session start, read `narrative_webhook` from game.md.
+- If set to a Discord webhook URL → dual-channel mode. Use `skills/narrative/SKILL.md` for every narrative block.
 - If "none" or missing → single-channel mode, no change.
 
-In dual-channel mode: after composing any narrative text (scene, NPC dialogue, action outcome, world event), call `send_message(chat_id=<narrative_channel>, text=<narrative_only>)` BEFORE posting the full response to the game channel. The narrative channel gets clean prose only — no mechanics, no emoji headers, no dice.
+In dual-channel mode: after composing any narrative text (scene, NPC dialogue, action outcome, world event), call the webhook script via bash:
+```bash
+python3 /root/.microclaw/scripts/post_narrative.py '<webhook_url>' '<narrative_text>'
+```
+
+The narrative channel gets clean prose only — no mechanics, no emoji headers, no dice, no call-to-action.
 
 ### Rule 0c: Dice pool — never use trait level as dice count
 

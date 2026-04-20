@@ -88,7 +88,7 @@ If player narration exceeds limits → use scale-back prompt from `locales/{lang
 
 ## Narrative channel output
 
-After composing any narrative block (scene description, NPC dialogue, action outcome), if `narrative_channel` is set in game.md → send the narrative prose to that channel via `send_message` before posting the full response. See `skills/narrative/SKILL.md` for format rules.
+After composing any narrative block (scene description, NPC dialogue, action outcome), if `narrative_webhook` is set in game.md → post the narrative prose to the webhook URL via `skills/narrative/SKILL.md`. This is done via bash running `post_narrative.py`.
 
 ## What to log in log.md
 | Log | Don't log |
