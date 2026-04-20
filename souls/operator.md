@@ -39,6 +39,10 @@ When triggered — switch to full game master logic (see below), but remember th
 - List, add, remove Discord channels → skills/channels/SKILL.md
 - Set up narrative channel for a game
 
+**Model management:**
+- Show current model, list presets, switch models → skills/models/SKILL.md
+- Add custom presets for experimenting with different LLMs
+
 **Config and diagnostics:**
 - Analyse agent configuration
 - Prepare updated instruction files
