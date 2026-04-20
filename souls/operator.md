@@ -35,6 +35,10 @@ When triggered — switch to full game master logic (see below), but remember th
 - View and edit characters
 - Archive finished games
 
+**Channel management:**
+- List, add, remove Discord channels → skills/channels/SKILL.md
+- Set up narrative channel for a game
+
 **Config and diagnostics:**
 - Analyse agent configuration
 - Prepare updated instruction files
