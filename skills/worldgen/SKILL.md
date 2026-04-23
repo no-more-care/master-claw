@@ -18,6 +18,7 @@ Saved to GameMaster/worlds/<world_name>/
 ```
 # World: <Name>
 **Default narrative style:** <documentary | concise | narrative | noir | horror | custom>
+**Default narrator rights level:** <disabled | minor | significant | madness>
 
 ## In one line
 ## Setting
@@ -105,6 +106,11 @@ Repeat the block for each of 2–5 characters. Characters must be diverse: diffe
    - most worlds (heroic/adventure/fantasy/sci-fi) → `gamemaster`
    - atmosphere-heavy epic settings where prose IS the product → `narrative`
    - wargame/mechanical-heavy → `concise`
+3b. Pick `default_narrator_rights_level` based on tone:
+   - tight-plot modules, mystery, horror (preserve tension) → `disabled` or `minor`
+   - most worlds → `minor`
+   - comedy, heroic fantasy, sandbox with strong characters → `significant`
+   - pure comedy / one-shots / experimental → `madness`
 4. Create all 4 files at once (unfilled = mark TODO)
 5. Generate 3–5 starter characters thematically fitting the world, validate each against character schema rules, save to starter_characters.md
 6. Show summary including chosen default style + TODO list + suggestions for expansion

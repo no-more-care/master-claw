@@ -51,6 +51,17 @@ New game:
    > Выберите или опишите свой (или просто `default` для gamemaster)."
 
    Save the choice as `narrative_style` in game.md. If "custom", also save the player's description as `narrative_style_description`. Default if unclear: `gamemaster`.
+
+4c. **⛔ MANDATORY — ASK the player about narrator rights level.** If the world (worlds/<world>/world.md) has a `default_narrator_rights_level` field, propose it as default. Otherwise default to `minor`. Send this prompt:
+   > "Насколько игрок может влиять на мир через права рассказчика (когда выпадает «Да, и…» или «Нет, но…»)?
+   > • `disabled` — только мастер решает, игрок не добавляет фактов
+   > • `minor` — игрок может дать себе +1 куб на будущий бросок / −1 сложности на одну проверку / снять одно состояние (по умолчанию)
+   > • `significant` — плюс ко всему: вводить второстепенных NPC, мини-триумфы в энкаунтерах, сессионные бонусы, менять детали сцен
+   > • `madness` — любая крутая ерунда, если интересно играть
+   >
+   > Выбери или нажми enter для `minor`."
+
+   Save as `narrator_rights_level` in game.md. See rules/SKILL.md section 11b for full effects. Player may change the level mid-game with "переключи права рассказчика на <level>".
 5. Create GameMaster/games/<name>/
 6. Create game.md, state.md, log.md, characters/
    → Use templates from: `locales/{lang}/templates/game_file.md`, `state_file.md`
@@ -66,6 +77,7 @@ Continue existing game:
    - If set to a valid webhook URL → enable dual-channel mode (see skills/narrative/SKILL.md)
    - If "none" or missing → ask the player if they want to enable narrative channel NOW (same prompt as new game step 4). Update game.md with their answer before continuing.
 4b. Read `narrative_style` from game.md. If missing, ask the player (same prompt as new game step 4b) and save to game.md. If set, use it for all narrative output (see narrator/SKILL.md section 9).
+4c. Read `narrator_rights_level` from game.md. If missing, ask the player (same prompt as new game step 4c) and save. If set, use it when handing narrator rights (see rules/SKILL.md section 11b).
 5. If "Current scene" section in state.md is empty or missing — read last 10 log.md entries to reconstruct it, then write it into state.md
 6. Summary: current scene, characters, dice reserves
 

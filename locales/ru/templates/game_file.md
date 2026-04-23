@@ -8,6 +8,7 @@
 **Вебхук нарратива:** <Discord webhook URL или "none">
 **Стиль нарратива:** <gamemaster | documentary | concise | narrative | noir | horror | custom>  # по умолчанию: gamemaster
 **Описание стиля:** <произвольный текст, только если style = "custom">
+**Уровень прав рассказчика:** <disabled | minor | significant | madness>  # по умолчанию: minor
 **Дата начала:** <дата>
 **Дата конца:** —
 ## Игроки

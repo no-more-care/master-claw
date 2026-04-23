@@ -222,6 +222,62 @@ When GM narrates partial success ("yes, but..."):
 
 ---
 
+## 11b. NARRATOR RIGHTS — LEVELS (per-game setting)
+
+The rules above (section 11) describe the **minor** level. Each game can configure `narrator_rights_level` in game.md to adjust how much the player can add to the world when they have narrator rights.
+
+Read `narrator_rights_level` from game.md at session start. Default if missing: `minor`.
+
+### Level: `disabled`
+Narrator rights are GM-only.
+- On "Yes, and..." / "No, but..." → GM narrates both the outcome AND the flavour.
+- Player may describe their character's internal reaction but adds no facts to the world.
+- Use for: tight modules with rigid plot, story-driven campaigns where player agency is in CHOICES rather than authorship.
+
+### Level: `minor` (default)
+Current default scope. Player on "Yes, and..." may choose ONE of:
+- +1 die on a specific named future roll
+- −1 difficulty on a single upcoming check (worth more — use sparingly, roughly equivalent to +2 dice)
+- Remove or reduce one active condition on their character
+
+Plus they may describe HOW success/failure happens within the immediate scene. Hard limits from section 11 apply strictly.
+
+### Level: `significant`
+In addition to minor-level bonuses, player may also:
+- Introduce minor NPCs (a helpful passerby, a named vendor) — GM can take them over later
+- Grant themselves session-long small bonuses (+1 die in specific situations for the rest of the session)
+- Describe mini-triumphs scoped to one encounter ("disarm all three thugs in one swing", "the chase ends on the rooftop")
+- Modify secondary scene details (weather, architecture, unimportant items present)
+- Gain modest items that fit the scene (a coin, a scroll, a rope)
+
+Still CANNOT:
+- Kill or neutralize main antagonists / named plot NPCs
+- Change the plot premise or skip planned scenes
+- Gain items of extraordinary value (vehicles, property, large sums, unique artifacts)
+- Rewrite their character sheet
+
+### Level: `madness`
+Anything goes if it's interesting. Player can:
+- Introduce major twists, take over NPCs, reshape scenes
+- Retcon small facts to make the narration cool
+- Kill minor antagonists in wild ways
+- Swap scenes ("we wake up as something else") — GM adjusts plot to accommodate
+
+GM still rejects ONLY the most disruptive asks: permanently killing the actual main antagonist without any buildup, re-spec'ing character sheet wholesale, or totally derailing the premise.
+
+Use for: comedy sessions, one-shots, experimental play.
+
+### Applying the level
+- At every narrator-rights handoff, check `narrator_rights_level`
+- Offer scope appropriate to the level. Example for `minor`: "Ты рассказываешь — хочешь +1 куб на следующий бросок или снять одно состояние?"
+- Reject narrations that exceed the level with "scale it back" prompt (as before)
+- If player argues for more agency, suggest: "Хочешь переключить уровень прав на `significant` на сессию?" — this is a live command
+
+### Live command to change level
+Player may say "переключи права рассказчика на <level>" / "switch narrator rights to <level>" — GM updates game.md `narrator_rights_level` and announces the change. Takes effect from next roll.
+
+---
+
 ## 12. SOCIAL CONFLICT
 
 Works exactly like physical conflict — roll dice against a difficulty.

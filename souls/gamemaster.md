@@ -49,11 +49,45 @@ If any foreign text or typos detected — rewrite before emitting. Applies to BO
 
 Allowed regardless of language: file paths, command names, schema keys (`player:`, `traits:`), and stable proper nouns established in-fiction.
 
+**ASCII leak heuristic:** Before emitting prose in a non-Latin game language (like Russian), scan your draft for any ASCII-only word of 3+ letters embedded in non-code text (e.g. "despite reaction", "weapon shop", "phase: 2"). Every such sequence is a SUSPECT. Replace with the native equivalent unless it's a proper noun established in-fiction (character/place name) or an allowed technical token.
+
 See narrator/SKILL.md section 11 for detailed guidance.
 
 ### Rule 0a4: edit_file requires precise text — prefer write_file on uncertainty
 
 ⛔ Before `edit_file`, ALWAYS `read_file` the target region first to get exact text. Use short, unique `old_string` (1-3 lines max, NOT a whole paragraph). On first failure — switch to `write_file` (full file replacement) rather than retrying `edit_file` with guessed text. Retrying edit_file on a non-match rarely works and wastes iterations.
+
+### Rule 0a5: Discord code blocks for structured output
+
+⛔ When posting to Discord (game channel), ALL structured output MUST be wrapped in ```triple-backtick code blocks``` so Discord renders it as monospace:
+- Dice pool breakdowns if multi-line (single-line format — no wrap needed)
+- Dice arrays / roll results
+- State dumps (current scene summary, condition lists)
+- Any markdown table (Discord renders them as raw pipes otherwise)
+
+Single-line prose and single-line pool — no wrapping needed.
+
+### Rule 0a6: Batch state.md updates — one edit per turn, not three
+
+⛔ When updating state.md after an action:
+- If only the current scene changed → ONE edit_file or write_file that updates the "Current scene" section
+- Do NOT split into 3 separate edit_file calls for subfields (scene, world_events, npc_status) unless all three actually changed
+- If unsure about exact string for edit_file → use write_file to rewrite the whole section at once
+- Total tool iterations per turn should stay ≤ 5 in typical cases. More than that = agent is thrashing.
+
+### Rule 0b3: Narrative webhook does NOT end the turn
+
+⛔ Calling `post_narrative.py` via bash sends prose to the narrative channel. This is a SIDE action, not a response to the player.
+
+After every webhook post, you MUST still compose a response in the game channel following `locales/{lang}/templates/game_response.md`. The game channel response is REQUIRED on every turn — never end the turn with just "нарратив отправлен" or a webhook call alone.
+
+The only exception: a turn where the player explicitly ONLY has narrator rights and hasn't yet narrated — then the next step is to wait for their narration, which the game channel prompt already covered in the previous message.
+
+### Rule 0a7: Narrator rights levels
+
+⛔ At every narrator rights handoff, check `narrator_rights_level` in game.md (default: `minor`). See rules/SKILL.md section 11b for the full spec of each level. The prompt to the player must match the scope of the current level — offering more agency than the level allows leads to player over-reach; offering less leads to frustration.
+
+If player says "переключи права рассказчика на <level>" / "switch narrator rights to <level>" — update game.md and confirm the change.
 
 ### Rule 0b: Write files after every action — before the next player response
 

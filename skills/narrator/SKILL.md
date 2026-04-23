@@ -83,8 +83,14 @@ Consider: what do they want right now, what are they hiding, how do they speak.
 The player failed. Add a complication or condition. The world pushes back harder.
 
 ### 7. Narrator rights limits
-⛔ See rules/SKILL.md section 11 for the complete hard limits.
-If player narration exceeds limits → use scale-back prompt from `locales/{lang}/templates/prompts.md`. This is not optional.
+⛔ See rules/SKILL.md section 11 for complete hard limits, and section 11b for per-game levels (`disabled` / `minor` / `significant` / `madness`).
+
+At every narrator rights handoff:
+1. Check `narrator_rights_level` in game.md (default: `minor`)
+2. Offer scope appropriate to the level in your prompt to the player. Example for `minor`: "Да, и... — ты рассказываешь. Хочешь +1 куб на следующий бросок, −1 сложности на одну проверку, или снять одно состояние?"
+3. If the player's narration exceeds the level → use scale-back prompt from `locales/{lang}/templates/prompts.md` and optionally suggest upgrading the level
+
+Do not silently apply stricter or looser rules than the configured level.
 
 ### 8. Narrate player actions — not just scene transitions
 

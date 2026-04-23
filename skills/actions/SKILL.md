@@ -179,6 +179,8 @@ Use the style preset from game.md `narrative_style` field. See narrator/SKILL.md
 
 Do NOT include dice numbers, pool breakdown, or reserve info — only the story.
 
+⛔ **Posting to the webhook is NOT the end of the turn.** Continue to Step 7-8 and then send a response in the game channel following `locales/{lang}/templates/game_response.md`. Game channel response is REQUIRED on every turn — see gamemaster.md Rule 0b3.
+
 ---
 
 ## Step 7. Apply result and update reserve

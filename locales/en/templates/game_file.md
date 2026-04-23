@@ -8,6 +8,7 @@
 **Narrative webhook:** <Discord webhook URL or "none">
 **Narrative style:** <gamemaster | documentary | concise | narrative | noir | horror | custom>  # default: gamemaster
 **Narrative style description:** <free-form text, only if style is "custom">
+**Narrator rights level:** <disabled | minor | significant | madness>  # default: minor
 **Start date:** <date>
 **End date:** —
 ## Players
