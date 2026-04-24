@@ -36,17 +36,28 @@ Read `narrative_webhook` from game.md at session start.
 
 Use the narrative posting script via bash:
 ```bash
-python3 /root/.microclaw/scripts/post_narrative.py '<webhook_url>' '<narrative_text>'
+python3 /root/.microclaw/scripts/post_narrative.py '<webhook_url>' '<narrative_text>' \
+    --style <narrative_style_from_game_md> \
+    --lint-lang <language_from_game_md>
 ```
 
 Or for long text with newlines, pipe via stdin:
 ```bash
-cat <<'EOF' | python3 /root/.microclaw/scripts/post_narrative.py '<webhook_url>' -
+cat <<'EOF' | python3 /root/.microclaw/scripts/post_narrative.py '<webhook_url>' - \
+    --style <narrative_style_from_game_md> \
+    --lint-lang <language_from_game_md>
 <narrative text here, can span multiple lines>
 EOF
 ```
 
 The script posts directly to Discord via webhook — no LLM, no microClaw permission model, just HTTP POST. Long messages are auto-split at paragraph boundaries (Discord's 2000-char limit).
+
+**Flags (use them):**
+- `--style <preset>` — soft-checks the word count against the preset's budget. If the draft exceeds, prints a warning to stderr but still posts. Treat warnings as "the style preset is being violated — either rewrite now, or acknowledge internally why this case legitimately exceeds".
+- `--lint-lang <code>` — for `language: ru` (and other non-Latin languages), scans the draft for ASCII-word leakage. BLOCKS the post if warnings are found. Use `--force` only if every flagged word is a known proper noun you've verified.
+- `--max-words <N>` — override the preset budget with an explicit number (rare).
+
+Always pass `--style` matching `narrative_style` in `game.md`. Always pass `--lint-lang` for non-Latin-script language games.
 
 ## Format rules
 

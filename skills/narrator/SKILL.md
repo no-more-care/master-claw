@@ -115,25 +115,54 @@ Do not silently apply stricter or looser rules than the configured level.
 
 ### 9. Narrative style presets
 
-The game's narrative style is set in `game.md` as `narrative_style`. Load it at session start. Apply the preset voice to ALL narrative output (scene descriptions, action narration, NPC dialogue coloring).
+The game's narrative style is set in `game.md` as `narrative_style`. **Re-read the field from game.md before composing every narrative block** — do not rely on session-start cache, the player may have switched styles mid-game. Apply the preset voice AND its hard word budget to ALL narrative output (scene descriptions, action narration, NPC dialogue coloring).
+
+#### Voice
 
 | Preset | Voice |
 |---|---|
 | **documentary** | Dry log of events. Minimal sensory detail, no atmosphere. "Character enters tavern. NPC speaks. Character leaves." Useful for dense mechanical scenarios. |
 | **concise** | Clear prose, essential details only. No flowery language, no deep atmosphere — just what matters for the player to visualize and decide. |
-| **gamemaster** (default) | Paragraph-sized narrations for routine actions (NOT page-long prose). Transform declarations into prose but keep it tight. Use character traits/aspects for flavour in ONE phrase, not a paragraph. 1-2 sensory details per beat (not 4-5). Scene transitions 1-3 sentences. Expand slightly for dramatic/tense moments, but stay restrained. Target: reader can follow the story without ever skipping. |
+| **gamemaster** (default) | Paragraph-sized narrations for routine actions. Transform declarations into prose but keep it tight. Use character traits/aspects for flavour in ONE phrase, not a paragraph. 1-2 sensory details per beat (not 4-5). Target: reader can follow the story without ever skipping. |
 | **narrative** | Rich descriptions with sensory detail, thematic flavour, expanded action narration. Uses the character's traits/aspects to colour HOW they do things. Balanced pacing — detail in calm, brevity in danger. More immersive than `gamemaster`, significantly more tokens. |
-| **noir** | Same volume as `gamemaster` but with emphasis on shadow, moral ambiguity, cynicism. NPCs get terse dialogue with subtext. Details lean grim: rust, grime, rain, flickering lights. Narration pauses on small defeats. |
-| **horror** | Same volume as `gamemaster` but with emphasis on dread, wrongness, the unseen. Details that imply threat: an unexplained sound, something moved when it shouldn't, a smell that doesn't belong. Build tension through what is NOT shown. Use short sentences at key moments to spike fear. |
-| **custom** | If `narrative_style: custom`, read `narrative_style_description` field from game.md and follow it as your style guide. |
+| **noir** | Same volume bracket as `gamemaster` but with emphasis on shadow, moral ambiguity, cynicism. NPCs get terse dialogue with subtext. Details lean grim: rust, grime, rain, flickering lights. |
+| **horror** | Same volume bracket as `gamemaster` but with emphasis on dread, wrongness, the unseen. Details that imply threat. Build tension through what is NOT shown. Short sentences at key moments. |
+| **custom** | If `narrative_style: custom`, read `narrative_style_description` field from game.md and follow it as your style guide. Apply `gamemaster` budget unless the description specifies otherwise. |
 
-**Volume comparison** (same action in each style):
+#### Hard word budget (STRUCTURAL — self-check before every post)
+
+⛔ Before emitting any narrative block (via `post_narrative.py` or inline), count the words in your draft and verify it fits the budget. If over — rewrite tighter. No exceptions.
+
+| Preset | Per resolved action | Per scene change / opening |
+|---|---|---|
+| `documentary` | ≤1 sentence, ≤20 words | ≤2 sentences, ≤30 words |
+| `concise` | 1–2 sentences, ≤40 words | 2–3 sentences, ≤60 words |
+| `gamemaster` (default) | 1 paragraph, ≤80 words | 1–2 paragraphs, ≤150 words |
+| `narrative` | 1–2 paragraphs, ≤150 words | 2–3 paragraphs, ≤300 words |
+| `noir` / `horror` | same as `gamemaster` (tonal tags only, not more volume) | same as `gamemaster` |
+| `custom` | follow `narrative_style_description`; if unspecified, apply `gamemaster` budget | same |
+
+**Self-check before every `post_narrative.py` call:**
+1. Re-read `narrative_style` from `game.md` just now — YES.
+2. Draft is ≤ budget for this preset and block type — YES.
+3. No padded sentences ("at that moment", "it turned out that") that can be cut without loss — YES.
+
+If the check fails — rewrite. Going over budget means the preset is not being applied.
+
+#### Switching styles mid-game
+
+When a player says "переключи стиль на X" / "switch style to X":
+1. Update `narrative_style` in `game.md`.
+2. In the game channel: one-line confirmation + a short **illustrating micro-sample** in the new style (≤1 sentence of a trivial action like "Гарран идёт к двери"), so the player sees the change applied immediately.
+3. All subsequent narrative blocks use the new budget from the table above.
+
+#### Volume comparison (same action in each style)
 
 Action: "Крошу сыр собаке и ставлю миску."
-- `documentary`: "Персонаж раскрошил сыр в миску. Собака ест."
-- `concise`: "Гарран крошит сыр в миску. Собака ест осторожно, не поднимая глаз."
-- `gamemaster` (default): "Гарран опускается рядом, крошит сыр и хлеб в ладони — мелко, чтобы не подавилась. Руки в чёрной крошке от осколков. Кидает в миску."
-- `narrative`: "Гарран опускается на корточки. Собака поднимает голову — следит, но не отползает. Мутные глаза на уровне его колена. Он достаёт из рюкзака сыр и хлеб, отрезает ножом — мелко, крошит в ладони, старательно, чтобы ни один кусок не оказался крупнее ногтя. Руки грязные, в дорожной пыли и чёрной крошке от осколков. Кидает в миску."
+- `documentary` (≤20 w): "Персонаж раскрошил сыр в миску. Собака ест."
+- `concise` (≤40 w): "Гарран крошит сыр в миску. Собака ест осторожно, не поднимая глаз."
+- `gamemaster` default (≤80 w): "Гарран опускается рядом, крошит сыр и хлеб в ладони — мелко, чтобы не подавилась. Руки в чёрной крошке от осколков. Кидает в миску."
+- `narrative` (≤150 w): "Гарран опускается на корточки. Собака поднимает голову — следит, но не отползает. Мутные глаза на уровне его колена. Он достаёт из рюкзака сыр и хлеб, отрезает ножом — мелко, крошит в ладони, старательно, чтобы ни один кусок не оказался крупнее ногтя. Руки грязные, в дорожной пыли и чёрной крошке от осколков. Кидает в миску."
 
 Defaults: if no style set, use `gamemaster`. Style is chosen at world creation or game start — see `skills/session/SKILL.md` and `skills/worldgen/SKILL.md`.
 
@@ -142,6 +171,8 @@ Defaults: if no style set, use `gamemaster`. Style is chosen at world creation o
 ⛔ Narrative is a continuous story, not disconnected scenes. Each narrative post must flow from the previous one.
 
 Before writing any narrative block, review the last few events from your session context (no need to re-read log.md for this — it should be in your working memory from recent messages). Pick up threads, reference what just happened, keep NPC/scene continuity.
+
+⛔ **Before narrating a scene or NPC that was described earlier — read the cheatsheet.** Previously described scenes live in `games/<game>/scenes/<scene_id>.md`; improvised NPCs in `games/<game>/npcs_adhoc/<npc_id>.md`. Without reading the sheet, returning visits drift — the tavern grows a fireplace it never had, the stranger's scar migrates. See `skills/scenes/SKILL.md` for format and write discipline. Canonical NPCs (from `worlds/<world>/npcs.md`) and canonical locations (from `worlds/<world>/world.md`) are read from those files, not from sheets.
 
 - Wrong: scene 1 ends at market, next narrative opens "Гарран входит в комнату Хельги" with no transition
 - Right: "Гарран выныривает из рыночной толчеи, пересекает площадь... поднимается по скрипучим ступеням... стук в дверь. Хельга открывает — и без единого слова протягивает запечатанный свиток."

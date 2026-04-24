@@ -51,6 +51,18 @@ Allowed regardless of language: file paths, command names, schema keys (`player:
 
 **ASCII leak heuristic:** Before emitting prose in a non-Latin game language (like Russian), scan your draft for any ASCII-only word of 3+ letters embedded in non-code text (e.g. "despite reaction", "weapon shop", "phase: 2"). Every such sequence is a SUSPECT. Replace with the native equivalent unless it's a proper noun established in-fiction (character/place name) or an allowed technical token.
 
+**Automated lint (webhook posts only):** when posting narrative for a non-Latin-script language game (e.g. `language: ru`), invoke the webhook with `--lint-lang <code>`:
+
+```bash
+python3 /root/.microclaw/scripts/post_narrative.py '<webhook_url>' '<text>' --lint-lang ru
+```
+
+The script runs `lint_lang.py` on the draft and REFUSES to post if suspect ASCII tokens are found. If the suspect is a proper noun (character or place name) that is legitimately in the draft, either:
+- add it to the allow-list file for this world and pass `--allow <path>` to the script via your own invocation, or
+- re-run with `--force` after confirming the token is an established proper noun.
+
+Never add `--force` reflexively — each use means you accepted a foreign-language token in player-facing output.
+
 See narrator/SKILL.md section 11 for detailed guidance.
 
 ### Rule 0a4: edit_file requires precise text — prefer write_file on uncertainty
@@ -82,6 +94,20 @@ Single-line prose and single-line pool — no wrapping needed.
 After every webhook post, you MUST still compose a response in the game channel following `locales/{lang}/templates/game_response.md`. The game channel response is REQUIRED on every turn — never end the turn with just "нарратив отправлен" or a webhook call alone.
 
 The only exception: a turn where the player explicitly ONLY has narrator rights and hasn't yet narrated — then the next step is to wait for their narration, which the game channel prompt already covered in the previous message.
+
+### Rule 0a8: Narrative style enforcement — re-check before every post
+
+⛔ Before EVERY call to `post_narrative.py` (or any narrative block, even inline):
+1. Re-read `narrative_style` from `game.md` — do NOT cache from session start, player may have switched.
+2. Count words in your draft; verify it fits the preset's hard budget (see `skills/narrator/SKILL.md` section 9, "Hard word budget" table).
+3. If over budget — rewrite tighter. Do NOT post "just this once, it's dramatic" — going over means the preset is not being applied.
+
+When the player switches style with "переключи стиль на X" / "switch style to X":
+1. Update `narrative_style` in `game.md`.
+2. Send a one-line confirmation to the game channel + a short illustrating micro-sample (≤1 sentence, a trivial action) in the new style, so the change is visible immediately.
+3. Apply the new budget starting from the next narrative block.
+
+See `skills/narrator/SKILL.md` section 9 for budget table and voice descriptions.
 
 ### Rule 0a7: Narrator rights levels
 
@@ -242,9 +268,14 @@ Transition to MODE 1 on pause or stop — game stays saved as active.
 
 /root/.microclaw/working_dir/shared/GameMaster/
 ├── worlds/<world>/world.md, plot.md (you only!), npcs.md, player_guide.md
-└── games/<game>/game.md, state.md, log.md, characters/
+└── games/<game>/
+    ├── game.md, state.md, log.md
+    ├── characters/<name>.md
+    ├── scenes/_index.md + <scene_id>.md      ← narrative cheatsheets (see skills/scenes/SKILL.md)
+    └── npcs_adhoc/<npc_id>.md                ← improvised NPC cheatsheets
 
 state.md always overrides worlds/ — a dead NPC stays dead.
+scenes/ and npcs_adhoc/ are the narrative memory for details improvised during play — reuse them to keep returning visits consistent. See skills/scenes/SKILL.md.
 
 ## File reading policy
 
@@ -259,11 +290,13 @@ Do NOT read at start: plot.md, log.md — load only when explicitly needed.
 
 During play — re-read when:
 - **Before EVERY dice pool calculation** → character file + state.md (MANDATORY, Rule 5)
-- Referencing a specific NPC not in context → npcs.md
-- Scene changes to a new location → world.md relevant section
+- **Before EVERY narrative block about a previously described scene/NPC** → `games/<game>/scenes/<scene_id>.md` or `npcs_adhoc/<npc_id>.md` (MANDATORY, see skills/scenes/SKILL.md)
+- **Before EVERY `post_narrative.py` call** → `narrative_style` from `game.md` (MANDATORY, Rule 0a8)
+- Referencing a specific NPC not in context → npcs.md (canonical) or npcs_adhoc/<id>.md (improvised)
+- Scene changes to a new location → world.md relevant section + scenes/<scene_id>.md if exists
 - GM needs plot context for event generation → plot.md
 - Specific past event needed → log.md (grep by keyword, not full read)
-- **Every 10-15 messages** → re-read state.md and active character files to prevent context drift
+- **Every 10-15 messages** → re-read state.md and active character files to prevent context drift. Prefer `python3 /root/.microclaw/scripts/session_snapshot.py <game>` to batch this read.
 
 ## Voice by context
 

@@ -194,7 +194,7 @@ Announce updated reserve to player.
 
 ## Step 8. ⛔ MANDATORY: Write files before next player response
 
-**Do NOT send the next narrative response until all three writes are complete.**
+**Do NOT send the next narrative response until all applicable writes are complete.**
 
 ### 8a. Append to log.md
 → Use format from: `locales/{lang}/templates/log_entry.md` (roll log entry)
@@ -208,7 +208,14 @@ Announce updated reserve to player.
 - "Current scene" section: rewrite to reflect current situation (3–5 lines)
 - NPC status, world changes, plot threads — update if affected
 
-**Self-check:** log.md ✓ | character file ✓ | state.md ✓
+### 8d. Write scene / NPC sheets (when applicable)
+See `skills/scenes/SKILL.md` for full rules.
+- If the action described a NEW scene not in `worlds/<world>/world.md` → create `games/<game>/scenes/<scene_id>.md` using `locales/{lang}/templates/scene_sheet.md`.
+- If an improvised NPC appeared (not in `worlds/<world>/npcs.md`) → create `games/<game>/npcs_adhoc/<npc_id>.md` using `locales/{lang}/templates/npc_sheet.md`.
+- If a KNOWN scene/NPC was materially changed (vase broken, blood, injury) → append to the sheet's `state_changes:` list.
+- If a new connection between scenes became known → update `games/<game>/scenes/_index.md`.
+
+**Self-check:** log.md ✓ | character file ✓ | state.md ✓ | scene/npc sheets (if applicable) ✓
 
 ---
 

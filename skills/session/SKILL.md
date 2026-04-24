@@ -63,16 +63,18 @@ New game:
 
    Save as `narrator_rights_level` in game.md. See rules/SKILL.md section 11b for full effects. Player may change the level mid-game with "переключи права рассказчика на <level>".
 5. Create GameMaster/games/<name>/
-6. Create game.md, state.md, log.md, characters/
+6. Create game.md, state.md, log.md, characters/, scenes/, npcs_adhoc/
    → Use templates from: `locales/{lang}/templates/game_file.md`, `state_file.md`
+   → Create `scenes/_index.md` with a single `# Scene graph` header; `npcs_adhoc/` stays empty. Templates `locales/{lang}/templates/scene_sheet.md` and `npc_sheet.md` describe per-entity sheet format (see skills/scenes/SKILL.md).
 7. If worlds/<world>/starter_characters.md exists — display it to players in readable format, then use the game start prompt from `locales/{lang}/templates/prompts.md`
 8. For each player: if they pick a starter — copy the character data into characters/<name>.md (full yaml schema from characters/SKILL.md), register in game.md. If they create their own — run character creation procedure (characters/SKILL.md).
 9. Announce ready
 
 Continue existing game:
 1. List games with status active in game.md
-2. Load game.md, state.md (full), character sheets
+2. Load game.md, state.md (full), character sheets. Prefer batching via `python3 /root/.microclaw/scripts/session_snapshot.py <game>` — it returns game metadata, current scene, party locations, last rolls, active threads, and known sub-scenes in a single briefing. Fall back to point-wise reads if the script is unavailable.
 3. Read `language` field from game.md — use that locale for templates
+3b. **Lazy migration:** if `games/<game>/scenes/` or `npcs_adhoc/` directory is missing — create them. Create `scenes/_index.md` with a `# Scene graph` header if absent. Do NOT retro-fill sheets from past log.md — let them accumulate from the next visit/meeting onward. See `skills/scenes/SKILL.md`.
 4. Read `narrative_webhook` from game.md:
    - If set to a valid webhook URL → enable dual-channel mode (see skills/narrative/SKILL.md)
    - If "none" or missing → ask the player if they want to enable narrative channel NOW (same prompt as new game step 4). Update game.md with their answer before continuing.
@@ -124,5 +126,7 @@ All file templates are stored in `locales/{lang}/templates/`:
 - `game_file.md` — game.md template
 - `state_file.md` — state.md template
 - `log_entry.md` — log entry format
+- `scene_sheet.md` — scene cheatsheet (see skills/scenes/SKILL.md)
+- `npc_sheet.md` — improvised NPC cheatsheet (see skills/scenes/SKILL.md)
 
 See those files for the actual formats.
