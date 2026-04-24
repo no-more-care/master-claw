@@ -120,12 +120,28 @@ working_dir/shared/GameMaster/
 
 MasterClaw's skills are prompt-heavy (lots of rules, procedures, templates). Model capability directly shapes session quality. Informal observations from playtesting:
 
-- **Free tier** (free OpenRouter models, small self-hosted like Llama/Qwen): context leaks, rule violations, forgets state frequently. Useful only for smoke-testing pipeline wiring.
-- **Cheap tier** (Grok-4.1-fast, GLM-5-turbo, DeepSeek-chat, Gemini Flash): works for casual play if you re-ground it periodically with reminders about state and rules. Breaks down if a player tries to manipulate the GM (e.g. arguing about difficulty, invoking non-existent traits). Expect occasional language drift on non-English games.
-- **Mid tier** (Grok-4.1-full, GLM-5.1, DeepSeek-R1, Gemini Pro, Claude Haiku 4.5): noticeably more consistent. Still benefits from explicit reminders in long sessions but handles pushback better. Reasonable choice for serious campaigns on a budget.
+- **Free tier** (free OpenRouter models, small self-hosted like Llama/Qwen): not reliably testable — most free endpoints on OpenRouter hit rate limits or provider outages during any serious run. Even when they respond, expect rule violations, `activate_skill` misuse despite explicit soul warnings, and tool-loop stalls with no final text emitted. Useful only for smoke-testing pipeline wiring.
+- **Cheap tier** (roughly $0.05–$1 per M output): uneven. See the cheap-tier playtest notes below — **most cheap models fabricate dice rolls** (skip `scripts/roll.py` and invent results) and **mangle the character YAML schema**. Only Grok-4.1-fast passed the baseline 3-turn test cleanly and is the current cheap-tier recommendation. Retest before adopting anything else from this tier.
+- **Mid tier** (GLM-5 / 5.1, DeepSeek-R1, Gemini-2.5 Pro, Grok-4.1 full, Claude Haiku 4.5): noticeably more consistent. Still benefits from explicit reminders in long sessions but handles pushback better. Reasonable choice for serious campaigns on a budget. Not re-baselined after the recent skill/script additions — do that before promoting one to default.
 - **Premium tier** (Claude Sonnet 4.6+, GPT-5, Claude Opus): expected to handle the full rule surface without hand-holding. ~10× the cost of cheap-tier. Not yet baseline-tested against this ruleset — retest when evaluating production upgrades.
+
+### Cheap-tier baseline (3-turn agentic playtest, April 2026)
+
+Tested via the web channel with `gamemaster.md` soul: (1) create world + trader starter, (2) look around, (3) haggle using Торговля + Обаяние. All four models shared the same failure of **never creating a scene sheet in `games/<game>/scenes/`** despite improvising specifics — that's a skill-side gap, not model-side. Everything else was model-side:
+
+| Model | Character YAML | Pool build | Uses `roll.py` | Narrative |
+|---|---|---|---|---|
+| `x-ai/grok-4.1-fast` ($0.20/$0.50) | ✅ schema-correct, 18 pts, reserve 7/7 | ✅ correct breakdown, waits for confirm | ✅ did not fabricate | crisp, concise |
+| `z-ai/glm-4.7-flash` ($0.06/$0.40) | ❌ prose+table, allowed level 6 (>5) | ✅ breakdown ok | ❌ **fabricated** "1 success out of 4" | vivid but rambling; prior run leaked Chinese chars into Russian |
+| `deepseek/deepseek-chat-v3.1` ($0.15/$0.75) | ❌ invented own "level 1 = aspects" schema, reserve 3 (should 7) | ❌ `"Уровень 1 = 1 кубик"` — the exact `level=dice` bug the soul warns about | ❌ **fabricated** "3 of 3 success" | best narrative voice of the four — but mechanics unsafe |
+| `qwen/qwen3-235b-a22b-2507` ($0.07/$0.10) | ❌ traits without levels, reserve 3, invented `[Используется]` aspect state | ⚠️ no dice count shown | ❌ **fabricated** "4 успеха / 4к6" | flat, character name drift (`Kel_Torren` vs `Кэл Торрен`) |
+
+**Takeaway:** fabricated rolls are the most dangerous failure — the model invents outcomes to please the player instead of yielding to real RNG, silently breaking the whole system's fairness. Three of four cheap models do it. Only Grok-4.1-fast respected the rule and stopped to wait for player confirmation.
+
+**Recommendation for cheap-tier default: `x-ai/grok-4.1-fast`** until mid-tier is re-baselined.
 
 Rules of thumb:
 - Don't lock the codebase to a single provider's quirks. Keep prompts model-agnostic.
 - After non-trivial skill changes, retest on at least one cheap-tier model (it will surface instruction-following gaps that a strong model would paper over).
 - When a player reports "the GM lost state" or "the GM ignored a rule", first check the model tier before patching the skill.
+- If a model silently produces roll results without calling `scripts/roll.py` (visible in runtime logs), treat it as disqualified from production — not a prompt tweak, a trust issue.
