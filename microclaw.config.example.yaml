@@ -8,6 +8,10 @@
 channels:
   web:
     enabled: true
+    # Web UI (gateway on localhost:10961) — useful for local testing without Discord/Telegram.
+    # Without a soul the gateway falls back to a generic assistant, which is NOT the game master.
+    # Point it at gamemaster.md for playtesting, or operator.md if you prefer an admin console.
+    soul_path: "/root/.microclaw/souls/gamemaster.md"
 
   telegram:
     enabled: true
@@ -43,7 +47,11 @@ channels:
 
 # LLM provider configuration
 # Supports: openrouter, openai, anthropic, ollama, deepseek, google, and more
-# See microClaw docs for full list
+# See microClaw docs for full list.
+#
+# Model choice is a tradeoff between cost and reliability — see "Model tier notes" in CLAUDE.md.
+# The value below is an example; pick a model that fits your budget and test it on a throwaway game
+# before running a real campaign.
 llm_provider: "openrouter"
 api_key: "YOUR_LLM_API_KEY"
 model: "x-ai/grok-4.1-fast"

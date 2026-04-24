@@ -2,7 +2,9 @@
 
 ## What is this project?
 
-MasterClaw is an AI game master system for the **BlackBirdPie** tabletop RPG, running on **microClaw** platform. The agent inside microClaw is an LLM (currently Grok 4.1, may change) that reads the souls/skills/locales from this repo as its instructions. This CLAUDE.md is NOT read by the agent — it is context for Claude Code sessions working on this project.
+MasterClaw is an AI game master system for the **BlackBirdPie** tabletop RPG, running on **microClaw** platform. The agent inside microClaw is an LLM configured via `microclaw.config.yaml` — any chat-capable model with tool-calling works. It reads the souls/skills/locales from this repo as its instructions. This CLAUDE.md is NOT read by the agent — it is context for Claude Code sessions working on this project.
+
+See **Model tier notes** at the bottom of this file for tradeoffs.
 
 Supports multiplayer campaigns via Discord (players) and Telegram (operator).
 
@@ -113,3 +115,17 @@ working_dir/shared/GameMaster/
 - Agent dir on server: `/root/.microclaw/`
 - Branch: `develop`
 - Pull updates: `cd /root/.microclaw && git pull origin develop`
+
+## Model tier notes
+
+MasterClaw's skills are prompt-heavy (lots of rules, procedures, templates). Model capability directly shapes session quality. Informal observations from playtesting:
+
+- **Free tier** (free OpenRouter models, small self-hosted like Llama/Qwen): context leaks, rule violations, forgets state frequently. Useful only for smoke-testing pipeline wiring.
+- **Cheap tier** (Grok-4.1-fast, GLM-5-turbo, DeepSeek-chat, Gemini Flash): works for casual play if you re-ground it periodically with reminders about state and rules. Breaks down if a player tries to manipulate the GM (e.g. arguing about difficulty, invoking non-existent traits). Expect occasional language drift on non-English games.
+- **Mid tier** (Grok-4.1-full, GLM-5.1, DeepSeek-R1, Gemini Pro, Claude Haiku 4.5): noticeably more consistent. Still benefits from explicit reminders in long sessions but handles pushback better. Reasonable choice for serious campaigns on a budget.
+- **Premium tier** (Claude Sonnet 4.6+, GPT-5, Claude Opus): expected to handle the full rule surface without hand-holding. ~10× the cost of cheap-tier. Not yet baseline-tested against this ruleset — retest when evaluating production upgrades.
+
+Rules of thumb:
+- Don't lock the codebase to a single provider's quirks. Keep prompts model-agnostic.
+- After non-trivial skill changes, retest on at least one cheap-tier model (it will surface instruction-following gaps that a strong model would paper over).
+- When a player reports "the GM lost state" or "the GM ignored a rule", first check the model tier before patching the skill.
