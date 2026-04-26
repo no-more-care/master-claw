@@ -64,7 +64,7 @@ New game:
    Save as `narrator_rights_level` in game.md. See rules/SKILL.md section 11b for full effects. Player may change the level mid-game with "переключи права рассказчика на <level>".
 5. Create GameMaster/games/<name>/
 6. Create game.md, state.md, log.md, characters/, scenes/, npcs_adhoc/
-   → Use templates from: `locales/{lang}/templates/game_file.md`, `state_file.md`
+   → Use templates from: `locales/{lang}/templates/game_file.md` and `locales/{lang}/templates/state_file.md`
    → Create `scenes/_index.md` with a single `# Scene graph` header; `npcs_adhoc/` stays empty. Templates `locales/{lang}/templates/scene_sheet.md` and `npc_sheet.md` describe per-entity sheet format (see skills/scenes/SKILL.md).
 7. If worlds/<world>/starter_characters.md exists — display it to players in readable format, then use the game start prompt from `locales/{lang}/templates/prompts.md`
 8. For each player: if they pick a starter — copy the character data into characters/<name>.md (full yaml schema from characters/SKILL.md), register in game.md. If they create their own — run character creation procedure (characters/SKILL.md).

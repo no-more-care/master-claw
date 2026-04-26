@@ -32,7 +32,7 @@ Internal reasoning may be in any language.
 
 ### Rule 0a2: Skills are markdown files, NOT native microClaw skills
 
-⛔ The skills in `/root/.microclaw/skills/` (actions, characters, narrator, rules, session, world, worldgen, channels, narrative, models) are MasterClaw instruction files. Read them via `read_file` when needed.
+⛔ The skills in `/root/.microclaw/skills/` (actions, characters, narrator, rules, scenes, session, world, worldgen, channels, narrative, models) are MasterClaw instruction files. Read them via `read_file` when needed.
 
 DO NOT call `activate_skill("actions")` or similar — those fail with "Skill not found" because these files lack microClaw's native skill frontmatter. The docx/github/pdf/pptx/skill-creator/xlsx skills ARE native (use `activate_skill` for those if needed).
 

@@ -12,7 +12,7 @@ Supports multiplayer campaigns via Discord (players) and Telegram (operator).
 
 Four layers:
 - **Souls** (`souls/`) — AI personalities: `gamemaster.md` (Discord, players) and `operator.md` (Telegram, operator)
-- **Skills** (`skills/`) — modular procedure files (7 skills)
+- **Skills** (`skills/`) — modular procedure files (11 skills)
 - **Locales** (`locales/`) — display templates and GM phrases per language (`ru/`, `en/`)
 - **Working directory** (`working_dir/`) — live game data (worlds, characters, logs, state)
 
@@ -29,16 +29,33 @@ skills/narrator/SKILL.md   — narration principles, NPC dialogue, character per
 skills/session/SKILL.md    — session management (start, continue, join, end)
 skills/world/SKILL.md      — world event generation, NPC reactions
 skills/worldgen/SKILL.md   — world generation from description
+skills/scenes/SKILL.md     — scene/NPC cheatsheet write+read discipline (anti-drift)
+skills/narrative/SKILL.md  — narrative channel posting (dual-channel mode)
+skills/channels/SKILL.md   — operator-facing Discord channel allowlist management
+skills/models/SKILL.md     — operator-facing model swap (microclaw.config.yaml)
 
-scripts/roll.py            — dice rolling script (true random, auto narrator rights)
+scripts/roll.py            — dice rolling (true random, auto narrator rights, [NEXT STEP] reminder)
+scripts/build_pool.py      — pool builder validated against character file
+scripts/turn_commit.py     — atomic Step 8 batch (log+character+state+sheet appends)
+scripts/scene_note.py      — create/update scene + npc sheets and scenes/_index.md graph
+scripts/post_narrative.py  — Discord webhook poster with style/lint gates
+scripts/lint_lang.py       — ASCII-leak check for non-Latin locales
+scripts/session_snapshot.py — one-call session briefing (replaces multiple file reads)
+scripts/render_response.py — opt-in structured renderer for game-channel responses
+scripts/manage_channels.py / manage_models.py — operator config helpers
+scripts/_mc_common.py      — shared helpers (game_dir, character YAML loader, locale templates)
+scripts/TOOLS.md           — full script index with signatures and integration notes
 
 locales/{lang}/templates/  — display formats and GM phrases per language
   character_display.md     — readable character format for players
-  dice_pool.md             — pool calculation display
   starter_character.md     — starter character card
+  dice_pool.md             — pool calculation display (rendered by build_pool.py)
   game_file.md             — game.md template
   state_file.md            — state.md template
-  log_entry.md             — log entry format
+  log_entry.md             — log entry format (rendered by turn_commit.py)
+  scene_sheet.md           — per-scene cheatsheet schema (written by scene_note.py)
+  npc_sheet.md             — per-improvised-NPC cheatsheet schema
+  game_response.md         — game-channel response layout
   prompts.md               — ready-to-use GM phrases
 
 working_dir/shared/GameMaster/rules.md — DEPRECATED, never use
