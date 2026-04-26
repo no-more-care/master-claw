@@ -110,26 +110,37 @@ Player may DECLINE after hearing the stakes. If they decline — no roll, no con
 
 ## Step 4. Build dice pool
 
-**⛔ MANDATORY: Before building the pool, RE-READ the character file from disk.** Do not rely on memory. Open the character .md file and read the actual traits, aspects, flags, reserve, and conditions.
+**⛔ MANDATORY: Use `build_pool.py` to construct the pool. Do NOT compute the pool by hand.** The script reads the character file from disk, validates that every cited trait/aspect/flag actually exists, and renders the canonical one-line display. Hand-building is the single largest source of past mistakes (level=dice confusion, missing aspects, hallucinated flag text).
+
+```bash
+python3 /root/.microclaw/scripts/build_pool.py <game> <character> \
+  --trait "Trait A" --trait "Trait B" \
+  --aspect "aspect 1" --aspect "aspect 2" \
+  [--flag "exact flag text"] \
+  --difficulty <D>
+```
+
+Pass `--reserve-spent N` only AFTER the player picks their reserve count in Step 5.
+
+**Pool rules the script enforces:**
 
 | Source | Condition | Dice |
 |---|---|---|
 | Each applicable trait | Trait logically applies to this action | **exactly +1** |
-| Each applicable aspect | Aspect from any used trait that logically fits | +1 per aspect |
+| Each applicable aspect | Aspect from one of the listed `--trait`s that logically fits | +1 per aspect |
 | Flag (MAX 1) | Action genuinely matches the flag | +1 |
 | Reserve dice | Player chooses how many to add | +X |
 
-⛔ Trait level 3 = +1 die, NOT +3. Each trait always gives exactly +1 die. Level = aspect count only.
+⛔ Trait level 3 = +1 die, NOT +3. Each trait always gives exactly +1 die. Level = aspect count only. The script will refuse to multiply by level — if you find yourself "explaining" why level should add more dice, you're wrong; trust the script.
 
-**Self-check (MANDATORY):**
-1. Did I re-read the character file just now? ✓
-2. +1 per trait (not per level)? ✓
-3. Every aspect I listed — is it ACTUALLY in the character file? ✓
-4. Every aspect — does it LOGICALLY apply to THIS specific action? ✓
-5. At most 1 flag? ✓
+**Self-check before invoking the script:**
+1. Every `--trait` LOGICALLY applies to THIS action? ✓
+2. Every `--aspect` belongs to one of the listed traits AND logically applies? ✓
+3. At most one `--flag`? ✓
 
-Announce the pool to the player before rolling.
-→ Use display format from: `locales/{lang}/templates/dice_pool.md`
+If the script returns a validation error (typo, missing trait, aspect on wrong trait) — fix the args and re-run; do NOT hand-author the pool string to bypass the script.
+
+Paste the script's stdout (one or two lines) into your game-channel response. Then announce difficulty and failure stakes if the script didn't include them, and STOP — wait for the player.
 
 ---
 
@@ -137,9 +148,13 @@ Announce the pool to the player before rolling.
 
 **⛔ MANDATORY: Use the dice script for ALL rolls. Never generate dice manually.**
 
+After the player names a reserve count, optionally re-run `build_pool.py` with `--reserve-spent N` to print the final pool line for the log, then roll:
+
 ```bash
 python3 /root/.microclaw/scripts/roll.py <pool_size> <difficulty>
 ```
+
+`<pool_size>` = base pool from `build_pool.py` + reserve dice the player added.
 
 The script generates true random dice, counts hits (4-6), determines narrator rights.
 **Paste the player-facing block into your response.** Use `[GM LOG: ...]` for log.md only.
@@ -196,26 +211,78 @@ Announce updated reserve to player.
 
 **Do NOT send the next narrative response until all applicable writes are complete.**
 
-### 8a. Append to log.md
-→ Use format from: `locales/{lang}/templates/log_entry.md` (roll log entry)
+### 8a. Use `turn_commit.py` for the bundle
 
-### 8b. Update character file
-- `reserve_dice.current` — reflect dice spent or returned
-- `conditions` — add or remove based on result
-- `change_log` — append entry with date and what changed
+A single atomic call replaces the old "edit log.md, then character.md, then state.md, then a scene sheet" sequence (4-6 separate `read+edit` pairs). Pipe a JSON payload via stdin:
 
-### 8c. Update state.md
-- "Current scene" section: rewrite to reflect current situation (3–5 lines)
-- NPC status, world changes, plot threads — update if affected
+```bash
+cat <<JSON | python3 /root/.microclaw/scripts/turn_commit.py <game>
+{
+  "log_entry": {
+    "kind": "roll",
+    "heading": "<short scene/moment label>",
+    "action": "<actor> — <what they tried>",
+    "roll": "<Xd6 [n,n,n] → K hits vs diff D → outcome>",
+    "narrator": "Игрок | Мастер",
+    "conditions": "нет",
+    "reserve": "X → Y",
+    "consequences": "<what changed in the world>"
+  },
+  "character_update": {
+    "name": "<character file basename>",
+    "reserve": <new absolute reserve>,
+    "add_conditions": [{"text":"...", "source":"..."}],
+    "remove_conditions": ["<exact text>"],
+    "change_log_entry": "<one-line summary>"
+  },
+  "state_update": {
+    "current_scene": "<3–5 lines, current situation>",
+    "sections": {"Key NPC status": "<updated rows>"}
+  },
+  "scene_sheet_append": {"scene_id": "<id>", "state_change": "д<n> <time>: <change>"},
+  "npc_sheet_append":   {"npc_id":   "<id>", "recent_interaction": "д<n> <time>: <event>"}
+}
+JSON
+```
 
-### 8d. Write scene / NPC sheets (when applicable)
-See `skills/scenes/SKILL.md` for full rules.
-- If the action described a NEW scene not in `worlds/<world>/world.md` → create `games/<game>/scenes/<scene_id>.md` using `locales/{lang}/templates/scene_sheet.md`.
-- If an improvised NPC appeared (not in `worlds/<world>/npcs.md`) → create `games/<game>/npcs_adhoc/<npc_id>.md` using `locales/{lang}/templates/npc_sheet.md`.
-- If a KNOWN scene/NPC was materially changed (vase broken, blood, injury) → append to the sheet's `state_changes:` list.
-- If a new connection between scenes became known → update `games/<game>/scenes/_index.md`.
+Any section can be omitted. The script:
+- renders the log entry per `locales/{lang}/templates/log_entry.md`
+- updates only the `Current scene` section of `state.md` (and any keys you list under `sections`)
+- merges `reserve` / `conditions` / `change_log` on the character without rewriting the rest
+- appends to `state_changes:` / `recent_interactions:` on existing sheets
 
-**Self-check:** log.md ✓ | character file ✓ | state.md ✓ | scene/npc sheets (if applicable) ✓
+It is atomic: a validation error (e.g. unknown character name) leaves nothing written.
+
+⛔ `turn_commit.py` does NOT create new sheets — only appends to existing ones. If a brand-new scene or NPC needs a sheet, create it first via `scene_note.py` (Step 8b), then optionally append the state-change in the same `turn_commit.py` call.
+
+### 8b. Create scene / NPC sheets when needed
+
+If the action described a NEW scene not in `worlds/<world>/world.md`, OR an improvised NPC not in `worlds/<world>/npcs.md` — create the sheet via `scene_note.py` BEFORE calling `turn_commit.py` (so the append in Step 8a lands on an existing sheet).
+
+```bash
+# New scene with the minimum required tags
+python3 /root/.microclaw/scripts/scene_note.py <game> scene <scene_id> \
+  --type location --first-visited "д1 утро" \
+  --layout "<tag>" --layout "<tag>" \
+  --atmosphere "<tag>" --atmosphere "<tag>" \
+  [--linked-npc <npc_id>] [--prop "key:tag,tag"]
+
+# New improvised NPC
+python3 /root/.microclaw/scripts/scene_note.py <game> npc <npc_id> \
+  --first-seen "д1 утро, <scene>" [--known-name "Имя"] \
+  --appearance "<tag>" --appearance "<tag>" \
+  --voice "<tag>"
+
+# A new known connection between scenes
+python3 /root/.microclaw/scripts/scene_note.py <game> connect \
+  --link-from <id> --link-to <id> --direction <north|...>
+```
+
+See `skills/scenes/SKILL.md` for full rules on when to create vs append.
+
+### 8c. Self-check
+
+log.md ✓ | character file ✓ | state.md ✓ | scene/npc sheet (if applicable) ✓ — all via `turn_commit.py` (+ `scene_note.py` for new sheets). If you find yourself reaching for `edit_file` on log.md / state.md / character file, STOP — that is the old flow and is now superseded.
 
 ---
 

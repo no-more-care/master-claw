@@ -115,15 +115,27 @@ See `skills/narrator/SKILL.md` section 9 for budget table and voice descriptions
 
 If player says "переключи права рассказчика на <level>" / "switch narrator rights to <level>" — update game.md and confirm the change.
 
-### Rule 0b: Write files after every action — before the next player response
+### Rule 0b: Write files after every action — use `turn_commit.py`
 
-After every resolved action (roll or auto-success), complete ALL THREE before writing the next narrative:
-1. Append entry to log.md (use `locales/{lang}/templates/log_entry.md`)
-2. Update character file (reserve, conditions, new aspects/flags)
-3. Rewrite state.md "Current scene" section to reflect the world as it is NOW
+After every resolved action (roll or auto-success), bundle the writes through `turn_commit.py` rather than 3-5 separate `edit_file` calls:
 
-⛔ Do NOT send next narrative until all three writes are done.
+```bash
+cat <<JSON | python3 /root/.microclaw/scripts/turn_commit.py <game>
+{
+  "log_entry": {"kind":"roll","heading":"...","action":"...","roll":"...","narrator":"...","conditions":"...","reserve":"...","consequences":"..."},
+  "character_update": {"name":"<basename>","reserve":<int>,"change_log_entry":"..."},
+  "state_update": {"current_scene":"3-5 lines"},
+  "scene_sheet_append": {"scene_id":"<id>","state_change":"д<n> <time>: ..."},
+  "npc_sheet_append":   {"npc_id":"<id>","recent_interaction":"д<n> <time>: ..."}
+}
+JSON
+```
+
+⛔ Do NOT send next narrative until `turn_commit.py` exits 0.
 ⛔ Never skip because "nothing important happened" — if a roll was made, write the log.
+⛔ For NEW improvised scenes/NPCs (not yet in `worlds/`), call `scene_note.py` BEFORE `turn_commit.py` (the commit only appends to existing sheets). Full reference: `skills/scenes/SKILL.md`.
+
+The old per-file `edit_file` flow (log → character → state → sheet) is obsolete for action commits — `turn_commit.py` is atomic, validated, and one tool call instead of 4-6.
 
 ### Rule 0b2: Narrative channel — dual-channel output via Discord webhook
 
@@ -144,14 +156,21 @@ python3 /root/.microclaw/scripts/post_narrative.py '<webhook_url>' '<narrative_t
 
 The narrative channel gets clean prose only — no mechanics, no emoji headers, no dice, no call-to-action.
 
-### Rule 0c: Dice pool — never use trait level as dice count
+### Rule 0c: Dice pool — use `build_pool.py`, never compute by hand
 
-⛔ Each trait always gives exactly +1 die. Level = aspect count only.
+⛔ Pool construction goes through `build_pool.py`. The script reads the character file from disk, validates every cited trait/aspect/flag, and prints the canonical one-line display per `dice_pool.md`. Hand-built pools are the largest single source of past mistakes (level=dice confusion, missing aspects, hallucinated flags).
 
-Before announcing any pool, verify:
-1. Did I RE-READ the character file from disk right now? (MANDATORY)
-2. +1 per trait (not per level)? Every aspect actually in the file? Logically applies?
-3. At most 1 flag? Announced difficulty and waited for confirmation?
+```bash
+python3 /root/.microclaw/scripts/build_pool.py <game> <character> \
+  --trait "..." --trait "..." \
+  --aspect "..." --aspect "..." \
+  [--flag "..."] \
+  --difficulty <D>
+```
+
+Each trait always gives exactly +1 die. Level = aspect count only. The script enforces this — if you find yourself trying to "explain" why level should add more dice, you're wrong; trust the script.
+
+If `build_pool.py` returns a validation error (typo, aspect on wrong trait, unknown flag) — fix the args and re-run; do NOT bypass the script with `edit_file` of the response. Then announce difficulty + failure stakes (Step 3 of `actions/SKILL.md`) and STOP — wait for the player.
 
 ### Rule 0d: Always wait for player confirmation before rolling
 
@@ -317,12 +336,12 @@ During play — re-read when:
 - Do not decide for players. Describe the situation — yes. "You decide to enter" — never.
 - Log everything significant in log.md. Atmospheric details — no.
 
-## Dice rolling — use the dice script
+## Dice rolling — use the dice scripts
 
-**⛔ MANDATORY: Use the dice script for ALL rolls. Never generate dice manually.**
+**⛔ MANDATORY: All rolls go through `roll.py`. Never generate dice manually.**
 
-1. Re-read character file from disk (Rule 5)
-2. Build pool → use display format from `locales/{lang}/templates/dice_pool.md`
+1. Build pool via `build_pool.py` (it reads the character from disk and validates) — see Rule 0c
+2. Paste the script's pool line into the response
 3. Announce pool and difficulty to player, wait for confirmation
 4. Run: `python3 /root/.microclaw/scripts/roll.py <pool_size> <difficulty>`
 5. Paste the formatted result (player-facing block) into your response

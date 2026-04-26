@@ -101,6 +101,46 @@ If the index does not exist yet in a game, create it empty (`# Scene graph` head
 - **Update, don't rewrite:** for state changes, append to the `state_changes:` list or add a new tag to the relevant key. Do not rewrite entire sections.
 - **Never delete prior tags** unless the fact was narratively overwritten (e.g. "hearth: cold" after previously "hearth: live_fire" — append the change with a timestamp).
 
+### Tooling
+
+Two scripts cover the lifecycle. Always prefer them over `edit_file` on the sheet directly — they enforce schema and avoid YAML indentation drift.
+
+**Create a new sheet** (or merge into an existing one with `--update`):
+
+```bash
+# Scene
+python3 /root/.microclaw/scripts/scene_note.py <game> scene <scene_id> \
+  --type location --first-visited "д1 утро" \
+  --layout "<tag>" --layout "<tag>" \
+  --atmosphere "<tag>" --atmosphere "<tag>" \
+  [--linked-npc <id>] [--prop "key:tag,tag"]
+
+# Improvised NPC
+python3 /root/.microclaw/scripts/scene_note.py <game> npc <npc_id> \
+  --first-seen "д1 утро, <scene>" [--known-name "Name"] \
+  --appearance "<tag>" --appearance "<tag>" --voice "<tag>"
+
+# Known connection between scenes (updates _index.md)
+python3 /root/.microclaw/scripts/scene_note.py <game> connect \
+  [--parent <id> --parent-type town --add-sub-scene <id>] \
+  [--link-from <id> --link-to <id> --direction <north|...>]
+```
+
+`scene_note.py` enforces minimum required tags on create (`--type`, `--first-visited`/`--first-seen`, ≥2 layout / appearance, ≥2 atmosphere / ≥1 voice) and refuses snake_case violations.
+
+**Append a state-change / interaction to an existing sheet** — bundle it with the rest of the turn's writes via `turn_commit.py`:
+
+```json
+{
+  "scene_sheet_append": {"scene_id": "<id>", "state_change": "д<n> <time>: <change>"},
+  "npc_sheet_append":   {"npc_id":   "<id>", "recent_interaction": "д<n> <time>: <event>"}
+}
+```
+
+Or stand-alone via `scene_note.py ... --append-change "..."` / `--append-interaction "..."`.
+
+⛔ `turn_commit.py` ONLY appends to existing sheets. Create the sheet with `scene_note.py` first, then `turn_commit.py` can fold the state-change into the same atomic action commit.
+
 ## Read discipline
 
 Before narrating ANY block about a scene/NPC you've described before:

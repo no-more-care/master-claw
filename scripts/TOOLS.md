@@ -95,6 +95,49 @@ Pipe this line directly into `render_response.py` as `pool_line`.
 
 ---
 
+## `scene_note.py <game> {scene|npc|connect} ...` (NEW)
+
+**When.** scenes/SKILL.md write discipline, and `actions/SKILL.md` Step 8b — whenever the agent has improvised a scene or NPC NOT defined in `worlds/`. Create the sheet here BEFORE calling `turn_commit.py` (the latter only appends to existing sheets).
+
+**Replaces.** Hand-built `write_file` of the sheet template plus YAML you must format yourself. Now: argparse-driven flags, schema-validated, snake_case enforced.
+
+**Subcommands:**
+
+| Sub | Purpose | Required on create |
+|---|---|---|
+| `scene <id>` | create or update `scenes/<id>.md` | `--type`, `--first-visited`, ≥2 `--layout`, ≥2 `--atmosphere` |
+| `npc <id>` | create or update `npcs_adhoc/<id>.md` | `--first-seen`, ≥2 `--appearance`, ≥1 `--voice` |
+| `connect` | upsert nodes / edges in `scenes/_index.md` | one of `--parent` or both `--link-from`+`--link-to` |
+
+`<id>` must be snake_case ASCII (no spaces, no Cyrillic). Refuses to overwrite an existing sheet without `--update`. Use `--append-change "..."` (scene) / `--append-interaction "..."` (npc) to add a single timeline entry without touching other fields.
+
+**Typical calls:**
+
+```bash
+# new scene
+python3 scene_note.py silverwood_glen scene irvin_market_square \
+  --type location --first-visited "д1 утро" \
+  --layout "вход_юг" --layout "лоток_булочника_северо-восток" \
+  --atmosphere "пар_от_печи" --atmosphere "хлеб+специи" \
+  --linked-npc "yanov_baker" \
+  --prop "лоток:дубовый,навес,2_корзины"
+
+# new improvised NPC
+python3 scene_note.py silverwood_glen npc yanov_baker \
+  --first-seen "д1 утро, рынок Ирвина" --known-name "Старый Янов" \
+  --appearance "красное_лицо" --appearance "ловкие_руки" \
+  --voice "хриплый"
+
+# graph upsert
+python3 scene_note.py silverwood_glen connect \
+  --parent irvin --parent-type town \
+  --add-sub-scene irvin_market_square --add-sub-scene irvin_tavern_black_cat
+```
+
+**Output.** Human-readable status by default (`path: ..., created: True`); `--json` for machine-parseable form. Use `--dry-run` to preview without writing.
+
+---
+
 ## `turn_commit.py <game> [--dry-run]` (NEW)
 
 **When.** actions/SKILL.md Step 8 — batch-write log / character / state / scene sheet / npc sheet in one atomic call.
@@ -222,13 +265,16 @@ Numbers in parentheses = LLM iterations (approximate).
 
 ---
 
-## Not touching skill files
+## Wired into skills
 
-These tools are stand-alone. The skill markdown still describes the old flow; agent will use the new tools when the skills are updated to reference them. Before wiring into skills, recommended playtest order:
+As of April 2026, all of the above tools are referenced from the skill files and soul:
 
-1. Use `session_snapshot.py` on continue (already referenced in session/SKILL.md).
-2. Hand-run `build_pool.py` from the agent via bash as a sanity test.
-3. Have the agent call `render_response.py` for 1-2 turns to confirm the output shape fits Discord rendering.
-4. Only then update `skills/actions/SKILL.md` and `souls/gamemaster.md` to make these tools mandatory.
+- `build_pool.py` — `actions/SKILL.md` Step 4, `souls/gamemaster.md` Rule 0c
+- `roll.py` — `actions/SKILL.md` Step 5, `souls/gamemaster.md` "Dice rolling" section
+- `turn_commit.py` — `actions/SKILL.md` Step 8a, `souls/gamemaster.md` Rule 0b
+- `scene_note.py` — `scenes/SKILL.md` write discipline, `actions/SKILL.md` Step 8b
+- `post_narrative.py` — `actions/SKILL.md` Step 6b, `souls/gamemaster.md` Rule 0a8
+- `session_snapshot.py` — `session/SKILL.md` continue step
+- `render_response.py` — opt-in; the old per-turn manual assembly per `game_response.md` template still works, render_response is for agents that benefit from structured emission. Not wired as mandatory.
 
-Reason: if any tool has an unexpected edge case (YAML parse drift, rendering artefact), the agent should still be able to fall back to the old manual flow without breaking.
+If a tool returns a validation error, fix the args and re-run. Do NOT fall back to hand-built `edit_file` / inline pool strings — those are the patterns the scripts replace.
