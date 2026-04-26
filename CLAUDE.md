@@ -122,7 +122,7 @@ MasterClaw's skills are prompt-heavy (lots of rules, procedures, templates). Mod
 
 - **Free tier** (free OpenRouter models, small self-hosted like Llama/Qwen): currently **not viable** for MasterClaw. Verified across two playtest passes (5 distinct models — glm-4.5-air, qwen3-next, llama-3.3, gpt-oss-120b, minimax-m2.5). Provider rate limits or outages knock out half the candidates on any given day. The ones that *do* respond either stall in tool-loops without emitting final text, or break the character/game schema (no trait levels, wrong reserve, invented enum values for `narrative_style` / `narrator_rights_level`, missing flags). Even the best-of-free (minimax-m2.5) loses to cheap-tier grok-4.1-fast on every dimension. Recheck periodically: the bar for "free" rises over time, and temporary promo / gift-credit models occasionally land. Until then, useful only for smoke-testing pipeline wiring.
 - **Cheap tier** (roughly $0.05–$1 per M output): uneven. See the cheap-tier playtest notes below — **most cheap models fabricate dice rolls** (skip `scripts/roll.py` and invent results) and **mangle the character YAML schema**. Only Grok-4.1-fast passed the baseline 3-turn test cleanly and is the current cheap-tier recommendation. Retest before adopting anything else from this tier.
-- **Mid tier** (GLM-5 / 5.1, DeepSeek-R1, Gemini-2.5 Pro, Grok-4.1 full, Claude Haiku 4.5): noticeably more consistent. Still benefits from explicit reminders in long sessions but handles pushback better. Reasonable choice for serious campaigns on a budget. Not re-baselined after the recent skill/script additions — do that before promoting one to default.
+- **Mid tier** (roughly $0.30–$3.50 per M output): the qualitative jump from cheap is large. **Six mid-tier models tested in April 2026 — none fabricated dice rolls** (vs 3 of 4 cheap models that did). See mid-tier playtest notes below. Current production default: **`moonshotai/kimi-k2.5`** ($0.44/$2.00) — best schema fidelity, atmospheric narrative, correct mechanics, mid-range price. GLM-5 is a fine alternative if you prefer faster responses. Don't waste money on glm-5.1, mistral-medium-3.1, qwen3-235b-thinking, or gpt-5-mini for this workload — see notes for why.
 - **Premium tier** (Claude Sonnet 4.6+, GPT-5, Claude Opus): expected to handle the full rule surface without hand-holding. ~10× the cost of cheap-tier. Not yet baseline-tested against this ruleset — retest when evaluating production upgrades.
 
 ### Cheap-tier baseline (3-turn agentic playtest, April 2026)
@@ -138,7 +138,26 @@ Tested via the web channel with `gamemaster.md` soul: (1) create world + trader 
 
 **Takeaway:** fabricated rolls are the most dangerous failure — the model invents outcomes to please the player instead of yielding to real RNG, silently breaking the whole system's fairness. Three of four cheap models do it. Only Grok-4.1-fast respected the rule and stopped to wait for player confirmation.
 
-**Recommendation for cheap-tier default: `x-ai/grok-4.1-fast`** until mid-tier is re-baselined.
+**Recommendation for cheap-tier default: `x-ai/grok-4.1-fast`.**
+
+### Mid-tier baseline (3-turn agentic playtest, April 2026)
+
+Same scenario as cheap-tier. Six models tested. **None fabricated rolls** — verified in runtime logs by the actual `roll.py` invocations. Roll-fabrication is the cheap/free-tier failure mode and disappears at mid.
+
+| Model | Char YAML | Pool build | `roll.py` called | Notes |
+|---|---|---|---|---|
+| `moonshotai/kimi-k2.5` ($0.44/$2.00) | ✅✅ 6 traits sum 18, reserve 7/7, 3 typed flags | ✅ trait+aspect+flag breakdown, waits | — (waited for reserve choice) | Best narrative ("Янтарные Пределы", evocative). 11 min. **Recommended default.** |
+| `z-ai/glm-5` ($0.60/$2.08) | ✅ 5 traits, 7/7 reserve, but presented in prose | ✅ correct breakdown, waits | — (waited) | Verbose but mechanically correct. 3 min — fastest of mid. |
+| `z-ai/glm-5.1` ($1.05/$3.50) | ✅ reads char file accurately, picks trait by level | ✅ clean breakdown | ✅ `roll.py 4 3` | Compact replies. **+75% price for marginal gain over GLM-5 — skip unless price is irrelevant.** |
+| `openai/gpt-5-mini` ($0.25/$2.00) | ⚠️ skipped char card creation, only 2 traits mentioned | ✅ waits | ✅ `roll.py 2 4` | Bureaucratic — wastes turn 1 asking config questions despite "no extra questions" instruction. |
+| `mistralai/mistral-medium-3.1` ($0.40/$2.00) | ❌ pure prose, no traits/reserve/flags | — never reached | ✅ once, then stuck | Stuck in `bash` safety-gate loop on turn 3. Helper exhausted 3 approves with no final response. **Avoid.** |
+| `qwen/qwen3-235b-a22b-thinking-2507` ($0.15/$1.50) | ❌ no trait sheet, reserve 3 (should 7) | ❌ skipped pool announcement, rolled directly | ✅ `roll.py 2 2` | Thinking didn't fix schema. Atmospheric narrative ("херги") but breaks Step 4. 37 min — slow. |
+
+**Recommendation for mid-tier default: `moonshotai/kimi-k2.5`** — best schema, best narrative, correct mechanics, mid-range price, 262K context. Currently deployed on the droplet.
+
+### Skill-side bug observed across all tested tiers
+
+**No model creates `games/<game>/scenes/<scene_id>.md` sheets** when improvising scene specifics, despite `scenes/SKILL.md` mandating this. Affects free → mid uniformly. This is a skill instruction-side gap, not a model failing — the rule needs strengthening or a script-enforced entry point. Logged here as a TODO for the skill side.
 
 Rules of thumb:
 - Don't lock the codebase to a single provider's quirks. Keep prompts model-agnostic.
