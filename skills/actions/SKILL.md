@@ -211,6 +211,15 @@ Announce updated reserve to player.
 
 **Do NOT send the next narrative response until all applicable writes are complete.**
 
+⛔ The single most-skipped step in playtest. `roll.py`'s output ends with a `[NEXT STEP: ...]` sentinel reminding you to call `turn_commit.py` before responding. If you skip Step 8, the log loses the action, state.md drifts from reality, character reserve is stale, and the next session starts on broken state. None of this is recoverable from chat history.
+
+Order, every roll-resolved action, no exceptions:
+1. **NEW scene or NPC introduced this turn?** → `scene_note.py` (Step 8b below) FIRST.
+2. `turn_commit.py` (Step 8a below) — log + character + state + sheet appends in one atomic call.
+3. THEN compose and emit the game-channel narrative.
+
+If you find yourself drafting narrative prose immediately after `roll.py` — STOP. Run the writes first; the prose will be identical, but the writes are non-recoverable later.
+
 ### 8a. Use `turn_commit.py` for the bundle
 
 A single atomic call replaces the old "edit log.md, then character.md, then state.md, then a scene sheet" sequence (4-6 separate `read+edit` pairs). Pipe a JSON payload via stdin:

@@ -65,6 +65,13 @@ def roll(pool_size: int, difficulty: int) -> str:
     # GM-only section (internal, for log)
     lines.append("")
     lines.append(f"[GM LOG: dice={dice}, hits={hits}, diff={difficulty}, outcome={outcome}, narrator={narrator}]")
+    # Reminder for the agent — playtest showed turn_commit.py is frequently
+    # skipped after a roll because the model gets pulled into narrating the
+    # outcome. This sentinel is read by the agent (not the player) and is
+    # the only thing standing between a clean turn and a silent state-drift.
+    lines.append("[NEXT STEP: call turn_commit.py with this roll's data BEFORE emitting any narrative response. "
+                 "If a new scene/NPC was introduced, scene_note.py FIRST, then turn_commit.py. "
+                 "Do NOT respond to the player without these writes.]")
 
     return "\n".join(lines)
 

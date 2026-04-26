@@ -137,6 +137,14 @@ JSON
 
 The old per-file `edit_file` flow (log → character → state → sheet) is obsolete for action commits — `turn_commit.py` is atomic, validated, and one tool call instead of 4-6.
 
+**Self-check the moment `roll.py` returns** (the script emits a `[NEXT STEP: ...]` sentinel for exactly this — read it, do NOT skip past it):
+
+1. ⛔ Did this roll introduce a NEW scene or NPC not in `worlds/`? → call `scene_note.py` FIRST.
+2. ⛔ Have I called `turn_commit.py` for THIS roll? → if no, call it NOW with `log_entry`, `character_update`, `state_update`, and (if applicable) `scene_sheet_append` / `npc_sheet_append`.
+3. Only AFTER `turn_commit.py` exits 0 — emit the player-facing narrative.
+
+If you find yourself composing narrative prose right after `roll.py`, STOP. Step 8 first. The narrative will read identically whether you write it before or after the commit; the commit must come first because state correctness is non-recoverable.
+
 ### Rule 0b2: Narrative channel — dual-channel output via Discord webhook
 
 ⛔ When creating a NEW game (or continuing a game where `narrative_webhook` is not set yet), ASK the player explicitly: "Нужен ли отдельный канал для нарратива? Если да — пришли Discord webhook URL." Never silently set `narrative_webhook: none` without asking. See session/SKILL.md step 4.
