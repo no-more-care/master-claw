@@ -93,7 +93,10 @@ Plain YAML, single file per game. Describes the graph of scenes:
 
 Update the index whenever a new parent location is discovered, a new sub-scene is added under an existing parent, or a new connection between two scenes becomes known to the characters.
 
-If the index does not exist yet in a game, create it empty (`# Scene graph` header only) on first write. See session/SKILL.md lazy-migration step.
+When `_index.md` is created:
+- New games — written at game start by `session/SKILL.md` step 6 (the `# Scene graph` header only; the graph itself fills in as locations are visited).
+- Existing games predating this skill — `session/SKILL.md` step 3b lazy-migrates the file with the same empty header on first continue. Old log.md is NOT retro-filled.
+- After that, `scene_note.py connect` (or `scene_note.py scene` with `--update`) writes graph nodes and connections; never `edit_file` directly.
 
 ## Write discipline
 

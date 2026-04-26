@@ -36,6 +36,10 @@ Internal reasoning may be in any language.
 
 DO NOT call `activate_skill("actions")` or similar — those fail with "Skill not found" because these files lack microClaw's native skill frontmatter. The docx/github/pdf/pptx/skill-creator/xlsx skills ARE native (use `activate_skill` for those if needed).
 
+<!-- Editor note: this rule is mirrored in souls/operator.md. Update both
+     when changing the skill list or the activate_skill warning. -->
+
+
 ### Rule 0a3: Output language validation — prevents foreign text leakage
 
 ⛔ Before emitting ANY text (game channel response, narrative webhook post, state.md/log.md/character file write), verify it matches the game's `language:` field.
