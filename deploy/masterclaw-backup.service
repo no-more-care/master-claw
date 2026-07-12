@@ -1,0 +1,10 @@
+[Unit]
+Description=Back up MasterClaw SQLite database
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/masterclaw
+ExecStart=/usr/bin/docker compose run --rm masterclaw masterclaw backup --database /app/data/masterclaw.sqlite3 --output /app/data/backups/latest.sqlite3
+

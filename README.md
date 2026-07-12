@@ -1,5 +1,44 @@
 # MasterClaw
 
+> `develop-v2` is an active architectural rewrite on OpenHands SDK. The legacy
+> microClaw implementation remains in the repository as prompt/rules material and
+> is not the runtime architecture of v2.
+
+## v2 runtime
+
+MasterClaw v2 is a deterministic Discord game-master service for BlackBirdPie:
+
+- OpenHands SDK with OpenRouter-only, role-based model configuration;
+- SQLite state, durable Discord inbox and transactional multi-channel outbox;
+- code-owned mode routing, dice, reserve, XP, revisions and validation gates;
+- bounded typed pipelines for world/character generation, action interpretation,
+  advancement safety, consequences, narration and player narrator rights;
+- separate game and narrative Discord channels;
+- Docker Compose deployment for a single isolated Linux droplet.
+
+Development checks:
+
+```bash
+python -m pip install -e ".[dev]"
+python -m ruff check src tests
+python -m ruff format --check src tests
+python -m pytest -q
+```
+
+Runtime configuration starts from `.env.example`. See
+`docs/openhands-refactoring-plan.md`, `docs/v2-implementation-status.md` and
+`docs/v2-deployment.md`.
+
+Discord commands are ordinary durable messages beginning with `/`: `/world create`,
+`/world generate`, `/game prepare`, `/game progression`, `/game rights`,
+`/game narrative`, `/game scene`, `/character create`, `/character place`,
+`/game start`, `/game status`, `/character status`, `/xp status`, `/advance` and
+`/help`. All Discord participants have equal command permissions.
+
+## Archived legacy v1 material
+
+Everything below describes the retained microClaw source material, not the v2 runtime or deployment path.
+
 AI-powered Game Master for **BlackBirdPie** tabletop RPG, running on [microClaw](https://github.com/microclaw/microclaw).
 
 ## What is this?

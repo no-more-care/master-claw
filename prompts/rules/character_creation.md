@@ -1,0 +1,2 @@
+A starting character has 3–9 traits. Every trait starts at level 2–6, all levels sum to exactly 18, and each trait has exactly level aspects. The character has at least three locked flags, including at least one positive relationship flag. Reserve starts at 7/7. Names must be unique within the sheet. Application code validates all numeric and structural invariants.
+

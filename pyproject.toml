@@ -1,0 +1,35 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "masterclaw"
+version = "2.0.0.dev0"
+description = "Deterministic Discord game-master orchestration on OpenHands SDK"
+requires-python = ">=3.12"
+dependencies = [
+  "discord.py>=2.5,<3",
+  "openhands-sdk==1.33.0",
+  "pydantic>=2.11,<3",
+  "pydantic-settings>=2.10,<3",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.4,<10", "pytest-asyncio>=1.1,<2", "ruff>=0.15,<0.16"]
+
+[project.scripts]
+masterclaw = "masterclaw.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/masterclaw"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

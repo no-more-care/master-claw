@@ -1,0 +1,2 @@
+Progression must be enabled for the session. Advancement is allowed only when the current fictional situation provides safety and meaningful downtime. Raising a trait costs its new level and adds one aspect. A new trait costs 3 XP, starts at level 2 with two aspects, and requires a plausible explanation of where and how it was learned. The decision here is only an allow/deny gate; application code validates XP, shape and revisions.
+

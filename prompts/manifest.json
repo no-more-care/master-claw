@@ -1,0 +1,44 @@
+{
+  "fragments": {
+    "declaration_validation": {
+      "path": "rules/declaration_validation.md",
+      "version": 1,
+      "scope": "play"
+    },
+    "difficulty": {
+      "path": "rules/difficulty.md",
+      "version": 1,
+      "scope": "play"
+    },
+    "equipment": {
+      "path": "rules/equipment.md",
+      "version": 1,
+      "scope": "play"
+    },
+    "narrator_rights": {
+      "path": "rules/narrator_rights.md",
+      "version": 1,
+      "scope": "play"
+    },
+    "narrative_style": {
+      "path": "narrative/style.md",
+      "version": 1,
+      "scope": "play"
+    },
+    "world_generation": {
+      "path": "world/generation.md",
+      "version": 1,
+      "scope": "world_management"
+    },
+    "advancement": {
+      "path": "rules/advancement.md",
+      "version": 1,
+      "scope": "play"
+    },
+    "character_creation": {
+      "path": "rules/character_creation.md",
+      "version": 1,
+      "scope": "preparation"
+    }
+  }
+}

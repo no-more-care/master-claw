@@ -3,6 +3,10 @@ runtime/
 *.db
 *.db-shm
 *.db-wal
+data/
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
 
 # Logs
 runtime/logs/
@@ -17,13 +21,18 @@ working_dir/shared/GameMaster/worlds/
 
 # Config with secrets
 microclaw.config.yaml
+.env
 
 # Soul backups
 souls/*.bak
 souls/*.bak2
 
-# Temp files
+# Temp and Python files
 *.tmp
+.pytest_cache/
+.venv/
+__pycache__/
+*.py[cod]
 
 # Default microClaw skills — not part of this project
 skills/find-skills/

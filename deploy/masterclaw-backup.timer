@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily MasterClaw SQLite backup
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+RandomizedDelaySec=10m
+
+[Install]
+WantedBy=timers.target
+
