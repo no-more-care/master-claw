@@ -76,7 +76,10 @@ Implemented:
 - OpenRouter role smoke test covering state, reasoning and narrative model contracts;
 - deterministic multiplayer help, conditions/plot-item projections and social difficulty rules;
 - independent-scene revision tests proving that unrelated scenes can commit without a shared lock;
-- 79 passing tests covering the current core.
+- persistent per-session LLM token, cost and latency telemetry;
+- Discord typing status, terminal failure notices and logical 1800-character message chunks;
+- code-rendered Discord formats adapted from the legacy localized templates;
+- 83 passing tests covering the current core.
 
 The daemon now contains tested vertical slices for world setup, character preparation,
 automatic actions, roll-based actions, narrator-rights follow-up, progression and dual-channel output.

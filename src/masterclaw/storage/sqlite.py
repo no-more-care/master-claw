@@ -155,7 +155,28 @@ CREATE TABLE IF NOT EXISTS outbox_messages (
 );
 """
 
-MIGRATIONS: tuple[tuple[int, str], ...] = ((1, MIGRATION_1_SQL),)
+MIGRATION_2_SQL = """
+CREATE TABLE IF NOT EXISTS llm_calls (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    game_id TEXT REFERENCES games(game_id) ON DELETE SET NULL,
+    role TEXT NOT NULL,
+    model TEXT NOT NULL,
+    response_id TEXT,
+    prompt_tokens INTEGER NOT NULL DEFAULT 0,
+    completion_tokens INTEGER NOT NULL DEFAULT 0,
+    cache_read_tokens INTEGER NOT NULL DEFAULT 0,
+    cache_write_tokens INTEGER NOT NULL DEFAULT 0,
+    reasoning_tokens INTEGER NOT NULL DEFAULT 0,
+    latency_ms INTEGER NOT NULL,
+    cost REAL NOT NULL DEFAULT 0,
+    success INTEGER NOT NULL,
+    error TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS llm_calls_game_time ON llm_calls(game_id, created_at, id);
+"""
+
+MIGRATIONS: tuple[tuple[int, str], ...] = ((1, MIGRATION_1_SQL), (2, MIGRATION_2_SQL))
 SCHEMA_VERSION = MIGRATIONS[-1][0]
 
 
@@ -232,6 +253,66 @@ class SQLiteStore:
             with closing(sqlite3.connect(target_path)) as destination:
                 source.backup(destination)
         return target_path
+
+    def record_llm_call(
+        self,
+        *,
+        game_id: str | None,
+        role: str,
+        model: str,
+        response_id: str | None,
+        prompt_tokens: int,
+        completion_tokens: int,
+        cache_read_tokens: int,
+        cache_write_tokens: int,
+        reasoning_tokens: int,
+        latency_ms: int,
+        cost: float,
+        success: bool,
+        error: str | None = None,
+    ) -> None:
+        values = (
+            prompt_tokens,
+            completion_tokens,
+            cache_read_tokens,
+            cache_write_tokens,
+            reasoning_tokens,
+            latency_ms,
+        )
+        if any(value < 0 for value in values) or cost < 0:
+            raise ValueError("LLM metrics cannot be negative")
+        with self.transaction() as connection:
+            connection.execute(
+                """INSERT INTO llm_calls
+                   (game_id, role, model, response_id, prompt_tokens,
+                    completion_tokens, cache_read_tokens, cache_write_tokens,
+                    reasoning_tokens, latency_ms, cost, success, error)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    game_id,
+                    role,
+                    model,
+                    response_id,
+                    *values,
+                    cost,
+                    int(success),
+                    error[:2000] if error else None,
+                ),
+            )
+
+    def llm_session_totals(self, game_id: str) -> dict[str, int | float]:
+        with closing(self.connect()) as connection:
+            row = connection.execute(
+                """SELECT COUNT(*) AS calls,
+                          COALESCE(SUM(prompt_tokens), 0) AS prompt_tokens,
+                          COALESCE(SUM(completion_tokens), 0) AS completion_tokens,
+                          COALESCE(SUM(reasoning_tokens), 0) AS reasoning_tokens,
+                          COALESCE(SUM(latency_ms), 0) AS latency_ms,
+                          COALESCE(SUM(cost), 0) AS cost
+                   FROM llm_calls WHERE game_id = ?""",
+                (game_id,),
+            ).fetchone()
+        return dict(row)
 
     @contextmanager
     def transaction(self) -> Iterator[sqlite3.Connection]:
@@ -990,9 +1071,9 @@ class SQLiteStore:
                         (f"{idempotency_key}:delivery:{suffix}", target_channel, content),
                     )
 
-    def fail_batch(self, *, event_ids: list[str], error: str, retry: bool = True) -> None:
+    def fail_batch(self, *, event_ids: list[str], error: str, retry: bool = True) -> bool:
         if not event_ids:
-            return
+            return False
         with self.transaction() as connection:
             placeholders = ",".join("?" for _ in event_ids)
             if retry:
@@ -1009,6 +1090,21 @@ class SQLiteStore:
                         WHERE event_id IN ({placeholders})""",
                     (error[:2000], *event_ids),
                 )
+            rows = connection.execute(
+                f"SELECT status FROM inbox_messages WHERE event_id IN ({placeholders})",
+                event_ids,
+            ).fetchall()
+            return bool(rows) and all(row["status"] == InboxStatus.FAILED.value for row in rows)
+
+    def queue_system_notice(self, *, channel_id: str, key: str, content: str) -> None:
+        if not content.strip():
+            raise ValueError("system notice cannot be empty")
+        with self.transaction() as connection:
+            connection.execute(
+                """INSERT OR IGNORE INTO outbox_messages
+                   (idempotency_key, channel_id, content) VALUES (?, ?, ?)""",
+                (f"system-notice:{key}", channel_id, content.strip()),
+            )
 
     def recover_interrupted_work(self) -> int:
         """Single-worker startup recovery for messages claimed before a crash."""

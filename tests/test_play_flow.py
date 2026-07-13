@@ -175,5 +175,5 @@ def test_committed_roll_can_resume_from_same_discord_event_without_open_pending(
         )
     )
     assert isinstance(resumed, HandlerResponse)
-    assert "успехов" in resumed.text
+    assert "Успехов" in resumed.text
     assert never_intent.calls == 0

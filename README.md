@@ -27,7 +27,8 @@ python -m pytest -q
 
 Runtime configuration starts from `.env.example`. See
 `docs/openhands-refactoring-plan.md`, `docs/v2-implementation-status.md` and
-`docs/v2-deployment.md`.
+`docs/v2-deployment.md`. Discord rendering and legacy-template reuse are documented in
+`docs/v2-discord-formatting.md`.
 
 Discord commands are ordinary durable messages beginning with `/`: `/world create`,
 `/world generate`, `/game prepare`, `/game progression`, `/game rights`,

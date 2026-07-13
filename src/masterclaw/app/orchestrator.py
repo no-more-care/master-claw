@@ -44,7 +44,9 @@ class ChannelOrchestrator:
             )
             return batch
         except Exception as error:
-            self._store.fail_batch(event_ids=event_ids, error=repr(error), retry=True)
+            terminal = self._store.fail_batch(event_ids=event_ids, error=repr(error), retry=True)
+            if terminal:
+                self._queue_failure_notice(channel_id, event_ids)
             raise
 
     async def process_until_quiet(
@@ -81,7 +83,11 @@ class ChannelOrchestrator:
             )
             return batch
         except Exception as error:
-            self._store.fail_batch(event_ids=all_event_ids, error=repr(error), retry=True)
+            terminal = self._store.fail_batch(
+                event_ids=all_event_ids, error=repr(error), retry=True
+            )
+            if terminal:
+                self._queue_failure_notice(channel_id, all_event_ids)
             raise
 
     @staticmethod
@@ -97,3 +103,17 @@ class ChannelOrchestrator:
                 suffix = f"{delivery.kind}:{delivery_index}:{chunk_index}"
                 payloads.append((delivery.channel_id, chunk, suffix))
         return payloads
+
+    def _queue_failure_notice(self, channel_id: str, event_ids: list[str]) -> None:
+        if not event_ids:
+            return
+        key = self._idempotency_key(channel_id, event_ids)
+        self._store.queue_system_notice(
+            channel_id=channel_id,
+            key=key,
+            content=(
+                "Не удалось обработать запрос после нескольких попыток. "
+                "Сообщение сохранено, ничего повторять не нужно. "
+                "Попробуйте позже; запись доступна оператору для восстановления."
+            ),
+        )

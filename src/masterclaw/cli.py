@@ -93,38 +93,28 @@ def main(argv: list[str] | None = None) -> int:
         store = SQLiteStore(settings.database_path)
         store.initialize()
         registry = OpenHandsLLMRegistry(settings)
-        intent = create_intent_pipeline(OpenHandsCompletionPort(registry, ModelRole.STATE))
+
+        def completion(role: ModelRole) -> OpenHandsCompletionPort:
+            return OpenHandsCompletionPort(registry, role, store)
+
+        intent = create_intent_pipeline(completion(ModelRole.STATE))
         context = ContextAssembler(settings.prompt_path)
         advancement = AdvancementCoordinator(
             store=store,
             context=context,
-            safety_pipeline=create_advancement_safety_pipeline(
-                OpenHandsCompletionPort(registry, ModelRole.STATE)
-            ),
+            safety_pipeline=create_advancement_safety_pipeline(completion(ModelRole.STATE)),
         )
         application = MessageApplication(
             store=store,
             context=context,
             intent_pipeline=intent,
-            action_pipeline=create_action_pipeline(
-                OpenHandsCompletionPort(registry, ModelRole.REASONING)
-            ),
-            narrative_pipeline=create_narrative_pipeline(
-                OpenHandsCompletionPort(registry, ModelRole.NARRATIVE)
-            ),
+            action_pipeline=create_action_pipeline(completion(ModelRole.REASONING)),
+            narrative_pipeline=create_narrative_pipeline(completion(ModelRole.NARRATIVE)),
             advancement=advancement,
-            player_narration_pipeline=create_player_narration_pipeline(
-                OpenHandsCompletionPort(registry, ModelRole.STATE)
-            ),
-            worldgen_pipeline=create_worldgen_pipeline(
-                OpenHandsCompletionPort(registry, ModelRole.REASONING)
-            ),
-            character_pipeline=create_character_pipeline(
-                OpenHandsCompletionPort(registry, ModelRole.REASONING)
-            ),
-            consequence_pipeline=create_consequence_pipeline(
-                OpenHandsCompletionPort(registry, ModelRole.REASONING)
-            ),
+            player_narration_pipeline=create_player_narration_pipeline(completion(ModelRole.STATE)),
+            worldgen_pipeline=create_worldgen_pipeline(completion(ModelRole.REASONING)),
+            character_pipeline=create_character_pipeline(completion(ModelRole.REASONING)),
+            consequence_pipeline=create_consequence_pipeline(completion(ModelRole.REASONING)),
         )
         orchestrator = ChannelOrchestrator(store, application)
         client = DiscordIngressClient(

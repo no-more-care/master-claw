@@ -8,6 +8,7 @@ from masterclaw.domain.models import GameLifecycle, IncomingMessage
 from masterclaw.domain.state import GameState, WorldState
 from masterclaw.pipelines.intent import create_intent_pipeline
 from masterclaw.storage.sqlite import SQLiteStore
+from masterclaw.telemetry import current_game_id
 
 
 class FakeCompletion:
@@ -86,3 +87,33 @@ def test_active_game_message_updates_code_driven_activity_clock(tmp_path) -> Non
     )
     assert store.activity_state("game")["active_seconds"] == 300
     assert completion.calls == 0
+
+
+def test_llm_call_is_bound_to_the_channel_game_for_telemetry(tmp_path) -> None:
+    store = SQLiteStore(tmp_path / "db.sqlite3")
+    store.initialize()
+    store.create_world(WorldState("world", "World"))
+    store.create_game(GameState("game", "world", GameLifecycle.ACTIVE))
+    store.bind_channel(channel_id="channel", game_id="game")
+
+    class SessionAwareCompletion:
+        async def complete(self, *, system: str, user: str) -> str:
+            assert current_game_id() == "game"
+            return '{"intent":"ambiguous","confidence":1,"evidence":"test"}'
+
+    app = MessageApplication(
+        store=store,
+        context=ContextAssembler(Path(__file__).parents[1] / "prompts"),
+        intent_pipeline=create_intent_pipeline(SessionAwareCompletion()),
+    )
+    asyncio.run(
+        app(
+            IncomingMessage.now(
+                event_id="telemetry",
+                channel_id="channel",
+                author_id="alice",
+                content="Осматриваюсь",
+            )
+        )
+    )
+    assert current_game_id() is None

@@ -63,14 +63,19 @@ class DiscordIngressClient(discord.Client):
 
     async def _process_after_debounce(self, channel_id: str) -> None:
         try:
-            await self._orchestrator.process_until_quiet(
-                channel_id, quiet_seconds=self._debounce_seconds
-            )
+            channel = self.get_channel(int(channel_id))
+            if channel is None:
+                raise RuntimeError("Discord channel is unavailable to the bot")
+            async with channel.typing():
+                await self._orchestrator.process_until_quiet(
+                    channel_id, quiet_seconds=self._debounce_seconds
+                )
             await self._publish_outbox()
         except asyncio.CancelledError:
             raise
         except Exception:
             logger.exception("Discord batch processing failed for channel %s", channel_id)
+            await self._publish_outbox()
         finally:
             if channel_id in self._store.pending_inbox_channels():
                 self._scheduled[channel_id] = asyncio.create_task(

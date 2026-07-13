@@ -60,6 +60,9 @@ def test_repeated_handler_failure_moves_message_to_dead_letter_state(tmp_path) -
             pass
     assert store.pending(channel_id="c") == []
     assert store.failed_inbox()[0]["event_id"] == "1"
+    notice = store.pending_outbox(channel_id="c")
+    assert len(notice) == 1
+    assert "ничего повторять не нужно" in notice[0]["content"]
     store.requeue_failed_inbox("1")
     assert [item.event_id for item in store.pending(channel_id="c")] == ["1"]
 

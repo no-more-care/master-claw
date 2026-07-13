@@ -37,6 +37,7 @@ Copy `.env.example` to `.env` and set:
 - optional database, prompts and debounce settings.
 
 The daemon does not dynamically route models by price or availability. Each pipeline selects one configured role.
+`.env.example` uses `openrouter/x-ai/grok-4.5` for all three roles; deployments may override each role independently.
 
 ## Commands
 

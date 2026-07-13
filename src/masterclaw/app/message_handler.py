@@ -8,6 +8,7 @@ from masterclaw.app.action_service import ActionService
 from masterclaw.app.advancement_coordinator import AdvancementCoordinator
 from masterclaw.app.game_service import GameService, validate_id
 from masterclaw.app.progression_service import ProgressionService
+from masterclaw.app.response_format import format_pool_confirmation, format_roll_result
 from masterclaw.context.assembler import ContextAssembler
 from masterclaw.context.manifests import PipelineName, manifest_for
 from masterclaw.domain.characters import CharacterState
@@ -37,6 +38,7 @@ from masterclaw.pipelines.narrative import NarrativeResult
 from masterclaw.pipelines.player_narration import PlayerNarrationReview
 from masterclaw.pipelines.worldgen import WorldDraft
 from masterclaw.storage.sqlite import SQLiteStore
+from masterclaw.telemetry import bind_game, reset_game
 
 logger = logging.getLogger(__name__)
 
@@ -76,8 +78,15 @@ class MessageApplication:
         self._consequence_pipeline = consequence_pipeline
 
     async def __call__(self, message: IncomingMessage) -> str:
-        command = self._command(message.content)
         channel = self._store.channel_state(message.channel_id)
+        token = bind_game(channel.game_id)
+        try:
+            return await self._dispatch(message, channel)
+        finally:
+            reset_game(token)
+
+    async def _dispatch(self, message: IncomingMessage, channel) -> str:
+        command = self._command(message.content)
         route = self._router.route(command=command, channel=channel)
         if route.mode is OperatingMode.PLAY and channel.game_id is not None:
             self._store.record_activity(game_id=channel.game_id, occurred_at=message.created_at)
@@ -596,10 +605,18 @@ class MessageApplication:
         except MechanicsError as error:
             return f"Предложенный пул не прошёл проверку: {error}. Уточните заявку."
         payload = pending.payload
-        return (
-            f"Пул: {payload['pool_size']} куб.; сложность: {payload['difficulty']}. "
-            f"Резерв доступен: {sheet.reserve_current}. "
-            "Ответьте числом добавляемых кубов резерва (0 тоже допустим) или `отмена`."
+        return format_pool_confirmation(
+            pool_size=int(payload["pool_size"]),
+            difficulty=int(payload["difficulty"]),
+            reserve=sheet.reserve_current,
+            sources=tuple(
+                str(value)
+                for value in (
+                    *payload["trait_names"],
+                    *payload["aspect_names"],
+                    *([payload["flag"]] if payload["flag"] else []),
+                )
+            ),
         )
 
     async def _handle_pending_response(
@@ -635,11 +652,12 @@ class MessageApplication:
     async def _render_roll_outcome(
         self, *, message: IncomingMessage, roll
     ) -> str | HandlerResponse:
-        dice = ", ".join(str(value) for value in roll.dice)
-        mechanical = (
-            f"🎲 [{dice}] — успехов: {roll.hits}, сложность: {roll.difficulty}. "
-            f"Права рассказчика: `{roll.narrator_rights.value}`. "
-            f"Резерв: {roll.reserve_after}/7."
+        mechanical = format_roll_result(
+            dice=roll.dice,
+            hits=roll.hits,
+            difficulty=roll.difficulty,
+            rights=roll.narrator_rights.value,
+            reserve=roll.reserve_after,
         )
         if roll.narrator_rights.value.startswith("player_"):
             return mechanical + " Опишите исход действия в пределах полученных прав рассказчика."
