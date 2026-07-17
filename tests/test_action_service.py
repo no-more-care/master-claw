@@ -6,14 +6,21 @@ from masterclaw.domain.mechanics import (
     FlagType,
     NarratorRights,
     PoolProposal,
+    TemporaryBonus,
+    TemporaryBonusType,
     Trait,
 )
 from masterclaw.domain.models import GameLifecycle
-from masterclaw.domain.state import GameState, NarratorRightsLevel, WorldState
+from masterclaw.domain.state import (
+    GameState,
+    NarratorRightsLevel,
+    PendingStatus,
+    WorldState,
+)
 from masterclaw.storage.sqlite import SQLiteStore
 
 
-def setup_store(tmp_path) -> SQLiteStore:
+def setup_store(tmp_path, *, temporary_bonuses=()) -> SQLiteStore:
     store = SQLiteStore(tmp_path / "db.sqlite3")
     store.initialize()
     store.create_world(WorldState("world", "World"))
@@ -27,6 +34,7 @@ def setup_store(tmp_path) -> SQLiteStore:
             Flag("Belief", FlagType.BELIEF),
         ),
         reserve_current=5,
+        temporary_bonuses=tuple(temporary_bonuses),
     )
     store.create_character(CharacterState("hero", "game", "alice", "Bio", sheet))
     return store
@@ -152,3 +160,96 @@ def test_help_die_is_returned_on_failure_without_penalty(tmp_path) -> None:
     )
     helper = store.character_for_player(game_id="game", player_id="bob")
     assert helper.sheet.reserve_current == 7
+
+
+def test_help_die_is_returned_when_pool_is_cancelled(tmp_path) -> None:
+    store = setup_store(tmp_path)
+    add_helper(store)
+    pending = ActionService(store).propose_roll(
+        game_id="game",
+        player_id="alice",
+        scene_id="scene",
+        proposal=PoolProposal(trait_names=("Trait 0",), difficulty=1),
+        prompt="Confirm",
+    )
+    store.offer_help(game_id="game", helper_player_id="bob", target_player_id="alice")
+    assert store.character_for_player(game_id="game", player_id="bob").sheet.reserve_current == 6
+
+    store.cancel_pending(
+        interaction_id=pending.interaction_id,
+        player_id="alice",
+        expected_revision=pending.revision,
+    )
+
+    helper = store.character_for_player(game_id="game", player_id="bob")
+    assert helper.sheet.reserve_current == 7
+    assert store.pending_by_id(pending.interaction_id).status is PendingStatus.CANCELLED
+
+
+def test_help_die_is_returned_when_pool_expires(tmp_path) -> None:
+    store = setup_store(tmp_path)
+    add_helper(store)
+    pending = ActionService(store).propose_roll(
+        game_id="game",
+        player_id="alice",
+        scene_id="scene",
+        proposal=PoolProposal(trait_names=("Trait 0",), difficulty=1),
+        prompt="Confirm",
+    )
+    store.offer_help(game_id="game", helper_player_id="bob", target_player_id="alice")
+    assert store.character_for_player(game_id="game", player_id="bob").sheet.reserve_current == 6
+
+    store.expire_pending(
+        interaction_id=pending.interaction_id,
+        player_id="alice",
+        expected_revision=pending.revision,
+    )
+
+    helper = store.character_for_player(game_id="game", player_id="bob")
+    assert helper.sheet.reserve_current == 7
+    assert store.pending_by_id(pending.interaction_id).status is PendingStatus.EXPIRED
+
+
+def test_temporary_bonus_is_consumed_atomically_and_retry_is_idempotent(tmp_path) -> None:
+    bonus = TemporaryBonus(
+        "archive-route",
+        TemporaryBonusType.EXTRA_DIE,
+        "Following the courier through the archive",
+    )
+    store = setup_store(tmp_path, temporary_bonuses=(bonus,))
+    service = ActionService(store)
+    pending = service.propose_roll(
+        game_id="game",
+        player_id="alice",
+        scene_id="scene",
+        proposal=PoolProposal(
+            trait_names=("Trait 0",),
+            difficulty=2,
+            bonus_ids=("archive-route",),
+        ),
+        prompt="Confirm",
+    )
+
+    first = service.confirm_roll(
+        interaction_id=pending.interaction_id,
+        player_id="alice",
+        confirmation_event_id="bonus-roll",
+        die=lambda: 4,
+    )
+    second = service.confirm_roll(
+        interaction_id=pending.interaction_id,
+        player_id="alice",
+        confirmation_event_id="bonus-roll",
+        die=lambda: 1,
+    )
+
+    assert first == second
+    assert first.pool_size == 2
+    character = store.character_for_player(game_id="game", player_id="alice")
+    assert character.sheet.temporary_bonuses == ()
+    event = next(
+        item
+        for item in store.recent_domain_events(game_id="game", limit=10)
+        if item["event_type"] == "roll_committed"
+    )
+    assert event["payload"]["consumed_bonus_ids"] == ["archive-route"]

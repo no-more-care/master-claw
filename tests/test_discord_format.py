@@ -26,11 +26,37 @@ def test_default_split_prefers_logical_paragraph_boundaries() -> None:
 
 
 def test_legacy_game_templates_are_rendered_as_discord_markdown() -> None:
-    pool = format_pool_confirmation(pool_size=4, difficulty=2, reserve=5)
+    pool = format_pool_confirmation(pool_size=4, difficulty=2, reserve=5, locale="ru")
     result = format_roll_result(
-        dice=(6, 4, 1), hits=2, difficulty=2, rights="player_success", reserve=4
+        dice=(6, 4, 1),
+        hits=2,
+        difficulty=2,
+        rights="player_success",
+        reserve=4,
+        locale="ru",
     )
     assert "🎲 **Пул: 4 куб.**" in pool
     assert "Сколько кубов" in pool
     assert "`6 4 1`" in result
     assert "Права рассказчика" in result
+
+
+def test_mechanical_templates_follow_english_game_locale() -> None:
+    pool = format_pool_confirmation(
+        pool_size=3,
+        difficulty=2,
+        reserve=6,
+        locale="en",
+    )
+    result = format_roll_result(
+        dice=(5, 2, 1),
+        hits=1,
+        difficulty=2,
+        rights="gm_failure",
+        reserve=5,
+        locale="en",
+    )
+    assert "Pool: 3 dice" in pool
+    assert "How many reserve dice" in pool
+    assert "Hits: **1**" in result
+    assert "Narrator rights" in result

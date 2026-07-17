@@ -6,10 +6,11 @@ from masterclaw.app.game_service import GameService
 from masterclaw.domain.characters import CharacterState
 from masterclaw.domain.mechanics import CharacterSheet, Flag, FlagType, Trait
 from masterclaw.domain.models import GameLifecycle
+from masterclaw.domain.state import NarratorRightsLevel, ReserveRecoveryMode
 from masterclaw.storage.sqlite import SQLiteStore
 
 
-def add_character(store, game_id, scene_id):
+def add_character(store, game_id, scene_id, reserve=7):
     sheet = CharacterSheet(
         "Hero",
         tuple(Trait(f"T{i}", 3, tuple(f"A{i}.{n}" for n in range(3))) for i in range(6)),
@@ -18,12 +19,13 @@ def add_character(store, game_id, scene_id):
             Flag("Goal", FlagType.GOAL),
             Flag("Belief", FlagType.BELIEF),
         ),
+        reserve_current=reserve,
     )
     store.create_character(CharacterState("hero", game_id, "alice", "Bio", sheet))
     store.place_player(game_id=game_id, player_id="alice", scene_id=scene_id)
 
 
-def test_game_cannot_start_until_narrative_channel_and_scene_exist(tmp_path) -> None:
+def test_game_cannot_start_until_narrative_channel_and_character_exist(tmp_path) -> None:
     store = SQLiteStore(tmp_path / "db.sqlite3")
     store.initialize()
     service = GameService(store)
@@ -31,7 +33,6 @@ def test_game_cannot_start_until_narrative_channel_and_scene_exist(tmp_path) -> 
     service.prepare_game(game_id="my_game", world_id="my_world", channel_id="game-channel")
     assert service.readiness("my_game").missing == (
         "narrative_channel",
-        "initial_scene",
         "characters",
     )
     with pytest.raises(ValueError, match="not ready"):
@@ -80,3 +81,88 @@ def test_progression_is_configured_only_before_game_start(tmp_path) -> None:
     service.start_game("game")
     with pytest.raises(RuntimeError, match="only during preparation"):
         service.configure_progression(game_id="game", enabled=False)
+
+
+def test_reserve_recovery_mode_can_be_selected_during_preparation(tmp_path) -> None:
+    store = SQLiteStore(tmp_path / "db.sqlite3")
+    store.initialize()
+    service = GameService(store)
+    service.create_world(world_id="world", title="World")
+    service.prepare_game(game_id="game", world_id="world", channel_id="game-channel")
+
+    configured = service.configure_reserve_recovery(
+        game_id="game", mode=ReserveRecoveryMode.SAFE_REST
+    )
+
+    assert configured.reserve_recovery_mode is ReserveRecoveryMode.SAFE_REST
+
+
+def test_game_preparation_accepts_world_policy_defaults(tmp_path) -> None:
+    store = SQLiteStore(tmp_path / "db.sqlite3")
+    store.initialize()
+    service = GameService(store)
+    service.create_world(world_id="world", title="World")
+
+    game = service.prepare_game(
+        game_id="game",
+        world_id="world",
+        channel_id="game-channel",
+        progression_enabled=True,
+        narrator_rights_level=NarratorRightsLevel.SIGNIFICANT,
+        reserve_recovery_mode=ReserveRecoveryMode.SAFE_REST,
+    )
+
+    assert game.progression_enabled is True
+    assert game.narrator_rights_level is NarratorRightsLevel.SIGNIFICANT
+    assert game.reserve_recovery_mode is ReserveRecoveryMode.SAFE_REST
+
+
+def test_safe_rest_recovery_restores_everything_when_system_adjudicates_it(tmp_path) -> None:
+    store = SQLiteStore(tmp_path / "db.sqlite3")
+    store.initialize()
+    service = GameService(store)
+    service.create_world(world_id="world", title="World")
+    service.prepare_game(
+        game_id="game",
+        world_id="world",
+        channel_id="game-channel",
+        reserve_recovery_mode=ReserveRecoveryMode.SAFE_REST,
+    )
+    store.create_scene(scene_id="base", game_id="game", title="Safe Base")
+    add_character(store, "game", "base", reserve=2)
+    assert (
+        service.restore_reserve_for_safe_rest(
+            game_id="game",
+            reason="overnight at the base",
+            causation_id="rest-system",
+        )
+        == 1
+    )
+    assert store.character_for_player(game_id="game", player_id="alice").sheet.reserve_current == 7
+
+
+def test_system_roleplay_award_recovers_exactly_one_and_respects_game_mode(tmp_path) -> None:
+    store = SQLiteStore(tmp_path / "db.sqlite3")
+    store.initialize()
+    service = GameService(store)
+    service.create_world(world_id="world", title="World")
+    service.prepare_game(
+        game_id="game",
+        world_id="world",
+        channel_id="game-channel",
+        reserve_recovery_mode=ReserveRecoveryMode.ROLEPLAY_AWARD,
+    )
+    store.create_scene(scene_id="road", game_id="game", title="Road")
+    add_character(store, "game", "road", reserve=2)
+    assert service.award_reserve_die(
+        game_id="game",
+        player_id="alice",
+        reason="strong roleplay",
+        causation_id="award-1",
+    ) == (2, 3)
+    with pytest.raises(ValueError, match="safe-rest reserve recovery is disabled"):
+        service.restore_reserve_for_safe_rest(
+            game_id="game",
+            reason="overnight camp",
+            causation_id="rest-disabled",
+        )

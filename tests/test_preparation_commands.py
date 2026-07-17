@@ -3,39 +3,87 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
+from masterclaw.app.game_service import GameService
 from masterclaw.app.message_handler import MessageApplication
 from masterclaw.context.assembler import ContextAssembler
 from masterclaw.domain.models import IncomingMessage
+from masterclaw.pipelines.base import CompletionResult
 from masterclaw.pipelines.character_creation import create_character_pipeline
-from masterclaw.pipelines.intent import create_intent_pipeline
+from masterclaw.pipelines.state_decision import StateDecisionRouter
 from masterclaw.storage.sqlite import SQLiteStore
 
 
+def prepare_game(store: SQLiteStore, *, world_id: str, game_id: str, locale: str = "ru") -> None:
+    service = GameService(store)
+    service.create_world(world_id=world_id, title="World")
+    service.prepare_game(
+        game_id=game_id,
+        world_id=world_id,
+        channel_id="game-channel",
+        locale=locale,
+    )
+
+
 class NeverCompletion:
-    async def complete(self, *, system: str, user: str) -> str:
+    async def complete(self, **kwargs) -> CompletionResult:
         raise AssertionError("preparation commands must not call an LLM")
 
 
 class CharacterCompletion:
-    async def complete(self, *, system: str, user: str) -> str:
-        return json.dumps(
-            {
-                "name": "Hero",
-                "biography": "A traveller",
-                "traits": [
-                    {
-                        "name": f"Trait {i}",
-                        "level": 3,
-                        "aspects": [f"Aspect {i}.{n}" for n in range(3)],
-                    }
-                    for i in range(6)
-                ],
-                "flags": [
-                    {"text": "Friend of Mira", "type": "relationship"},
-                    {"text": "Never surrender", "type": "belief"},
-                    {"text": "Find home", "type": "goal"},
-                ],
-            }
+    async def complete(self, **kwargs) -> CompletionResult:
+        return CompletionResult(
+            json.dumps(
+                {
+                    "name": "Hero",
+                    "biography": "A traveller",
+                    "traits": [
+                        {
+                            "name": f"Trait {i}",
+                            "level": 3,
+                            "aspects": [f"Aspect {i}.{n}" for n in range(3)],
+                        }
+                        for i in range(6)
+                    ],
+                    "flags": [
+                        {
+                            "text": "Friend of Mira",
+                            "type": "relationship",
+                            "is_positive": True,
+                        },
+                        {
+                            "text": "Never surrender",
+                            "type": "belief",
+                            "is_positive": False,
+                        },
+                        {"text": "Find home", "type": "goal", "is_positive": False},
+                    ],
+                }
+            ),
+            used_tool=True,
+        )
+
+
+class NaturalPreparationIntent:
+    def __init__(self) -> None:
+        self.responses = iter(
+            (
+                "create_character",
+                "show_game_status",
+            )
+        )
+
+    async def complete(self, **kwargs) -> CompletionResult:
+        command = next(self.responses)
+        return CompletionResult(
+            json.dumps(
+                {
+                    "command": command,
+                    "argument": None,
+                    "confidence": 1,
+                    "evidence": "natural request",
+                }
+            ),
+            used_tool=True,
         )
 
 
@@ -59,21 +107,66 @@ def test_equal_player_can_prepare_and_start_game_with_progression_setting(tmp_pa
     app = MessageApplication(
         store=store,
         context=ContextAssembler(Path(__file__).parents[1] / "prompts"),
-        intent_pipeline=create_intent_pipeline(NeverCompletion()),
+        state_router=StateDecisionRouter(NeverCompletion()),
         character_pipeline=create_character_pipeline(CharacterCompletion()),
     )
-    assert "Создан черновик" in send(app, "1", '/world create world "World"')
-    assert "режиме подготовки" in send(app, "2", "/game prepare game world ru")
+    prepare_game(store, world_id="world", game_id="game")
+    send(app, "bad-channel", "/game narrative not-a-channel")
+    assert store.game_state("game").narrative_channel_id is None
     assert "включена" in send(app, "3", "/game progression on")
     assert "Нарративный канал" in send(app, "4", "/game narrative 999")
-    assert "Создана сцена" in send(app, "5", '/game scene opening "Opening"')
     assert "Создан персонаж" in send(app, "6", '/character create hero "A travelling hero"')
     status = send(app, "6a", "/character status")
-    assert "Персонаж `hero` — Hero" in status
+    assert "Персонаж **Hero**" in status
     assert "Опыт: 0" in status
     assert "Резерв: 7/7" in status
-    assert "размещён" in send(app, "7", "/character place opening")
-    assert "запущена" in send(app, "8", "/game start")
+    assert "началась" in send(app, "8", "/game start")
     game = store.game_state("game")
     assert game.progression_enabled is True
     assert game.narrative_channel_id == "999"
+
+
+def test_english_game_uses_english_deterministic_command_responses(tmp_path) -> None:
+    store = SQLiteStore(tmp_path / "db.sqlite3")
+    store.initialize()
+    app = MessageApplication(
+        store=store,
+        context=ContextAssembler(Path(__file__).parents[1] / "prompts"),
+        state_router=StateDecisionRouter(NeverCompletion()),
+        character_pipeline=create_character_pipeline(CharacterCompletion()),
+    )
+    prepare_game(store, world_id="english", game_id="english-game", locale="en")
+    assert "Progression enabled" in send(app, "en-3", "/game progression on")
+    assert "Created character" in send(app, "en-5", '/character create hero "A travelling hero"')
+    status = send(app, "en-6", "/character status")
+    assert "Traits:" in status
+    assert "Reserve: 7/7" in status
+    assert "XP: 0" in status
+
+
+def test_natural_character_creation_start_and_status_need_no_commands(tmp_path) -> None:
+    store = SQLiteStore(tmp_path / "db.sqlite3")
+    store.initialize()
+    app = MessageApplication(
+        store=store,
+        context=ContextAssembler(Path(__file__).parents[1] / "prompts"),
+        state_router=StateDecisionRouter(NaturalPreparationIntent()),
+        character_pipeline=create_character_pipeline(CharacterCompletion()),
+    )
+    prepare_game(store, world_id="world", game_id="game")
+    send(app, "narrative", "/game narrative 999")
+
+    created = send(
+        app,
+        "natural-character",
+        "Я бывшая разведчица, которая ищет пропавшего брата и никому не доверяет",
+    )
+    assert "создан персонаж" in created.lower()
+    assert store.character_for_player(game_id="game", player_id="alice") is not None
+    assert store.scene_projection(game_id="game", player_id="alice") is None
+
+    started = send(app, "natural-start", "Все готовы, начинаем игру")
+    assert "началась" in started.lower()
+    assert store.scene_projection(game_id="game", player_id="alice") is not None
+    status = send(app, "natural-status", "Какой сейчас статус игры?")
+    assert "состояние игры" in status.lower()

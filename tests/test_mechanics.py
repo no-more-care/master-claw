@@ -10,6 +10,8 @@ from masterclaw.domain.mechanics import (
     NarratorRights,
     PoolProposal,
     SocialRelation,
+    TemporaryBonus,
+    TemporaryBonusType,
     Trait,
     narrator_rights,
     reserve_after_roll,
@@ -117,3 +119,85 @@ def test_social_conflict_difficulty_is_computed_without_llm() -> None:
     assert social_difficulty(SocialRelation.ENEMY) == 5
     assert social_difficulty(SocialRelation.OPPONENT, DealPosition.ADVANTAGEOUS) == 5
     assert social_difficulty(SocialRelation.OPPONENT, DealPosition.UNFAVOURABLE) == 3
+
+
+def test_extra_die_temporary_bonus_is_an_explicit_pool_component() -> None:
+    rewarded = CharacterSheet(
+        name=sheet().name,
+        traits=sheet().traits,
+        flags=sheet().flags,
+        reserve_current=sheet().reserve_current,
+        temporary_bonuses=(
+            TemporaryBonus(
+                "archive-route",
+                TemporaryBonusType.EXTRA_DIE,
+                "Following the courier through the archive",
+            ),
+        ),
+    )
+
+    pool = validate_pool(
+        rewarded,
+        PoolProposal(
+            trait_names=("Body",),
+            difficulty=3,
+            bonus_ids=("archive-route",),
+        ),
+    )
+
+    assert pool.size == 2
+    assert pool.difficulty == 3
+    assert pool.bonus_ids == ("archive-route",)
+    assert "bonus:archive-route" in pool.components
+
+
+def test_difficulty_reduction_temporary_bonus_never_reduces_below_one() -> None:
+    rewarded = CharacterSheet(
+        name=sheet().name,
+        traits=sheet().traits,
+        flags=sheet().flags,
+        reserve_current=sheet().reserve_current,
+        temporary_bonuses=(
+            TemporaryBonus(
+                "known-weakness",
+                TemporaryBonusType.DIFFICULTY_REDUCTION,
+                "Exploiting the sentinel's known weakness",
+            ),
+        ),
+    )
+
+    pool = validate_pool(
+        rewarded,
+        PoolProposal(
+            trait_names=("Mind",),
+            difficulty=1,
+            bonus_ids=("known-weakness",),
+        ),
+    )
+
+    assert pool.size == 1
+    assert pool.difficulty == 1
+
+
+def test_unknown_or_multiple_temporary_bonuses_fail_closed() -> None:
+    rewarded = CharacterSheet(
+        name=sheet().name,
+        traits=sheet().traits,
+        flags=sheet().flags,
+        reserve_current=sheet().reserve_current,
+        temporary_bonuses=(
+            TemporaryBonus("one", TemporaryBonusType.EXTRA_DIE, "First trigger"),
+            TemporaryBonus("two", TemporaryBonusType.EXTRA_DIE, "Second trigger"),
+        ),
+    )
+
+    with pytest.raises(MechanicsError, match="unknown temporary bonus"):
+        validate_pool(
+            rewarded,
+            PoolProposal(trait_names=("Body",), bonus_ids=("missing",)),
+        )
+    with pytest.raises(MechanicsError, match="at most one"):
+        validate_pool(
+            rewarded,
+            PoolProposal(trait_names=("Body",), bonus_ids=("one", "two")),
+        )

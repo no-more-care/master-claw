@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import StrEnum
 
 from .models import GameLifecycle
@@ -27,6 +28,20 @@ class NarratorRightsLevel(StrEnum):
     MADNESS = "madness"
 
 
+class ReserveRecoveryMode(StrEnum):
+    SAFE_REST = "safe_rest"
+    ROLEPLAY_AWARD = "roleplay_award"
+    BOTH = "both"
+
+    @property
+    def allows_safe_rest(self) -> bool:
+        return self in {ReserveRecoveryMode.SAFE_REST, ReserveRecoveryMode.BOTH}
+
+    @property
+    def allows_roleplay_award(self) -> bool:
+        return self in {ReserveRecoveryMode.ROLEPLAY_AWARD, ReserveRecoveryMode.BOTH}
+
+
 @dataclass(frozen=True, slots=True)
 class SceneRef:
     scene_id: str
@@ -50,6 +65,7 @@ class GameState:
     narrator_rights_level: NarratorRightsLevel = NarratorRightsLevel.MINOR
     locale: str = "ru"
     narrative_channel_id: str | None = None
+    reserve_recovery_mode: ReserveRecoveryMode = ReserveRecoveryMode.BOTH
     revision: int = 0
 
 
@@ -70,6 +86,7 @@ class PendingInteraction:
     payload: dict[str, object] = field(default_factory=dict)
     status: PendingStatus = PendingStatus.OPEN
     revision: int = 0
+    created_at: datetime | None = field(default=None, compare=False)
 
 
 class InvalidTransition(ValueError):
@@ -96,6 +113,7 @@ def transition_game(game: GameState, target: GameLifecycle) -> GameState:
         narrator_rights_level=game.narrator_rights_level,
         locale=game.locale,
         narrative_channel_id=game.narrative_channel_id,
+        reserve_recovery_mode=game.reserve_recovery_mode,
         revision=game.revision + 1,
     )
 

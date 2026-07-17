@@ -10,6 +10,7 @@ from masterclaw.domain.mechanics import CharacterSheet, Flag, FlagType, Trait
 from masterclaw.domain.models import GameLifecycle
 from masterclaw.domain.state import GameState, WorldState
 from masterclaw.pipelines.advancement import create_advancement_safety_pipeline
+from masterclaw.pipelines.base import CompletionResult
 from masterclaw.storage.sqlite import SQLiteStore
 
 
@@ -17,9 +18,12 @@ class FakeCompletion:
     def __init__(self, allowed: bool) -> None:
         self.allowed = allowed
 
-    async def complete(self, *, system: str, user: str) -> str:
+    async def complete(self, **kwargs) -> CompletionResult:
         value = "true" if self.allowed else "false"
-        return f'{{"allowed":{value},"reason":"scene assessment","evidence":["current scene"]}}'
+        return CompletionResult(
+            f'{{"allowed":{value},"reason":"scene assessment","evidence":["current scene"]}}',
+            used_tool=True,
+        )
 
 
 def setup(tmp_path, *, enabled=True):

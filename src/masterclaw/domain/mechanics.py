@@ -17,6 +17,16 @@ class NarratorRights(StrEnum):
     GM_FAILURE = "gm_failure"
 
 
+class OutcomeAuthority(StrEnum):
+    """Narrative authority supplied to consequence planning for any resolved outcome."""
+
+    PLAYER_SUCCESS = NarratorRights.PLAYER_SUCCESS
+    GM_SUCCESS = NarratorRights.GM_SUCCESS
+    PLAYER_FAILURE = NarratorRights.PLAYER_FAILURE
+    GM_FAILURE = NarratorRights.GM_FAILURE
+    GM_AUTOMATIC = "gm_automatic"
+
+
 class SocialRelation(StrEnum):
     FRIEND = "friend"
     NEUTRAL = "neutral"
@@ -35,6 +45,24 @@ class FlagType(StrEnum):
     PERSONALITY = "personality"
     GOAL = "goal"
     BELIEF = "belief"
+
+
+class TemporaryBonusType(StrEnum):
+    EXTRA_DIE = "extra_die"
+    DIFFICULTY_REDUCTION = "difficulty_reduction"
+
+
+@dataclass(frozen=True, slots=True)
+class TemporaryBonus:
+    bonus_id: str
+    type: TemporaryBonusType
+    trigger: str
+
+    def __post_init__(self) -> None:
+        if not self.bonus_id.strip():
+            raise MechanicsError("temporary bonus id cannot be empty")
+        if not self.trigger.strip():
+            raise MechanicsError("temporary bonus trigger cannot be empty")
 
 
 @dataclass(frozen=True, slots=True)
@@ -68,12 +96,15 @@ class CharacterSheet:
     flags: tuple[Flag, ...]
     reserve_current: int = 7
     reserve_maximum: int = 7
+    temporary_bonuses: tuple[TemporaryBonus, ...] = ()
 
     def __post_init__(self) -> None:
         if len({trait.name for trait in self.traits}) != len(self.traits):
             raise MechanicsError("trait names must be unique")
         if not 0 <= self.reserve_current <= self.reserve_maximum <= 7:
             raise MechanicsError("reserve must satisfy 0 <= current <= maximum <= 7")
+        if len({bonus.bonus_id for bonus in self.temporary_bonuses}) != len(self.temporary_bonuses):
+            raise MechanicsError("temporary bonus ids must be unique")
 
 
 @dataclass(frozen=True, slots=True)
@@ -125,6 +156,7 @@ class PoolProposal:
     flag: str | None = None
     reserve_spent: int = 0
     difficulty: int = 1
+    bonus_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -133,6 +165,7 @@ class ValidatedPool:
     difficulty: int
     reserve_after_spend: int
     components: tuple[str, ...]
+    bonus_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -172,18 +205,38 @@ def validate_pool(sheet: CharacterSheet, proposal: PoolProposal) -> ValidatedPoo
         raise MechanicsError(f"unknown flag: {proposal.flag}")
     if not 0 <= proposal.reserve_spent <= sheet.reserve_current:
         raise MechanicsError("reserve spent exceeds available reserve")
+    if len(set(proposal.bonus_ids)) != len(proposal.bonus_ids):
+        raise MechanicsError("a temporary bonus cannot be counted more than once")
+    if len(proposal.bonus_ids) > 1:
+        raise MechanicsError("at most one temporary bonus may be used on a roll")
+    bonus_by_id = {bonus.bonus_id: bonus for bonus in sheet.temporary_bonuses}
+    selected_bonuses: list[TemporaryBonus] = []
+    for bonus_id in proposal.bonus_ids:
+        try:
+            selected_bonuses.append(bonus_by_id[bonus_id])
+        except KeyError as error:
+            raise MechanicsError(f"unknown temporary bonus: {bonus_id}") from error
 
     components = tuple(
         [f"trait:{name}" for name in proposal.trait_names]
         + [f"aspect:{name}" for name in proposal.aspect_names]
         + ([f"flag:{proposal.flag}"] if proposal.flag else [])
         + ["reserve" for _ in range(proposal.reserve_spent)]
+        + [
+            f"bonus:{bonus.bonus_id}"
+            for bonus in selected_bonuses
+            if bonus.type is TemporaryBonusType.EXTRA_DIE
+        ]
+    )
+    difficulty_reductions = sum(
+        bonus.type is TemporaryBonusType.DIFFICULTY_REDUCTION for bonus in selected_bonuses
     )
     return ValidatedPool(
         size=len(components),
-        difficulty=proposal.difficulty,
+        difficulty=max(1, proposal.difficulty - difficulty_reductions),
         reserve_after_spend=sheet.reserve_current - proposal.reserve_spent,
         components=components,
+        bonus_ids=proposal.bonus_ids,
     )
 
 

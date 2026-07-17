@@ -82,4 +82,4 @@ class ResponseBatch:
     deliveries: tuple[OutboundDelivery, ...] = ()
 
     def render_discord(self) -> str:
-        return "\n\n".join(f"<@{item.author_id}> {item.text}" for item in self.items)
+        return "\n\n".join(item.text for item in self.items)

@@ -9,6 +9,17 @@ Each applicable element = **+1 die** (NOT +trait level!):
 - Each applicable **aspect**: +1
 - Matching **flag**: +1 (max 1 per roll)
 - **Reserve dice**: player chooses how many to add (0..current reserve)
+- A character may spend any number of their own available reserve dice on their own roll, including
+  the entire reserve. A helper may contribute exactly one die to another character's pending roll.
+- On a failed roll, all reserve dice spent on that roll return to their owners: the acting
+  character receives all of their spent dice back (plus the normal failed-roll award, capped by
+  maximum reserve), and each helper receives their one contributed die back.
+- Because the service has no reliable session boundary, reserve recovery is selected per game:
+  `safe_rest`, `roleplay_award`, or `both`. Safe rest restores every character to maximum; a system
+  game-master roleplay award restores exactly one die to one character. There is no separate human GM or
+  recovery command. A dedicated system game-master decision evaluates canonical resolved outcomes
+  and scene state, supplies explicit evidence, and deterministic code applies and audits the result.
+  A direct player request cannot trigger recovery by itself.
 
 **Roll:** Nd6, each die showing 4-6 = 1 hit.
 

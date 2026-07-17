@@ -8,12 +8,12 @@ from masterclaw.domain.characters import CharacterState
 from masterclaw.domain.mechanics import CharacterSheet, Flag, FlagType, Trait
 from masterclaw.domain.models import GameLifecycle, IncomingMessage
 from masterclaw.domain.state import GameState, WorldState
-from masterclaw.pipelines.intent import create_intent_pipeline
+from masterclaw.pipelines.state_decision import StateDecisionRouter
 from masterclaw.storage.sqlite import SQLiteStore
 
 
 class NeverCompletion:
-    async def complete(self, *, system: str, user: str) -> str:
+    async def complete(self, **kwargs):
         raise AssertionError("commands must not call an LLM")
 
 
@@ -38,7 +38,7 @@ def setup_app(tmp_path):
     app = MessageApplication(
         store=store,
         context=ContextAssembler(Path(__file__).parents[1] / "prompts"),
-        intent_pipeline=create_intent_pipeline(NeverCompletion()),
+        state_router=StateDecisionRouter(NeverCompletion()),
     )
     return store, app, start
 

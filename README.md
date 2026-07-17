@@ -19,22 +19,35 @@ MasterClaw v2 is a deterministic Discord game-master service for BlackBirdPie:
 Development checks:
 
 ```bash
-python -m pip install -e ".[dev]"
-python -m ruff check src tests
-python -m ruff format --check src tests
-python -m pytest -q
+python -m pip install uv==0.9.26
+uv sync --locked --extra dev
+uv run python -m ruff check src tests
+uv run python -m ruff format --check src tests
+uv run python -m pytest --cov=masterclaw --cov-report=term-missing -q
+uv run masterclaw doctor
 ```
 
 Runtime configuration starts from `.env.example`. See
 `docs/openhands-refactoring-plan.md`, `docs/v2-implementation-status.md` and
 `docs/v2-deployment.md`. Discord rendering and legacy-template reuse are documented in
-`docs/v2-discord-formatting.md`.
+`docs/v2-discord-formatting.md`. The current prompt/tool boundary is specified in
+`docs/llm-pipeline-contract.md`; canonical runtime entities and SQLite relations are described in
+`docs/data-model.md`. The latest model/transport conclusions are in
+`docs/benchmarks/2026-07-13-model-role-transport-analysis.md`.
+Structured stage timing and the `performance-report` console workflow are documented in
+`docs/performance-telemetry.md`.
 
-Discord commands are ordinary durable messages beginning with `/`: `/world create`,
-`/world generate`, `/game prepare`, `/game progression`, `/game rights`,
-`/game narrative`, `/game scene`, `/character create`, `/character place`,
-`/game start`, `/game status`, `/character status`, `/xp status`, `/advance` and
-`/help`. All Discord participants have equal command permissions.
+Players use ordinary language: they describe a world or character, ask questions, roleplay,
+declare actions, confirm reserve spending, request help or advancement, and ask to begin play.
+The same conversational router handles preparation settings and status requests. Slash forms such
+as `/game status` remain optional shortcuts for diagnostics and automation; nobody needs to learn
+them. All Discord participants have equal permissions.
+
+World setup is staged: collect and label inputs/defaults, explicitly generate a public draft,
+revise or regenerate it, then approve it into the reusable world catalogue. A separate explicit
+catalogue selection begins game preparation. Every response also includes a code-rendered mode
+card with the relevant world, readiness, scene and compact character state; these cards do not
+consume model tokens.
 
 ## Archived legacy v1 material
 

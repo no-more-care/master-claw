@@ -4,9 +4,6 @@ from dataclasses import dataclass
 
 from .models import ChannelState, GameLifecycle, OperatingMode
 
-WORLD_COMMANDS = frozenset({"world", "мир", "create-world", "создать-мир"})
-PREPARATION_COMMANDS = frozenset({"prepare", "подготовка", "new-game", "новая-игра"})
-
 
 @dataclass(frozen=True, slots=True)
 class RouteDecision:
@@ -17,13 +14,7 @@ class RouteDecision:
 class ModeRouter:
     """Deterministic top-level router. It never calls an LLM."""
 
-    def route(self, *, command: str | None, channel: ChannelState) -> RouteDecision:
-        normalized = (command or "").strip().lower().lstrip("/")
-        if normalized in WORLD_COMMANDS:
-            return RouteDecision(OperatingMode.WORLD_MANAGEMENT, "explicit_world_command")
-        if normalized in PREPARATION_COMMANDS:
-            return RouteDecision(OperatingMode.PREPARATION, "explicit_preparation_command")
-
+    def route(self, *, channel: ChannelState) -> RouteDecision:
         if channel.game_id is None:
             return RouteDecision(OperatingMode.WORLD_MANAGEMENT, "channel_has_no_game")
         if channel.lifecycle in {GameLifecycle.DRAFT, GameLifecycle.PREPARING}:

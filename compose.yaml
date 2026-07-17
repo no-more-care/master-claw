@@ -5,13 +5,15 @@ services:
     env_file: .env
     stop_grace_period: 30s
     healthcheck:
-      test: ["CMD", "masterclaw", "doctor"]
+      test: ["CMD", "masterclaw", "healthcheck"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 20s
     volumes:
       - masterclaw-data:/app/data
+      - masterclaw-backups:/app/backups
 
 volumes:
   masterclaw-data:
+  masterclaw-backups:

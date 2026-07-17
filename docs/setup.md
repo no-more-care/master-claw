@@ -1,5 +1,9 @@
 # MasterClaw — Setup Guide
 
+> **Legacy guide.** This document describes the retired microClaw-based deployment and is not a
+> setup path for MasterClaw v2. For the current OpenHands SDK and Docker Compose service, follow
+> [the v2 deployment runbook](v2-deployment.md).
+
 Step-by-step guide to set up MasterClaw from scratch on a Linux server.
 
 ## Prerequisites

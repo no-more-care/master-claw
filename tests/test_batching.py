@@ -32,7 +32,7 @@ def test_messages_are_processed_sequentially_and_rendered_together() -> None:
 
     assert batch.items[1].text.endswith("first.")
     assert batch.render_discord() == (
-        "<@alice> Before this message I saw: nothing.\n\n<@bob> Before this message I saw: first."
+        "Before this message I saw: nothing.\n\nBefore this message I saw: first."
     )
 
 

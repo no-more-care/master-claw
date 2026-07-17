@@ -1,0 +1,1318 @@
+{
+  "created_at": "2026-07-13T10:34:18.861716+00:00",
+  "scenario_count": 6,
+  "models": [
+    "x-ai/grok-4.5",
+    "openai/gpt-5.6-luna",
+    "aion-labs/aion-3.0-mini",
+    "nex-agi/nex-n2-mini",
+    "nex-agi/nex-n2-pro",
+    "qwen/qwen3.7-plus",
+    "x-ai/grok-4.3"
+  ],
+  "summaries": [
+    {
+      "model": "x-ai/grok-4.5",
+      "passed": 6,
+      "total": 6,
+      "calls": 6,
+      "prompt_tokens": 3382,
+      "completion_tokens": 4663,
+      "reasoning_tokens": 4283,
+      "cost": 0.033782,
+      "latency_ms": 39121,
+      "list_price": {
+        "input_per_million": 2.0,
+        "output_per_million": 6.0
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "passed": 6,
+      "total": 6,
+      "calls": 6,
+      "prompt_tokens": 2179,
+      "completion_tokens": 653,
+      "reasoning_tokens": 291,
+      "cost": 0.006097,
+      "latency_ms": 11856,
+      "list_price": {
+        "input_per_million": 1.0,
+        "output_per_million": 6.0
+      }
+    },
+    {
+      "model": "aion-labs/aion-3.0-mini",
+      "passed": 5,
+      "total": 6,
+      "calls": 7,
+      "prompt_tokens": 2468,
+      "completion_tokens": 3746,
+      "reasoning_tokens": 3709,
+      "cost": 0.006972,
+      "latency_ms": 66357,
+      "list_price": {
+        "input_per_million": 0.7,
+        "output_per_million": 1.4
+      }
+    },
+    {
+      "model": "nex-agi/nex-n2-mini",
+      "passed": 6,
+      "total": 6,
+      "calls": 6,
+      "prompt_tokens": 2220,
+      "completion_tokens": 787,
+      "reasoning_tokens": 344,
+      "cost": 0.0001342,
+      "latency_ms": 6764,
+      "list_price": {
+        "input_per_million": 0.025,
+        "output_per_million": 0.1
+      }
+    },
+    {
+      "model": "nex-agi/nex-n2-pro",
+      "passed": 6,
+      "total": 6,
+      "calls": 6,
+      "prompt_tokens": 2220,
+      "completion_tokens": 646,
+      "reasoning_tokens": 404,
+      "cost": 0.001201,
+      "latency_ms": 9294,
+      "list_price": {
+        "input_per_million": 0.25,
+        "output_per_million": 1.0
+      }
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "passed": 5,
+      "total": 6,
+      "calls": 6,
+      "prompt_tokens": 2226,
+      "completion_tokens": 6990,
+      "reasoning_tokens": 6448,
+      "cost": 0.00965952,
+      "latency_ms": 207278,
+      "list_price": {
+        "input_per_million": 0.32,
+        "output_per_million": 1.28
+      }
+    },
+    {
+      "model": "x-ai/grok-4.3",
+      "passed": 5,
+      "total": 6,
+      "calls": 6,
+      "prompt_tokens": 3234,
+      "completion_tokens": 2922,
+      "reasoning_tokens": 2605,
+      "cost": 0.0105411,
+      "latency_ms": 45700,
+      "list_price": {
+        "input_per_million": 1.25,
+        "output_per_million": 2.5
+      }
+    }
+  ],
+  "results": [
+    {
+      "model": "x-ai/grok-4.5",
+      "role": "state",
+      "scenario": "state.intent_action",
+      "passed": true,
+      "checks": {
+        "action_declaration": true,
+        "confident": true
+      },
+      "output": {
+        "intent": "action_declaration",
+        "confidence": 0.95,
+        "evidence": "First-person statement of character carefully inspecting a locked door; clear declared PC action in play mode with no pending interaction."
+      },
+      "error": null,
+      "latency_ms": 3733,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 451,
+        "completion_tokens": 315,
+        "reasoning_tokens": 273,
+        "cache_read_tokens": 128,
+        "cost": 0.0026
+      }
+    },
+    {
+      "model": "x-ai/grok-4.5",
+      "role": "state",
+      "scenario": "state.advancement_unsafe",
+      "passed": true,
+      "checks": {
+        "denied_during_danger": true,
+        "has_reason": true
+      },
+      "output": {
+        "allowed": false,
+        "reason": "No safety or meaningful downtime exists amid active combat (arrows flying, orc charging). Skimming a medical book mid-fight is not a plausible opportunity or justification to learn Medicine.",
+        "evidence": [
+          "Arrows are flying through the ruined hall.",
+          "An orc is charging the character.",
+          "justification: Mara tries to skim a medical book during the fight."
+        ]
+      },
+      "error": null,
+      "latency_ms": 3110,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 562,
+        "completion_tokens": 420,
+        "reasoning_tokens": 337,
+        "cache_read_tokens": 128,
+        "cost": 0.003452
+      }
+    },
+    {
+      "model": "x-ai/grok-4.5",
+      "role": "reasoning",
+      "scenario": "reasoning.action_roll",
+      "passed": true,
+      "checks": {
+        "requires_roll": true,
+        "uses_exact_trait": true,
+        "uses_exact_aspect": true,
+        "has_difficulty": true
+      },
+      "output": {
+        "resolution": "roll",
+        "trait_names": [
+          "Agility"
+        ],
+        "aspect_names": [
+          "Lockpicking"
+        ],
+        "flag": null,
+        "difficulty": 2,
+        "evidence": [
+          "The iron door is locked with an ordinary difficulty-2 lock.",
+          "Guards are approaching.",
+          "traits include Agility with aspects Lockpicking"
+        ],
+        "clarification_question": null
+      },
+      "error": null,
+      "latency_ms": 10327,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 793,
+        "completion_tokens": 1179,
+        "reasoning_tokens": 1082,
+        "cache_read_tokens": 128,
+        "cost": 0.008468
+      }
+    },
+    {
+      "model": "x-ai/grok-4.5",
+      "role": "reasoning",
+      "scenario": "reasoning.scene_patch",
+      "passed": true,
+      "checks": {
+        "removes_exact_locked_fact": true,
+        "adds_open_fact": true,
+        "preserves_unrelated_fact": true
+      },
+      "output": {
+        "summary": "Iron lock opens successfully; door is no longer locked.",
+        "add_facts": [
+          "The iron lock is open."
+        ],
+        "remove_facts": [
+          "The iron door is locked."
+        ]
+      },
+      "error": null,
+      "latency_ms": 5452,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 528,
+        "completion_tokens": 708,
+        "reasoning_tokens": 667,
+        "cache_read_tokens": 128,
+        "cost": 0.005112
+      }
+    },
+    {
+      "model": "x-ai/grok-4.5",
+      "role": "narrative",
+      "scenario": "narrative.failed_lockpick_en",
+      "passed": true,
+      "checks": {
+        "mentions_door_or_lock": true,
+        "does_not_claim_opened": true,
+        "concise": true
+      },
+      "output": {
+        "narrative": "Mara works her picks carefully into the iron lock, feeling for the tumblers, but they refuse to shift under her touch. The tools slip with a soft scrape, leaving the heavy door sealed and unyielding as before. She draws back, the corridor quiet around her as she weighs what to try next."
+      },
+      "error": null,
+      "latency_ms": 5390,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 515,
+        "completion_tokens": 599,
+        "reasoning_tokens": 529,
+        "cache_read_tokens": 0,
+        "cost": 0.004624
+      }
+    },
+    {
+      "model": "x-ai/grok-4.5",
+      "role": "narrative",
+      "scenario": "narrative.successful_lockpick_ru",
+      "passed": true,
+      "checks": {
+        "russian_output": true,
+        "mentions_door": true,
+        "establishes_opening": true,
+        "concise": true
+      },
+      "output": {
+        "narrative": "Мара ловко и бесшумно справилась с замком. Железная дверь открылась тихо, не издав ни звука. Перед ней открылся тихий архив."
+      },
+      "error": null,
+      "latency_ms": 11109,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 533,
+        "completion_tokens": 1442,
+        "reasoning_tokens": 1395,
+        "cache_read_tokens": 128,
+        "cost": 0.009526
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "role": "state",
+      "scenario": "state.intent_action",
+      "passed": true,
+      "checks": {
+        "action_declaration": true,
+        "confident": true
+      },
+      "output": {
+        "intent": "action_declaration",
+        "confidence": 0.98,
+        "evidence": "The player explicitly declares an intended action: carefully inspecting the locked door."
+      },
+      "error": null,
+      "latency_ms": 2530,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 255,
+        "completion_tokens": 85,
+        "reasoning_tokens": 48,
+        "cache_read_tokens": 0,
+        "cost": 0.000765
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "role": "state",
+      "scenario": "state.advancement_unsafe",
+      "passed": true,
+      "checks": {
+        "denied_during_danger": true,
+        "has_reason": true
+      },
+      "output": {
+        "allowed": false,
+        "reason": "Mara cannot plausibly learn Medicine during an active fight with arrows flying and an orc charging. The situation provides neither safety nor meaningful downtime, and skimming a book under immediate threat is insufficient learning justification.",
+        "evidence": [
+          "Arrows are flying through the ruined hall.",
+          "An orc is charging Mara.",
+          "The requested learning opportunity is only skimming a medical book during the fight."
+        ]
+      },
+      "error": null,
+      "latency_ms": 1391,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 355,
+        "completion_tokens": 117,
+        "reasoning_tokens": 26,
+        "cache_read_tokens": 0,
+        "cost": 0.001057
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "role": "reasoning",
+      "scenario": "reasoning.action_roll",
+      "passed": true,
+      "checks": {
+        "requires_roll": true,
+        "uses_exact_trait": true,
+        "uses_exact_aspect": true,
+        "has_difficulty": true
+      },
+      "output": {
+        "resolution": "roll",
+        "trait_names": [
+          "Agility"
+        ],
+        "aspect_names": [
+          "Lockpicking"
+        ],
+        "flag": null,
+        "difficulty": 2,
+        "evidence": [
+          "The character has the Agility trait with the Lockpicking aspect at level 4.",
+          "The iron door has an ordinary difficulty-2 lock.",
+          "Guards are approaching."
+        ],
+        "clarification_question": null
+      },
+      "error": null,
+      "latency_ms": 3047,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 587,
+        "completion_tokens": 153,
+        "reasoning_tokens": 75,
+        "cache_read_tokens": 0,
+        "cost": 0.001505
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "role": "reasoning",
+      "scenario": "reasoning.scene_patch",
+      "passed": true,
+      "checks": {
+        "removes_exact_locked_fact": true,
+        "adds_open_fact": true,
+        "preserves_unrelated_fact": true
+      },
+      "output": {
+        "summary": "The iron lock opens successfully.",
+        "add_facts": [
+          "The iron door is unlocked."
+        ],
+        "remove_facts": [
+          "The iron door is locked."
+        ]
+      },
+      "error": null,
+      "latency_ms": 1389,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 327,
+        "completion_tokens": 128,
+        "reasoning_tokens": 90,
+        "cache_read_tokens": 0,
+        "cost": 0.001095
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "role": "narrative",
+      "scenario": "narrative.failed_lockpick_en",
+      "passed": true,
+      "checks": {
+        "mentions_door_or_lock": true,
+        "does_not_claim_opened": true,
+        "concise": true
+      },
+      "output": {
+        "narrative": "Mara works the pick into the iron lock, but the mechanism refuses to yield; a sharp scrape echoes through the quiet as the tool slips free. The door remains firmly closed and locked, leaving Mara to decide what to try next."
+      },
+      "error": null,
+      "latency_ms": 969,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 317,
+        "completion_tokens": 57,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0,
+        "cost": 0.000659
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "role": "narrative",
+      "scenario": "narrative.successful_lockpick_ru",
+      "passed": true,
+      "checks": {
+        "russian_output": true,
+        "mentions_door": true,
+        "establishes_opening": true,
+        "concise": true
+      },
+      "output": {
+        "narrative": "Мара осторожно поворачивает отмычку, и запор поддаётся почти беззвучно. Железная дверь приоткрывается, открывая тихий архив; перед ней остаётся решить, как войти."
+      },
+      "error": null,
+      "latency_ms": 2530,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 338,
+        "completion_tokens": 113,
+        "reasoning_tokens": 52,
+        "cache_read_tokens": 0,
+        "cost": 0.001016
+      }
+    },
+    {
+      "model": "aion-labs/aion-3.0-mini",
+      "role": "state",
+      "scenario": "state.intent_action",
+      "passed": true,
+      "checks": {
+        "action_declaration": true,
+        "confident": true
+      },
+      "output": {
+        "intent": "action_declaration",
+        "confidence": 0.95,
+        "evidence": "The player states an action they are performing ('I carefully inspect the locked door'), which is a direct declaration of an intended action in the game world."
+      },
+      "error": null,
+      "latency_ms": 6641,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 256,
+        "completion_tokens": 351,
+        "reasoning_tokens": 353,
+        "cache_read_tokens": 0,
+        "cost": 0.0006706
+      }
+    },
+    {
+      "model": "aion-labs/aion-3.0-mini",
+      "role": "state",
+      "scenario": "state.advancement_unsafe",
+      "passed": true,
+      "checks": {
+        "denied_during_danger": true,
+        "has_reason": true
+      },
+      "output": {
+        "allowed": false,
+        "reason": "The character is in the middle of combat with arrows flying and an orc charging, which is neither safe nor provides meaningful downtime for learning a new trait.",
+        "evidence": [
+          "Arrows are flying through the ruined hall.",
+          "An orc is charging the character."
+        ]
+      },
+      "error": null,
+      "latency_ms": 5125,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 360,
+        "completion_tokens": 311,
+        "reasoning_tokens": 292,
+        "cache_read_tokens": 0,
+        "cost": 0.0006874
+      }
+    },
+    {
+      "model": "aion-labs/aion-3.0-mini",
+      "role": "reasoning",
+      "scenario": "reasoning.action_roll",
+      "passed": false,
+      "checks": {
+        "requires_roll": false,
+        "uses_exact_trait": true,
+        "uses_exact_aspect": true,
+        "has_difficulty": false
+      },
+      "output": {
+        "resolution": "clarification",
+        "trait_names": [
+          "Agility"
+        ],
+        "aspect_names": [
+          "Lockpicking"
+        ],
+        "flag": null,
+        "difficulty": null,
+        "evidence": [
+          "The iron door is locked with an ordinary difficulty-2 lock.",
+          "Guards are approaching."
+        ],
+        "clarification_question": "Does Mara have lockpicking tools available to pick the iron lock?"
+      },
+      "error": null,
+      "latency_ms": 15781,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 609,
+        "completion_tokens": 999,
+        "reasoning_tokens": 1070,
+        "cache_read_tokens": 0,
+        "cost": 0.0018249
+      }
+    },
+    {
+      "model": "aion-labs/aion-3.0-mini",
+      "role": "reasoning",
+      "scenario": "reasoning.scene_patch",
+      "passed": true,
+      "checks": {
+        "removes_exact_locked_fact": true,
+        "adds_open_fact": true,
+        "preserves_unrelated_fact": true
+      },
+      "output": {
+        "summary": "The iron door is now open after successfully picking the lock.",
+        "add_facts": [
+          "The iron door is open."
+        ],
+        "remove_facts": [
+          "The iron door is locked."
+        ]
+      },
+      "error": null,
+      "latency_ms": 9561,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 331,
+        "completion_tokens": 533,
+        "reasoning_tokens": 527,
+        "cache_read_tokens": 0,
+        "cost": 0.0009779
+      }
+    },
+    {
+      "model": "aion-labs/aion-3.0-mini",
+      "role": "narrative",
+      "scenario": "narrative.failed_lockpick_en",
+      "passed": true,
+      "checks": {
+        "mentions_door_or_lock": true,
+        "does_not_claim_opened": true,
+        "concise": true
+      },
+      "output": {
+        "narrative": "Mara's pick scraped against the lock's innards, but the mechanism refused to yield. A final, frustrated twist only confirmed the door was still firmly sealed. She would need another approach."
+      },
+      "error": null,
+      "latency_ms": 18266,
+      "metrics": {
+        "calls": 2,
+        "prompt_tokens": 558,
+        "completion_tokens": 1035,
+        "reasoning_tokens": 997,
+        "cache_read_tokens": 0,
+        "cost": 0.0018396
+      }
+    },
+    {
+      "model": "aion-labs/aion-3.0-mini",
+      "role": "narrative",
+      "scenario": "narrative.successful_lockpick_ru",
+      "passed": true,
+      "checks": {
+        "russian_output": true,
+        "mentions_door": true,
+        "establishes_opening": true,
+        "concise": true
+      },
+      "output": {
+        "narrative": "Мара прислушалась к механизму замка, и её пальцы, натренированные годами, нашли нужный нажим. С тихим щелчком язычок ушёл внутрь, и тяжёлая железная дверь бесшумно подалась вперёд. За ней открылся сумрачный архив, хранящий свои тайны."
+      },
+      "error": null,
+      "latency_ms": 10983,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 354,
+        "completion_tokens": 517,
+        "reasoning_tokens": 470,
+        "cache_read_tokens": 0,
+        "cost": 0.0009716
+      }
+    },
+    {
+      "model": "nex-agi/nex-n2-mini",
+      "role": "state",
+      "scenario": "state.intent_action",
+      "passed": true,
+      "checks": {
+        "action_declaration": true,
+        "confident": true
+      },
+      "output": {
+        "intent": "action_declaration",
+        "confidence": 0.92,
+        "evidence": "The message says \"I carefully inspect the locked door,\" indicating the player is declaring an in-game action directed at a specific object."
+      },
+      "error": null,
+      "latency_ms": 875,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 260,
+        "completion_tokens": 47,
+        "reasoning_tokens": 2,
+        "cache_read_tokens": 0,
+        "cost": 1.12e-05
+      }
+    },
+    {
+      "model": "nex-agi/nex-n2-mini",
+      "role": "state",
+      "scenario": "state.advancement_unsafe",
+      "passed": true,
+      "checks": {
+        "denied_during_danger": true,
+        "has_reason": true
+      },
+      "output": {
+        "allowed": false,
+        "reason": "Mara is in active combat in a ruined hall with arrows flying and an orc charging, so there is no safety or meaningful downtime to learn Medicine. The supplied justification—skimming a medical book during the fight—is not a plausible opportunity to acquire the trait under these circumstances.",
+        "evidence": [
+          "Arrows are flying through the ruined hall.",
+          "An orc is charging the character.",
+          "Advancement requires safety and meaningful downtime.",
+          "The request describes trying to skim a medical book during the fight."
+        ]
+      },
+      "error": null,
+      "latency_ms": 1422,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 366,
+        "completion_tokens": 107,
+        "reasoning_tokens": 2,
+        "cache_read_tokens": 0,
+        "cost": 1.985e-05
+      }
+    },
+    {
+      "model": "nex-agi/nex-n2-mini",
+      "role": "reasoning",
+      "scenario": "reasoning.action_roll",
+      "passed": true,
+      "checks": {
+        "requires_roll": true,
+        "uses_exact_trait": true,
+        "uses_exact_aspect": true,
+        "has_difficulty": true
+      },
+      "output": {
+        "resolution": "roll",
+        "trait_names": [
+          "Agility"
+        ],
+        "aspect_names": [
+          "Lockpicking"
+        ],
+        "flag": null,
+        "difficulty": 2,
+        "evidence": [
+          "Mara has Agility level 4.",
+          "Mara has the Lockpicking aspect.",
+          "The iron door is locked with an ordinary difficulty-2 lock.",
+          "Guards are approaching."
+        ],
+        "clarification_question": null
+      },
+      "error": null,
+      "latency_ms": 1750,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 600,
+        "completion_tokens": 305,
+        "reasoning_tokens": 179,
+        "cache_read_tokens": 0,
+        "cost": 4.55e-05
+      }
+    },
+    {
+      "model": "nex-agi/nex-n2-mini",
+      "role": "reasoning",
+      "scenario": "reasoning.scene_patch",
+      "passed": true,
+      "checks": {
+        "removes_exact_locked_fact": true,
+        "adds_open_fact": true,
+        "preserves_unrelated_fact": true
+      },
+      "output": {
+        "summary": "Picking the iron lock successfully opens it, changing the door from locked to unlocked.",
+        "add_facts": [
+          "The iron door is unlocked."
+        ],
+        "remove_facts": [
+          "The iron door is locked."
+        ]
+      },
+      "error": null,
+      "latency_ms": 1281,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 333,
+        "completion_tokens": 201,
+        "reasoning_tokens": 157,
+        "cache_read_tokens": 0,
+        "cost": 2.8425e-05
+      }
+    },
+    {
+      "model": "nex-agi/nex-n2-mini",
+      "role": "narrative",
+      "scenario": "narrative.failed_lockpick_en",
+      "passed": true,
+      "checks": {
+        "mentions_door_or_lock": true,
+        "does_not_claim_opened": true,
+        "concise": true
+      },
+      "output": {
+        "narrative": "Mara slips the pick into the iron lock and braces the tension wrench, but the tumblers do not yield to her careful pressure. The lock only grinds, catches, and clicks back into place, leaving the door firmly closed and locked before her."
+      },
+      "error": null,
+      "latency_ms": 734,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 323,
+        "completion_tokens": 61,
+        "reasoning_tokens": 2,
+        "cache_read_tokens": 0,
+        "cost": 1.4175e-05
+      }
+    },
+    {
+      "model": "nex-agi/nex-n2-mini",
+      "role": "narrative",
+      "scenario": "narrative.successful_lockpick_ru",
+      "passed": true,
+      "checks": {
+        "russian_output": true,
+        "mentions_door": true,
+        "establishes_opening": true,
+        "concise": true
+      },
+      "output": {
+        "narrative": "Мара подвела тонкий инструмент к замку, и металл под её пальцами покорно сдвинулся, словно вспомнил нужный путь. Дверь раскрылась почти беззвучно, открывая проход в тихий архив за ней."
+      },
+      "error": null,
+      "latency_ms": 702,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 338,
+        "completion_tokens": 66,
+        "reasoning_tokens": 2,
+        "cache_read_tokens": 0,
+        "cost": 1.505e-05
+      }
+    },
+    {
+      "model": "nex-agi/nex-n2-pro",
+      "role": "state",
+      "scenario": "state.intent_action",
+      "passed": true,
+      "checks": {
+        "action_declaration": true,
+        "confident": true
+      },
+      "output": {
+        "intent": "action_declaration",
+        "confidence": 0.95,
+        "evidence": "The player states they are actively inspecting a specific object in the scene: \"I carefully inspect the locked door.\""
+      },
+      "error": null,
+      "latency_ms": 875,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 260,
+        "completion_tokens": 44,
+        "reasoning_tokens": 1,
+        "cache_read_tokens": 0,
+        "cost": 0.000109
+      }
+    },
+    {
+      "model": "nex-agi/nex-n2-pro",
+      "role": "state",
+      "scenario": "state.advancement_unsafe",
+      "passed": true,
+      "checks": {
+        "denied_during_danger": true,
+        "has_reason": true
+      },
+      "output": {
+        "allowed": false,
+        "reason": "Mara is in immediate combat danger, with arrows flying and an orc charging her. Skimming a medical book during a fight is not meaningful downtime and does not provide a plausible opportunity to learn Medicine.",
+        "evidence": [
+          "Arrows are flying through the ruined hall.",
+          "An orc is charging the character.",
+          "Mara tries to skim a medical book during the fight."
+        ]
+      },
+      "error": null,
+      "latency_ms": 2344,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 366,
+        "completion_tokens": 162,
+        "reasoning_tokens": 96,
+        "cache_read_tokens": 0,
+        "cost": 0.0002535
+      }
+    },
+    {
+      "model": "nex-agi/nex-n2-pro",
+      "role": "reasoning",
+      "scenario": "reasoning.action_roll",
+      "passed": true,
+      "checks": {
+        "requires_roll": true,
+        "uses_exact_trait": true,
+        "uses_exact_aspect": true,
+        "has_difficulty": true
+      },
+      "output": {
+        "resolution": "roll",
+        "trait_names": [
+          "Agility"
+        ],
+        "aspect_names": [
+          "Lockpicking"
+        ],
+        "flag": null,
+        "difficulty": 2,
+        "evidence": [
+          "Mara has Agility with aspect Lockpicking.",
+          "The iron door is locked with an ordinary difficulty-2 lock.",
+          "Guards are approaching."
+        ],
+        "clarification_question": null
+      },
+      "error": null,
+      "latency_ms": 2655,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 600,
+        "completion_tokens": 304,
+        "reasoning_tokens": 304,
+        "cache_read_tokens": 0,
+        "cost": 0.000454
+      }
+    },
+    {
+      "model": "nex-agi/nex-n2-pro",
+      "role": "reasoning",
+      "scenario": "reasoning.scene_patch",
+      "passed": true,
+      "checks": {
+        "removes_exact_locked_fact": true,
+        "adds_open_fact": true,
+        "preserves_unrelated_fact": true
+      },
+      "output": {
+        "summary": "The iron lock opens successfully.",
+        "add_facts": [
+          "The iron door is unlocked."
+        ],
+        "remove_facts": [
+          "The iron door is locked."
+        ]
+      },
+      "error": null,
+      "latency_ms": 858,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 333,
+        "completion_tokens": 35,
+        "reasoning_tokens": 1,
+        "cache_read_tokens": 0,
+        "cost": 0.00011825
+      }
+    },
+    {
+      "model": "nex-agi/nex-n2-pro",
+      "role": "narrative",
+      "scenario": "narrative.failed_lockpick_en",
+      "passed": true,
+      "checks": {
+        "mentions_door_or_lock": true,
+        "does_not_claim_opened": true,
+        "concise": true
+      },
+      "output": {
+        "narrative": "I work the pick into the iron lock, but the mechanism refuses to yield beneath my touch. The door stays shut, its cold weight unyielding, leaving me to decide what to try next."
+      },
+      "error": null,
+      "latency_ms": 1578,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 323,
+        "completion_tokens": 50,
+        "reasoning_tokens": 1,
+        "cache_read_tokens": 0,
+        "cost": 0.00013075
+      }
+    },
+    {
+      "model": "nex-agi/nex-n2-pro",
+      "role": "narrative",
+      "scenario": "narrative.successful_lockpick_ru",
+      "passed": true,
+      "checks": {
+        "russian_output": true,
+        "mentions_door": true,
+        "establishes_opening": true,
+        "concise": true
+      },
+      "output": {
+        "narrative": "Мара осторожно возится с замком, и механизм поддаётся без единого скрипа. Железная дверь бесшумно отходит в сторону, открывая тихий архив за ней."
+      },
+      "error": null,
+      "latency_ms": 984,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 338,
+        "completion_tokens": 51,
+        "reasoning_tokens": 1,
+        "cache_read_tokens": 0,
+        "cost": 0.0001355
+      }
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "role": "state",
+      "scenario": "state.intent_action",
+      "passed": true,
+      "checks": {
+        "action_declaration": true,
+        "confident": true
+      },
+      "output": {
+        "intent": "action_declaration",
+        "confidence": 1.0,
+        "evidence": "The player explicitly declares an in-game action, stating they are inspecting a specific object (the locked door) to interact with the environment."
+      },
+      "error": null,
+      "latency_ms": 31952,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 261,
+        "completion_tokens": 739,
+        "reasoning_tokens": 677,
+        "cache_read_tokens": 0,
+        "cost": 0.00102944
+      }
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "role": "state",
+      "scenario": "state.advancement_unsafe",
+      "passed": true,
+      "checks": {
+        "denied_during_danger": true,
+        "has_reason": true
+      },
+      "output": {
+        "allowed": false,
+        "reason": "The current scene involves active combat with arrows flying and an orc charging, providing absolutely no safety or downtime. Furthermore, attempting to skim a medical book during a life-or-death fight is not a plausible learning opportunity.",
+        "evidence": [
+          "Arrows are flying through the ruined hall.",
+          "An orc is charging the character.",
+          "Mara tries to skim a medical book during the fight."
+        ]
+      },
+      "error": null,
+      "latency_ms": 33000,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 367,
+        "completion_tokens": 1058,
+        "reasoning_tokens": 948,
+        "cache_read_tokens": 0,
+        "cost": 0.00147168
+      }
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "role": "reasoning",
+      "scenario": "reasoning.action_roll",
+      "passed": false,
+      "checks": {
+        "requires_roll": false,
+        "uses_exact_trait": true,
+        "uses_exact_aspect": true,
+        "has_difficulty": true
+      },
+      "output": {
+        "resolution": "clarification",
+        "trait_names": [
+          "Agility"
+        ],
+        "aspect_names": [
+          "Lockpicking"
+        ],
+        "flag": null,
+        "difficulty": 2,
+        "evidence": [
+          "The iron door is locked with an ordinary difficulty-2 lock.",
+          "Guards are approaching."
+        ],
+        "clarification_question": "What tools are you using to pick the lock? No equipment is listed in your character state or the current scene."
+      },
+      "error": null,
+      "latency_ms": 71452,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 601,
+        "completion_tokens": 2578,
+        "reasoning_tokens": 2448,
+        "cache_read_tokens": 0,
+        "cost": 0.00349216
+      }
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "role": "reasoning",
+      "scenario": "reasoning.scene_patch",
+      "passed": true,
+      "checks": {
+        "removes_exact_locked_fact": true,
+        "adds_open_fact": true,
+        "preserves_unrelated_fact": true
+      },
+      "output": {
+        "summary": "The character successfully picks the iron lock, unlocking the door.",
+        "add_facts": [
+          "The iron door is unlocked."
+        ],
+        "remove_facts": [
+          "The iron door is locked."
+        ]
+      },
+      "error": null,
+      "latency_ms": 15280,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 334,
+        "completion_tokens": 523,
+        "reasoning_tokens": 457,
+        "cache_read_tokens": 0,
+        "cost": 0.00077632
+      }
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "role": "narrative",
+      "scenario": "narrative.failed_lockpick_en",
+      "passed": true,
+      "checks": {
+        "mentions_door_or_lock": true,
+        "does_not_claim_opened": true,
+        "concise": true
+      },
+      "output": {
+        "narrative": "Mara worked her pick inside the iron door's keyhole, but the stubborn tumblers refused to yield to her efforts. With a frustrating scrape of metal, the mechanism remained entirely unchanged, leaving the heavy door firmly shut and locked. She withdrew her tools, staring at the unyielding barrier."
+      },
+      "error": null,
+      "latency_ms": 20297,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 324,
+        "completion_tokens": 1047,
+        "reasoning_tokens": 971,
+        "cache_read_tokens": 0,
+        "cost": 0.00144384
+      }
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "role": "narrative",
+      "scenario": "narrative.successful_lockpick_ru",
+      "passed": true,
+      "checks": {
+        "russian_output": true,
+        "mentions_door": true,
+        "establishes_opening": true,
+        "concise": true
+      },
+      "output": {
+        "narrative": "Мара аккуратно повернула отмычку, и тяжелый железный замок щелкнул, поддаваясь её навыкам. Дверь бесшумно отворилась, открывая взору пыльные стеллажи тихого архива. Она замерла на пороге, вслушиваясь в тишину и решая, как лучше проскользнуть внутрь."
+      },
+      "error": null,
+      "latency_ms": 35297,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 339,
+        "completion_tokens": 1045,
+        "reasoning_tokens": 947,
+        "cache_read_tokens": 0,
+        "cost": 0.00144608
+      }
+    },
+    {
+      "model": "x-ai/grok-4.3",
+      "role": "state",
+      "scenario": "state.intent_action",
+      "passed": true,
+      "checks": {
+        "action_declaration": true,
+        "confident": true
+      },
+      "output": {
+        "intent": "action_declaration",
+        "confidence": 0.9,
+        "evidence": "Player states 'I carefully inspect the locked door' as a direct declaration of in-game action."
+      },
+      "error": null,
+      "latency_ms": 5202,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 432,
+        "completion_tokens": 305,
+        "reasoning_tokens": 266,
+        "cache_read_tokens": 128,
+        "cost": 0.0011681
+      }
+    },
+    {
+      "model": "x-ai/grok-4.3",
+      "role": "state",
+      "scenario": "state.advancement_unsafe",
+      "passed": true,
+      "checks": {
+        "denied_during_danger": true,
+        "has_reason": true
+      },
+      "output": {
+        "allowed": false,
+        "reason": "Current scene is active combat with arrows and charging orc; no safety or downtime exists. Justification of skimming a book mid-fight is implausible and supplies no learning opportunity.",
+        "evidence": []
+      },
+      "error": null,
+      "latency_ms": 6577,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 534,
+        "completion_tokens": 376,
+        "reasoning_tokens": 333,
+        "cache_read_tokens": 128,
+        "cost": 0.0014731
+      }
+    },
+    {
+      "model": "x-ai/grok-4.3",
+      "role": "reasoning",
+      "scenario": "reasoning.action_roll",
+      "passed": true,
+      "checks": {
+        "requires_roll": true,
+        "uses_exact_trait": true,
+        "uses_exact_aspect": true,
+        "has_difficulty": true
+      },
+      "output": {
+        "resolution": "roll",
+        "trait_names": [
+          "Agility"
+        ],
+        "aspect_names": [
+          "Lockpicking"
+        ],
+        "flag": null,
+        "difficulty": 2,
+        "evidence": [
+          "Agility trait with Lockpicking aspect present in actor_character",
+          "The iron door is locked with an ordinary difficulty-2 lock in current_scene"
+        ],
+        "clarification_question": null
+      },
+      "error": null,
+      "latency_ms": 8610,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 755,
+        "completion_tokens": 647,
+        "reasoning_tokens": 558,
+        "cache_read_tokens": 128,
+        "cost": 0.00242685
+      }
+    },
+    {
+      "model": "x-ai/grok-4.3",
+      "role": "reasoning",
+      "scenario": "reasoning.scene_patch",
+      "passed": false,
+      "checks": {
+        "removes_exact_locked_fact": true,
+        "adds_open_fact": false,
+        "preserves_unrelated_fact": true
+      },
+      "output": {
+        "summary": "Lock opens, removing locked state.",
+        "add_facts": [],
+        "remove_facts": [
+          "The iron door is locked."
+        ]
+      },
+      "error": null,
+      "latency_ms": 8500,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 505,
+        "completion_tokens": 597,
+        "reasoning_tokens": 563,
+        "cache_read_tokens": 128,
+        "cost": 0.00198935
+      }
+    },
+    {
+      "model": "x-ai/grok-4.3",
+      "role": "narrative",
+      "scenario": "narrative.failed_lockpick_en",
+      "passed": true,
+      "checks": {
+        "mentions_door_or_lock": true,
+        "does_not_claim_opened": true,
+        "concise": true
+      },
+      "output": {
+        "narrative": "Mara worked the picks into the iron lock with steady fingers, feeling for the right catch, but the tumblers stayed stubborn and unyielding. The door remained firmly shut. She withdrew the tools and glanced around the room for another option."
+      },
+      "error": null,
+      "latency_ms": 7375,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 493,
+        "completion_tokens": 450,
+        "reasoning_tokens": 394,
+        "cache_read_tokens": 128,
+        "cost": 0.00160685
+      }
+    },
+    {
+      "model": "x-ai/grok-4.3",
+      "role": "narrative",
+      "scenario": "narrative.successful_lockpick_ru",
+      "passed": true,
+      "checks": {
+        "russian_output": true,
+        "mentions_door": true,
+        "establishes_opening": true,
+        "concise": true
+      },
+      "output": {
+        "narrative": "Мара ощутила лёгкое сопротивление, и железная дверь беззвучно приоткрылась. За ней открывался тихий архив с пыльными полками. Она могла войти или прислушаться."
+      },
+      "error": null,
+      "latency_ms": 9436,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 515,
+        "completion_tokens": 547,
+        "reasoning_tokens": 491,
+        "cache_read_tokens": 128,
+        "cost": 0.00187685
+      }
+    }
+  ]
+}

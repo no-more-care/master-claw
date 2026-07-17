@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from masterclaw.app.progression_service import ProgressionService
-from masterclaw.context.assembler import ContextAssembler
+from masterclaw.context.assembler import ContextAssembler, ContextHistory
 from masterclaw.context.manifests import PipelineName, manifest_for
 from masterclaw.domain.characters import CharacterState
 from masterclaw.domain.progression import AdvancementPermit
 from masterclaw.pipelines.advancement import AdvancementSafetyDecision
 from masterclaw.pipelines.base import BoundedJsonPipeline
 from masterclaw.storage.sqlite import SQLiteStore
+from masterclaw.telemetry import traced_stage
 
 
 class AdvancementCoordinator:
@@ -72,6 +73,7 @@ class AdvancementCoordinator:
             permit=permit,
         )
 
+    @traced_stage("domain.advancement_gate", component="advancement_coordinator")
     async def _authorize(
         self, *, game_id: str, player_id: str, request: dict[str, object]
     ) -> AdvancementPermit:
@@ -82,8 +84,9 @@ class AdvancementCoordinator:
         scene = self._store.scene_projection(game_id=game_id, player_id=player_id)
         if character is None or scene is None:
             raise ValueError("character or current scene is missing")
+        manifest = manifest_for(PipelineName.ADVANCEMENT_SAFETY)
         assembled = self._context.assemble(
-            manifest_for(PipelineName.ADVANCEMENT_SAFETY),
+            manifest,
             {
                 "current_scene": scene,
                 "actor_character": {
@@ -96,10 +99,21 @@ class AdvancementCoordinator:
                 },
                 "advancement_request": request,
             },
+            history=ContextHistory(
+                self._store.recent_domain_events(
+                    game_id=game_id,
+                    limit=manifest.recent_domain_events,
+                ),
+                self._store.recent_chat_messages(
+                    game_id=game_id,
+                    player_id=player_id,
+                    limit=manifest.recent_chat_messages,
+                ),
+            ),
         )
         decision = await self._pipeline.run(
             task="Decide whether advancement is currently fictionally allowed.",
-            dynamic_context=assembled.text,
+            context=assembled,
         )
         if not decision.allowed:
             raise ValueError(f"advancement is not allowed now: {decision.reason}")

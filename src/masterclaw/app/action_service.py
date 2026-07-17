@@ -4,6 +4,7 @@ import uuid
 from collections.abc import Callable
 from dataclasses import replace
 
+from masterclaw.app.i18n import tr
 from masterclaw.domain.actions import RollRecord
 from masterclaw.domain.mechanics import (
     NarratorRights,
@@ -12,6 +13,7 @@ from masterclaw.domain.mechanics import (
     roll_pool,
     validate_pool,
 )
+from masterclaw.domain.models import GameLifecycle
 from masterclaw.domain.state import (
     NarratorRightsLevel,
     PendingInteraction,
@@ -19,12 +21,14 @@ from masterclaw.domain.state import (
     PendingStatus,
 )
 from masterclaw.storage.sqlite import SQLiteStore
+from masterclaw.telemetry import traced_stage
 
 
 class ActionService:
     def __init__(self, store: SQLiteStore) -> None:
         self._store = store
 
+    @traced_stage("domain.roll_proposal", component="action_service")
     def propose_roll(
         self,
         *,
@@ -54,8 +58,10 @@ class ActionService:
                 "trait_names": list(proposal.trait_names),
                 "aspect_names": list(proposal.aspect_names),
                 "flag": proposal.flag,
+                "bonus_ids": list(proposal.bonus_ids),
                 "reserve_spent": proposal.reserve_spent,
                 "difficulty": proposal.difficulty,
+                "validated_difficulty": pool.difficulty,
                 "pool_size": pool.size,
                 "declaration": declaration.strip(),
             },
@@ -63,6 +69,7 @@ class ActionService:
         self._store.put_pending(pending)
         return pending
 
+    @traced_stage("domain.roll_confirmation", component="action_service")
     def confirm_roll(
         self,
         *,
@@ -80,6 +87,9 @@ class ActionService:
             raise ValueError("pending interaction is not open")
         if pending.player_id != player_id or pending.kind is not PendingKind.POOL_CONFIRMATION:
             raise ValueError("player cannot confirm this interaction")
+        game = self._store.game_state(pending.game_id)
+        if game is None or game.lifecycle is not GameLifecycle.ACTIVE:
+            raise ValueError("rolls can be confirmed only while the game is active")
         character = self._store.character_for_player(game_id=pending.game_id, player_id=player_id)
         if character is None:
             raise ValueError("character no longer exists")
@@ -94,6 +104,7 @@ class ActionService:
             flag=payload["flag"],
             reserve_spent=reserve_spent,
             difficulty=int(payload["difficulty"]),
+            bonus_ids=tuple(payload.get("bonus_ids", ())),
         )
         pool = validate_pool(character.sheet, proposal)
         help_dice = self._store.help_count(interaction_id)
@@ -102,10 +113,11 @@ class ActionService:
             size=pool.size + help_dice,
             components=pool.components + tuple("help" for _ in range(help_dice)),
         )
-        if pool.size != payload["pool_size"] + reserve_spent + help_dice:
+        if pool.size != payload["pool_size"] + reserve_spent + help_dice or pool.difficulty != int(
+            payload.get("validated_difficulty", payload["difficulty"])
+        ):
             raise ValueError("confirmed pool no longer matches proposed pool")
         result = roll_pool(pool, die=die)
-        game = self._store.game_state(pending.game_id)
         effective_rights = result.narrator_rights
         if game is not None and game.narrator_rights_level is NarratorRightsLevel.DISABLED:
             effective_rights = (
@@ -148,5 +160,10 @@ class ActionService:
                 }
                 else None
             ),
+            narration_prompt=tr(
+                game.locale if game is not None else "ru",
+                "player_narrate",
+            ),
+            consumed_bonus_ids=pool.bonus_ids,
         )
         return self._store.roll_for_interaction(interaction_id) or record

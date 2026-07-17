@@ -1,7 +1,6 @@
 # MasterClaw v2 — план архитектурного рефакторинга на OpenHands SDK
 
-> Статус: проектирование, без реализации.  
-> База анализа: ветка `develop`, commit `03cff1b`.  
+> Статус: реализовано в активной v2-ветке; документ сохраняет архитектурные решения.
 > Целевая ветка: `develop-v2`.
 
 ## 1. Цель и исходная проблема
@@ -28,7 +27,7 @@ MasterClaw v1 — набор больших инструкций для унив
 7. **Fail closed.** Не прошедший gate результат не публикуется и не коммитится.
 8. **Идемпотентность.** Повтор Discord event, retry LLM или рестарт процесса не должен удваивать бросок, сообщение или изменение состояния.
 9. **Разделение core и adapters.** Игровой движок не зависит от Discord, OpenRouter или файлового формата.
-10. **Промты — версионируемый материал.** Текущие souls/skills переразбираются на небольшие контекстные модули, но не остаются исполняемой архитектурой.
+10. **Промты — аудируемый материал.** Текущие souls/skills переразбираются на небольшие контекстные модули, а фактический system/schema/transport контракт идентифицируется content hash и git revision без отдельных version-полей.
 
 ## 3. Что есть в текущей реализации
 
@@ -101,7 +100,7 @@ src/masterclaw/
   context/             # selectors, budgets, prompt assembly
   prompts/             # статические фрагменты и версии
   gates/               # pre/post/transition/publish validators
-  storage/             # repositories, unit of work, migrations
+  storage/             # repositories, unit of work, current schema
   adapters/discord/    # bot, commands, message mapping
   adapters/llm/        # OpenHands, provider/model registry
   adapters/rng/        # crypto RNG / seeded RNG for tests
@@ -174,7 +173,7 @@ tests/
 
 Контекст: worldgen fragment, пользовательский brief, существующая редактируемая секция, cross-section constraints, locale. Не загружаются правила хода, активные персонажи, session log и Discord-диалоги.
 
-Генерация выполняется секционно: outline -> structured sections -> cross-reference validation -> consistency critic -> publish. Один огромный вызов «создай весь мир» не используется.
+Фактический runtime использует два смысловых этапа: свободный creative pitch -> полная typed-структуризация с проверкой согласованности и cross-reference -> пользовательское подтверждение публикации. Ошибки ссылок и идентичности входят в Pydantic-контракт структуризации, поэтому участвуют в bounded repair/fallback. Секционные outline/critic-контракты сохранены только для исторических benchmark/smoke сценариев и не являются путём публикации мира.
 
 ### 6.3 PREPARATION
 
@@ -275,7 +274,7 @@ Context builder проверяет наличие, ACL, revision, размер �
 - locale phrasing/examples;
 - anti-patterns — в основном превращаются в кодовые gates и тесты.
 
-Каждый fragment получает `id`, `version`, `scope`, `dependencies`, `token_estimate` и regression tests. Дубли из souls/skills удаляются после сравнения с каноническим источником.
+Каждый fragment получает `id`, `scope`, `dependencies`, модельно-зависимую оценку токенов и regression tests. Изменения фактического prompt-контракта видны через `prompt_fingerprint`; отдельное версионирование fragments на текущем этапе намеренно не используется. Дубли из souls/skills удаляются после сравнения с каноническим источником.
 
 ## 8. LLM pipelines на OpenHands SDK
 
@@ -292,8 +291,8 @@ OpenHands используется как provider-agnostic execution layer: `LL
 | outcome narration | да | prose + fact references | roll result уже задан |
 | scene answer | да | prose | bounded scene context |
 | player narration review | иногда | accept/reject + reasons | hard limits частично кодом |
-| world outline/section | да | typed section | секционная генерация |
-| consistency critic | да/правила | findings | отдельная модель/вызов |
+| world creative pitch | да | loose module plot | не владеет id и публикацией |
+| world structuring | да/правила | complete typed world | consistency и cross-reference входят в schema validation |
 | summarization projection | да, offline | candidate brief | не канонический state |
 
 Для каждого pipeline задаются primary/fallback models, timeout, retry policy, max tokens, temperature, price ceiling и circuit breaker. Fallback не должен менять schema или capability set.
@@ -398,13 +397,13 @@ Bot token, provider keys и webhook credentials хранятся в secret manag
 - input/output/cache tokens и стоимость по model/pipeline/game;
 - schema failure, repair, fallback и clarification rates;
 - gate rejection reasons;
-- context composition: fragment ids, revisions, token counts;
+- context composition: fragment ids, aggregate revisions, model-tokenizer counts and prompt fingerprint;
 - duplicate suppression;
 - transaction conflicts;
 - Discord delivery failures;
 - доля ходов без LLM и среднее число LLM calls на ход.
 
-Сохраняются hash/version промтов и sanitized LLM I/O. Секреты и приватный hidden context редактируются по политике retention.
+Сохраняется content hash фактического prompt/tool-контракта. Полные LLM I/O не сохраняются по умолчанию; ошибки санитизируются, а секреты и hidden context не попадают в телеметрию.
 
 ## 13. Тестовая стратегия
 
@@ -412,7 +411,7 @@ Bot token, provider keys и webhook credentials хранятся в secret manag
 
 - unit tests всех правил и state transitions;
 - property-based tests для pool/reserve/narrator-rights;
-- schema and migration tests;
+- current-schema initialization tests;
 - transaction/idempotency/concurrency tests;
 - Discord contract tests с mocked API;
 - snapshot tests locale renderers;
@@ -420,7 +419,7 @@ Bot token, provider keys и webhook credentials хранятся в secret manag
 
 ### 13.2 Model evaluation
 
-Сценарии из `CLAUDE.md` превращаются в versioned fixtures. Для каждой поддерживаемой модели измеряются:
+Сценарии из `CLAUDE.md` превращаются в eval fixtures. Для каждой поддерживаемой модели измеряются:
 
 - structured-output validity;
 - factual grounding;
@@ -458,14 +457,14 @@ Bot token, provider keys и webhook credentials хранятся в secret manag
 - сохранить golden fixtures текущего поведения;
 - согласовать вопросы из раздела 17.
 
-**Выход:** versioned domain specification и acceptance matrix.
+**Выход:** domain specification и acceptance matrix.
 
 ### Этап 1 — domain core без LLM и Discord
 
 - Pydantic/domain models;
 - state machine;
 - mechanics services;
-- repositories и migrations;
+- repositories и текущая схема;
 - import/export текущих markdown данных;
 - deterministic gates.
 
@@ -531,7 +530,7 @@ Bot token, provider keys и webhook credentials хранятся в secret manag
 - дешёвые модели безопасно ограничены pipelines, которые прошли eval;
 - Discord bot поддерживает полный игровой и операторский workflow;
 - все provider/model вызовы наблюдаемы по стоимости и качеству;
-- clean start не требует импорта данных v1 (согласованное решение); совместимость схемы v2 контролируется миграциями;
+- clean start не требует импорта данных v1; версионирование схемы на этом этапе отсутствует;
 - документация содержит deployment, backup, recovery и incident procedures.
 
 ## 16. Основные риски и меры
@@ -541,7 +540,7 @@ Bot token, provider keys и webhook credentials хранятся в secret manag
 | OpenHands ориентирован прежде всего на software agents | использовать SDK как LLM/tool/event substrate, а доменную orchestration держать в MasterClaw |
 | слишком много маленьких LLM calls увеличат latency | батчить только логически совместимые задачи, кэшировать static prompts, parallelize read-only critics |
 | структурированный output остаётся нестабилен на дешёвых моделях | строгие schemas, один repair, fallback templates, per-pipeline qualification |
-| schema drift после обновлений v2 | последовательные транзакционные миграции и fail-closed schema version check |
+| schema drift до появления миграций | clean start с текущей схемой и проверенный backup перед обновлением |
 | Discord retries создадут дубли | inbox/outbox и idempotency keys |
 | hidden plot попадёт в context | selector ACL, provenance audit и leakage tests |
 | prompt fragments снова начнут дублироваться | canonical ids, dependency graph и CI duplicate checks |

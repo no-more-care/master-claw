@@ -1,0 +1,3044 @@
+{
+  "created_at": "2026-07-13T14:03:26.135594+00:00",
+  "suite": "worldgen",
+  "scenario_count": 4,
+  "attempt_count": 48,
+  "repeats": 1,
+  "config_mode": "production",
+  "role_config": {
+    "state": {
+      "temperature": 0.0,
+      "max_output_tokens": 500,
+      "timeout_seconds": 60,
+      "reasoning_effort": "low",
+      "output_transport": "prompt_json"
+    },
+    "reasoning": {
+      "temperature": 0.2,
+      "max_output_tokens": 1600,
+      "timeout_seconds": 60,
+      "reasoning_effort": "medium",
+      "output_transport": "prompt_json"
+    },
+    "narrative": {
+      "temperature": 0.7,
+      "max_output_tokens": 1800,
+      "timeout_seconds": 60,
+      "reasoning_effort": "low",
+      "output_transport": "native_tool"
+    },
+    "worldgen": {
+      "temperature": 0.8,
+      "max_output_tokens": 4000,
+      "timeout_seconds": 180,
+      "reasoning_effort": "medium",
+      "output_transport": "prompt_json"
+    }
+  },
+  "models": [
+    "aion-labs/aion-3.0",
+    "aion-labs/aion-3.0-mini",
+    "deepseek/deepseek-v4-pro",
+    "google/gemini-3-flash-preview",
+    "openai/gpt-5.6-luna",
+    "qwen/qwen3.7-plus"
+  ],
+  "transports": [
+    "prompt_json",
+    "native_tool"
+  ],
+  "summaries": [
+    {
+      "model": "aion-labs/aion-3.0",
+      "transport": "prompt_json",
+      "passed": 3,
+      "total": 4,
+      "calls": 5,
+      "prompt_tokens": 4246,
+      "completion_tokens": 6552,
+      "reasoning_tokens": 3198,
+      "cost": 0.050898,
+      "latency_ms": 145342,
+      "list_price": {
+        "input_per_million": 3.0,
+        "output_per_million": 6.0
+      }
+    },
+    {
+      "model": "aion-labs/aion-3.0",
+      "transport": "native_tool",
+      "passed": 2,
+      "total": 4,
+      "calls": 5,
+      "prompt_tokens": 4950,
+      "completion_tokens": 6377,
+      "reasoning_tokens": 2748,
+      "cost": 0.047928,
+      "latency_ms": 121670,
+      "list_price": {
+        "input_per_million": 3.0,
+        "output_per_million": 6.0
+      }
+    },
+    {
+      "model": "aion-labs/aion-3.0-mini",
+      "transport": "prompt_json",
+      "passed": 3,
+      "total": 4,
+      "calls": 4,
+      "prompt_tokens": 2751,
+      "completion_tokens": 8831,
+      "reasoning_tokens": 7218,
+      "cost": 0.014289099999999999,
+      "latency_ms": 175248,
+      "list_price": {
+        "input_per_million": 0.7,
+        "output_per_million": 1.4
+      }
+    },
+    {
+      "model": "aion-labs/aion-3.0-mini",
+      "transport": "native_tool",
+      "passed": 3,
+      "total": 4,
+      "calls": 4,
+      "prompt_tokens": 4102,
+      "completion_tokens": 8584,
+      "reasoning_tokens": 6831,
+      "cost": 0.01409028,
+      "latency_ms": 140748,
+      "list_price": {
+        "input_per_million": 0.7,
+        "output_per_million": 1.4
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4-pro",
+      "transport": "prompt_json",
+      "passed": 2,
+      "total": 4,
+      "calls": 5,
+      "prompt_tokens": 4297,
+      "completion_tokens": 11166,
+      "reasoning_tokens": 7205,
+      "cost": 0.04058272475,
+      "latency_ms": 203123,
+      "list_price": {
+        "input_per_million": 0.435,
+        "output_per_million": 0.87
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4-pro",
+      "transport": "native_tool",
+      "passed": 3,
+      "total": 4,
+      "calls": 4,
+      "prompt_tokens": 3712,
+      "completion_tokens": 6847,
+      "reasoning_tokens": 2961,
+      "cost": 0.03028644,
+      "latency_ms": 249451,
+      "list_price": {
+        "input_per_million": 0.435,
+        "output_per_million": 0.87
+      }
+    },
+    {
+      "model": "google/gemini-3-flash-preview",
+      "transport": "prompt_json",
+      "passed": 4,
+      "total": 4,
+      "calls": 4,
+      "prompt_tokens": 2608,
+      "completion_tokens": 4977,
+      "reasoning_tokens": 3228,
+      "cost": 0.016235,
+      "latency_ms": 41108,
+      "list_price": {
+        "input_per_million": 0.5,
+        "output_per_million": 3.0
+      }
+    },
+    {
+      "model": "google/gemini-3-flash-preview",
+      "transport": "native_tool",
+      "passed": 2,
+      "total": 4,
+      "calls": 6,
+      "prompt_tokens": 5521,
+      "completion_tokens": 7748,
+      "reasoning_tokens": 4907,
+      "cost": 0.0260045,
+      "latency_ms": 60826,
+      "list_price": {
+        "input_per_million": 0.5,
+        "output_per_million": 3.0
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "transport": "prompt_json",
+      "passed": 4,
+      "total": 4,
+      "calls": 4,
+      "prompt_tokens": 2611,
+      "completion_tokens": 2284,
+      "reasoning_tokens": 366,
+      "cost": 0.016315,
+      "latency_ms": 22077,
+      "list_price": {
+        "input_per_million": 1.0,
+        "output_per_million": 6.0
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "transport": "native_tool",
+      "passed": 3,
+      "total": 4,
+      "calls": 4,
+      "prompt_tokens": 2631,
+      "completion_tokens": 2379,
+      "reasoning_tokens": 197,
+      "cost": 0.016905,
+      "latency_ms": 23874,
+      "list_price": {
+        "input_per_million": 1.0,
+        "output_per_million": 6.0
+      }
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "transport": "prompt_json",
+      "passed": 4,
+      "total": 4,
+      "calls": 4,
+      "prompt_tokens": 2657,
+      "completion_tokens": 10730,
+      "reasoning_tokens": 8808,
+      "cost": 0.01458464,
+      "latency_ms": 285201,
+      "list_price": {
+        "input_per_million": 0.32,
+        "output_per_million": 1.28
+      }
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "transport": "native_tool",
+      "passed": 0,
+      "total": 4,
+      "calls": 0,
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "reasoning_tokens": 0,
+      "cost": 0.0,
+      "latency_ms": 2561,
+      "list_price": {
+        "input_per_million": 0.32,
+        "output_per_million": 1.28
+      }
+    }
+  ],
+  "scenario_summaries": [
+    {
+      "model": "aion-labs/aion-3.0",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.grimdark_outline_has_playable_pressure",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "aion-labs/aion-3.0",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.public_sections_preserve_outline",
+      "passed": 0,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "aion-labs/aion-3.0",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.secret_plot_uses_public_world",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 1
+    },
+    {
+      "model": "aion-labs/aion-3.0",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.consistency_rejects_public_secret_conflict",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "aion-labs/aion-3.0",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.grimdark_outline_has_playable_pressure",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "aion-labs/aion-3.0",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.public_sections_preserve_outline",
+      "passed": 0,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "aion-labs/aion-3.0",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.secret_plot_uses_public_world",
+      "passed": 0,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 1
+    },
+    {
+      "model": "aion-labs/aion-3.0",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.consistency_rejects_public_secret_conflict",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "aion-labs/aion-3.0-mini",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.grimdark_outline_has_playable_pressure",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "aion-labs/aion-3.0-mini",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.public_sections_preserve_outline",
+      "passed": 0,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "aion-labs/aion-3.0-mini",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.secret_plot_uses_public_world",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "aion-labs/aion-3.0-mini",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.consistency_rejects_public_secret_conflict",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "aion-labs/aion-3.0-mini",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.grimdark_outline_has_playable_pressure",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "aion-labs/aion-3.0-mini",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.public_sections_preserve_outline",
+      "passed": 0,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "aion-labs/aion-3.0-mini",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.secret_plot_uses_public_world",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "aion-labs/aion-3.0-mini",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.consistency_rejects_public_secret_conflict",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "deepseek/deepseek-v4-pro",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.grimdark_outline_has_playable_pressure",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "deepseek/deepseek-v4-pro",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.public_sections_preserve_outline",
+      "passed": 0,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "deepseek/deepseek-v4-pro",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.secret_plot_uses_public_world",
+      "passed": 0,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 1
+    },
+    {
+      "model": "deepseek/deepseek-v4-pro",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.consistency_rejects_public_secret_conflict",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "deepseek/deepseek-v4-pro",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.grimdark_outline_has_playable_pressure",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "deepseek/deepseek-v4-pro",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.public_sections_preserve_outline",
+      "passed": 0,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "deepseek/deepseek-v4-pro",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.secret_plot_uses_public_world",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "deepseek/deepseek-v4-pro",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.consistency_rejects_public_secret_conflict",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "google/gemini-3-flash-preview",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.grimdark_outline_has_playable_pressure",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "google/gemini-3-flash-preview",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.public_sections_preserve_outline",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "google/gemini-3-flash-preview",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.secret_plot_uses_public_world",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "google/gemini-3-flash-preview",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.consistency_rejects_public_secret_conflict",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "google/gemini-3-flash-preview",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.grimdark_outline_has_playable_pressure",
+      "passed": 0,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 1
+    },
+    {
+      "model": "google/gemini-3-flash-preview",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.public_sections_preserve_outline",
+      "passed": 0,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 1
+    },
+    {
+      "model": "google/gemini-3-flash-preview",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.secret_plot_uses_public_world",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "google/gemini-3-flash-preview",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.consistency_rejects_public_secret_conflict",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.grimdark_outline_has_playable_pressure",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.public_sections_preserve_outline",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.secret_plot_uses_public_world",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.consistency_rejects_public_secret_conflict",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.grimdark_outline_has_playable_pressure",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.public_sections_preserve_outline",
+      "passed": 0,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.secret_plot_uses_public_world",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.consistency_rejects_public_secret_conflict",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.grimdark_outline_has_playable_pressure",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.public_sections_preserve_outline",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.secret_plot_uses_public_world",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.consistency_rejects_public_secret_conflict",
+      "passed": 1,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.grimdark_outline_has_playable_pressure",
+      "passed": 0,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.public_sections_preserve_outline",
+      "passed": 0,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.secret_plot_uses_public_world",
+      "passed": 0,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.consistency_rejects_public_secret_conflict",
+      "passed": 0,
+      "attempts": 1,
+      "stable": true,
+      "repairs": 0
+    }
+  ],
+  "results": [
+    {
+      "model": "aion-labs/aion-3.0",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.grimdark_outline_has_playable_pressure",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "premise_matches_brief": true,
+        "multiple_locations": true,
+        "multiple_factions": true,
+        "multiple_tensions": true,
+        "unique_location_ids": true
+      },
+      "output": {
+        "premise": "Generations ago, humanity descended into a vast cavern network to escape something on the surface—something the ruling merchant guilds refuse to discuss. Now the underground city of stillwater_hollow is slowly drowning. Water rises year by year, flooding the lower districts and forcing thousands upward into overcrowded, guild-controlled terraces. The guilds hold power through monopoly: they own the pumps, the salvage routes to the sealed surface gates, the filtered water, and the archive of what came before. They claim the surface is poisoned, uninhabitable, dead. Most believe them, because believing otherwise means admitting the guilds have been lying for a century. But the pumps are failing, the salvage is running thin, and the water keeps rising. Something has to change—reform, revolt, or a desperate expedition upward—but every path costs something someone cannot afford to lose.",
+        "themes": [
+          "Scarcity as a tool of control",
+          "Complicity bought by survival",
+          "The cost of inherited lies",
+          "Institutional decay disguised as stability",
+          "Hope as a dangerous and finite resource",
+          "Who deserves the dry places"
+        ],
+        "location_seeds": [
+          {
+            "id": "stillwater_hollow",
+            "name": "Stillwater Hollow",
+            "purpose": "The central underground city, built in a vast limestone cavern system; partially flooded, ruled by guild compacts, with habitable upper terraces and increasingly submerged lower wards."
+          },
+          {
+            "id": "the_drowned_wards",
+            "name": "The Drowned Wards",
+            "purpose": "Formerly thriving lower districts now partially submerged; home to the dispossessed who cling to rooftops and upper floors, harvesting salvage from flooded buildings."
+          },
+          {
+            "id": "guildspire_terrace",
+            "name": "Guildspire Terrace",
+            "purpose": "The elevated administrative and residential district where the merchant guilds maintain their halls, archives, and private pumping systems above the floodline."
+          },
+          {
+            "id": "the_stillwell",
+            "name": "The Stillwell",
+            "purpose": "Ancient pumping station and water filtration complex that keeps the city from total inundation; controlled by the Brotherhood, failing incrementally, its deterioration a closely guarded secret."
+          },
+          {
+            "id": "salvage_edge",
+            "name": "Salvage Edge",
+            "purpose": "The northern frontier where scavengers climb toward the sealed surface gates; dangerous, strictly regulated by guild permits, and the only legal path upward."
+          },
+          {
+            "id": "the_lamp_market",
+            "name": "The Lamp Market",
+            "purpose": "The commercial heart of the habitable zone, where goods, permits, and favors trade hands under oil lamps that the Lampwrights Guild controls absolutely."
+          },
+          {
+            "id": "the_vats",
+            "name": "The Vats",
+            "purpose": "Fungus-farming and fish-rearing district feeding the city; productive but increasingly contaminated by rising floodwaters, with output quietly declining."
+          },
+          {
+            "id": "hollow_chapel",
+            "name": "Hollow Chapel",
+            "purpose": "Abandoned worship space carved into the cavern wall, now used as an unofficial meeting place for dissidents, surface-seekers, and those who remember old stories."
+          },
+          {
+            "id": "the_glassworks",
+            "name": "The Glassworks",
+            "purpose": "Manufacturing district producing tools, lamp housings, and trade goods; operating at reduced capacity due to material shortages and guild quota disputes."
+          },
+          {
+            "id": "the_sealed_gates",
+            "name": "The Sealed Gates",
+            "purpose": "Massive ancient doors blocking the passage to the surface, guarded by guild enforcers; the subject of rumor, pilgrimage, and desperate hope."
+          }
+        ],
+        "faction_seeds": [
+          "The Compact of Tides: Coalition of the three wealthiest merchant guilds who jointly govern Stillwater Hollow through permits, water rights, and control of the historical archive; they maintain that the surface is dead and the city's slow drowning is manageable.",
+          "The Stillwell Brotherhood: Guild controlling the ancient pumps and water filtration; their engineers know the systems are failing but fear that public knowledge would trigger panic and revolt, so they ration quietly and search desperately for solutions.",
+          "The Lampwrights Guild: Controllers of all artificial light in the habitable zones; their monopoly on illumination makes them indispensable and gives them outsized political influence despite their smaller size.",
+          "The Drowned: Not a formal faction but a growing underclass of flood-refugees from the lower wards; organized informally, increasingly radical, and beginning to demand representation or retribution.",
+          "The Surface Seekers: Loose network of scavengers, scholars, and dreamers who believe the surface may be habitable again; they seek evidence, smuggle salvage, and quietly plan expeditions the guilds would punish severely.",
+          "The Vowkeepers: Remnant religious order preserving fragments of pre-Descent records and oral histories; they hold pieces of the truth about why humanity fled but are divided on whether revelation would save or destroy the city.",
+          "The Siltwater Smugglers: Black-market network moving unlicensed goods, people, and information between wards; pragmatic survivors who profit from the guilds' restrictions and would lose everything if the system reformed too quickly."
+        ],
+        "tensions": [
+          "The pumps are failing faster than the Stillwell Brotherhood admits; each month brings new breakdowns, and the guilds refuse to invest in full repair because acknowledging the crisis means acknowledging the city may be unsustainable.",
+          "The Drowned demand dry ground and representation; the guilds offer token charity and relocation to worse housing, pushing thousands toward radicalization.",
+          "Surface Seekers have found anomalies suggesting the surface may not be as dead as the guilds claim, but proving it requires an expedition the guilds will arrest anyone for attempting.",
+          "The Vowkeepers possess documents that contradict the official history of the Descent, but releasing them could destabilize the city; some members want to burn the records to prevent chaos.",
+          "Guild quota disputes are strangling the Glassworks and the Vats; production is falling, food is scarce, and the guilds would rather suppress output data than redistribute power.",
+          "The Siltwater Smugglers are becoming the Drowned's real infrastructure; if the guilds crack down, they risk triggering open revolt, but tolerating them erodes guild authority.",
+          "The Sealed Gates are showing signs of deterioration from the surface side—stress fractures, temperature changes, sounds—raising questions about what, if anything, is pressing to get in or out.",
+          "Reformists within the guilds argue for gradual power-sharing to prevent revolution; hardliners argue that any concession will be read as weakness and invite collapse; both sides are right about the other's plan failing."
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 38000,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 805,
+        "completion_tokens": 1730,
+        "reasoning_tokens": 492,
+        "cache_read_tokens": 0,
+        "cost": 0.012795
+      }
+    },
+    {
+      "model": "aion-labs/aion-3.0",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.public_sections_preserve_outline",
+      "attempt": 1,
+      "passed": false,
+      "checks": {
+        "preserves_location_ids": true,
+        "preserves_factions": false,
+        "descriptions_are_substantial": true
+      },
+      "output": {
+        "locations": [
+          {
+            "id": "drowned_exchange",
+            "name": "Drowned Exchange",
+            "description": "A half-submerged trading hall built into the ruins of a pre-flood bank vault, where the Salt Ledger conducts its business. The upper galleries remain dry and are reserved for those with positive air credit. The lower floors are flooded knee-to-chest deep, where desperate traders wade to barter salvage, labor contracts, and minutes of breathable air. Massive vault doors now serve as bulkheads against the rising water. The air here is thick with brine and the whispers of those negotiating terms that may never be settled. Every transaction adds to someone's debt, and the Ledger's clerks watch from catwalks above, recording everything in brine-stained ledgers."
+          },
+          {
+            "id": "last_pump",
+            "name": "The Last Pump",
+            "description": "The ancient mechanism that keeps the lower vaults from complete inundation, and it is dying. The Pump Wardens tend it with a mixture of engineering and desperate ritual, replacing corroded parts with salvaged metal and prayer. Each day the pump's rhythm grows more irregular. When it stops, the lower levels flood within hours, and the air pressure that keeps the upper galleries breathable begins to equalize. The Wardens know the pump needs parts that may no longer exist in the flooded city, and they are running out of ways to patch both the machinery and the truth. The chamber echoes with the laboring groan of metal that has outlasted its builders."
+          }
+        ],
+        "factions": [
+          "Salt Ledger — The dominant merchant guild, so named for the brine-stained ledgers that record every citizen's air debt. They control the distribution of filtered air and access to the few remaining dry platforms. Their authority rests on a simple premise: without the Ledger's records and infrastructure, everyone drowns. They are not cruel for cruelty's sake; they believe rationing is survival and that debt is the only system that keeps people working toward collective preservation. But the Ledger is also a bureaucracy that has forgotten mercy, where a child's breathing allowance can be garnished for a parent's unpaid labor, and where the surface and its abandonment are questions no clerk is permitted to ask aloud.",
+          "Pump Wardens — The engineers and mechanics who keep the city's pumps running. Once a respected craft guild, they are now a desperate order maintaining failing machinery with dwindling expertise. Many elder Wardens have died or retired, and the knowledge transfer is incomplete. They know the Last Pump is failing and disagree sharply on the response: some want to openly petition the Salt Ledger for resources and risk panic; others want to cannibalize secondary pumps to buy time; a few whisper that the abandoned surface might hold salvageable parts, if anyone could survive the climb. Their loyalty is to the machinery and the people it keeps alive, not to the Ledger that rationed their predecessors to death."
+        ],
+        "tensions": [
+          "Air debt — The Salt Ledger's system of air rationing binds every citizen to labor they may never finish paying off. The debt is inheritable, creating generational servitude that sparks quiet resistance, desperate bargains, and a growing underground of people who trade favors outside the Ledger's records. Some argue the debt system is the only thing preventing chaos; others see it as a cage that will drown them all slowly.",
+          "A failing pump — The Last Pump's deterioration threatens to flood the lower vaults and collapse air pressure throughout the city. The Pump Wardens' internal disagreements about how to respond mirror the larger question facing everyone: can the city be saved through salvage and sacrifice, or is it time to seek another way, even if that means confronting what the guilds have hidden about the surface?"
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 40265,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 784,
+        "completion_tokens": 1802,
+        "reasoning_tokens": 1197,
+        "cache_read_tokens": 0,
+        "cost": 0.013164
+      }
+    },
+    {
+      "model": "aion-labs/aion-3.0",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.secret_plot_uses_public_world",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "substantial_plot": true,
+        "uses_named_world_element": true,
+        "not_generic_cult_only": true
+      },
+      "output": {
+        "secret_plot": "THE TRUTH: The surface was sealed deliberately by Salt Ledger founders three generations ago. It is not toxic—it is habitable, perhaps recovering. The underground city exists because merchants engineered a containment crisis to create a captive population dependent on controlled air. The air-debt economy is built on manufactured scarcity.\n\nTHE LAST PUMP: Its deeper mechanisms, understood only by senior Pump Wardens, can open the great seal to the surface. The pump is failing because Salt Ledger agents have quietly degraded it for years—ensuring the seal cannot open even if discovered. The crisis is sabotage dressed as decay.\n\nSALT LEDGER SPLIT: The Inner Circle (founder descendants) knows the truth and maintains the lie. Reformists suspect the surface may be viable but lack proof. Hardliners know the truth and want the pump destroyed—fearing reopening will destroy their order.\n\nPUMP WARDEN DOUBT: Senior Warden Cael Murk has identified tool marks on the pump's seal mechanisms indicating deliberate sabotage, not age. He hasn't shared this widely. Wardens are split: some believe him, some think he's pressure-sick, some are co-opted by Hardliners.\n\nCLUES: (1) Tool marks on the pump's seal mechanisms—deliberate, inconsistent with wear. (2) The Drowned Exchange holds waterlogged archives referencing 'the Compact of Containment' and payments to 'surface sealers' from the founding generation. (3) Air readings near the upper seal show compositions inconsistent with the toxic-surface narrative; the Salt Ledger suppresses them. (4) A dying founder's confession, sealed in a vault beneath the Drowned Exchange, names three conspirators and admits the surface was 'not yet dead.' The vault key is held by a Salt Ledger elder. (5) Pump Warden initiates learn a ritual phrase about 'the breath above'—actually a fragment of the surface-opening protocol.\n\nPATH ONE—REFORM: Ally with Reformists and sympathetic Wardens for a controlled reopening. Cost: air-debt economy collapses, debtors revolt, Hardliners attempt to destroy the pump. The surface is habitable but not welcoming—no infrastructure. Hope, but expensive.\n\nPATH TWO—SEIZURE: Side with Murk and militant Wardens to seize the pump by force, demanding truth and opening. Cost: open conflict with Salt Ledger enforcers. The pump is vulnerable during fighting—damage could doom everyone. If successful, the surface opens but underground order shatters. Wardens are mechanics, not governors.\n\nCONSEQUENCES: If truth is revealed and nothing changes, Salt Ledger legitimacy erodes and unrest grows. If the pump fails before the seal opens, everyone dies. If the surface opens, the underground city may be abandoned within a generation, but the transition will be brutal. No path is without cost, but there are paths."
+      },
+      "error": null,
+      "used_repair": true,
+      "latency_ms": 53484,
+      "metrics": {
+        "calls": 2,
+        "prompt_tokens": 2122,
+        "completion_tokens": 2245,
+        "reasoning_tokens": 851,
+        "cache_read_tokens": 512,
+        "cost": 0.018684
+      }
+    },
+    {
+      "model": "aion-labs/aion-3.0",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.consistency_rejects_public_secret_conflict",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "rejects_contradiction": true,
+        "names_issue": true
+      },
+      "output": {
+        "consistent": false,
+        "issues": [
+          "Direct contradiction: The premise states 'The sealed surface has been unreachable for ages,' but the secret plot reveals 'The guild sends a caravan to the surface weekly.' If weekly caravans reach the surface, it is reachable, not unreachable. This contradicts the foundational premise, not merely public perception.",
+          "The premise describes the surface as 'sealed,' implying it is physically blocked off. A weekly caravan route requires an accessible passage, which conflicts with the concept of a seal.",
+          "While public facts being false can be intentional in a conspiracy, the premise should represent world truth rather than public belief. The premise and secret plot cannot both be true simultaneously.",
+          "Dangling reference: The secret plot mentions 'the guild' as if a single guild exists, but the brief and public facts establish 'merchant guilds' (plural). The secret plot needs to specify which guild or clarify the relationship between guilds.",
+          "Missing context: If caravans travel weekly to the surface, there must be a route, destination, and reason for these trips. None of this infrastructure is established, creating a gap between the secret plot and any playable discovery."
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 13593,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 535,
+        "completion_tokens": 775,
+        "reasoning_tokens": 658,
+        "cache_read_tokens": 0,
+        "cost": 0.006255
+      }
+    },
+    {
+      "model": "aion-labs/aion-3.0",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.grimdark_outline_has_playable_pressure",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "premise_matches_brief": true,
+        "multiple_locations": true,
+        "multiple_factions": true,
+        "multiple_tensions": true,
+        "unique_location_ids": true
+      },
+      "output": {
+        "premise": "Beneath a surface no one has seen in three generations lies Verath Hollow, a once-great underground city now half-drowned by rising floodwaters from below. Five merchant guilds maintain order through control of the pumps, the food supply, the lamp oil, and the archive of surface records. The official teaching is that the surface was abandoned because the sun died and the air turned poisonous. But water levels keep rising, food stores are thinning, and the guilds' answers no longer satisfy the growing population crammed into ever-shrinking dry districts. The city survives because most people obey and a few people ask no questions. Change is possible but every path toward truth demands a price someone else will pay.",
+        "themes": [
+          "Stability maintained through controlled ignorance",
+          "Water as currency, weapon, and grave",
+          "Complicity versus survival in a closed system",
+          "The buried truth as both threat and liberation",
+          "Class stratification written into vertical geography",
+          "Costly hope: doing good with incomplete information",
+          "Institutional decay disguised as tradition"
+        ],
+        "location_seeds": [
+          {
+            "id": "the_drowned_market",
+            "name": "The Drowned Market",
+            "purpose": "Central trade hub built on a terraced plaza where guilds auction water rights, food rations, and salvage; the lowest terraces flood at high tide, making every purchase a gamble."
+          },
+          {
+            "id": "the_pumpworks",
+            "name": "The Pumpworks",
+            "purpose": "Industrial heart of the city, a labyrinth of steam-driven pumps and channels that hold back the rising flood; controlled by the guilds and staffed by debt-bound laborers."
+          },
+          {
+            "id": "the_memory_vaults",
+            "name": "The Memory Vaults",
+            "purpose": "Sealed archive of surface-era records, maps, and departure logs; access is restricted by the guilds, and the few scholars inside know more than they are permitted to say."
+          },
+          {
+            "id": "the_surface_gate",
+            "name": "The Surface Gate",
+            "purpose": "Massive sealed blast door at the city's highest point, chained shut and under constant guard; pilgrims leave offerings, dissidents scratch questions into its frame."
+          },
+          {
+            "id": "the_lantern_quarter",
+            "name": "The Lantern Quarter",
+            "purpose": "Elevated wealthy district where guild families live in dry, well-lit terraces above the flood line; a visible symbol of who gets comfort and who gets none."
+          },
+          {
+            "id": "the_sump",
+            "name": "The Sump",
+            "purpose": "Lowest and poorest district, partially submerged, where displaced families build precarious platforms over black water; crime, sickness, and resentment fester here."
+          },
+          {
+            "id": "the_salt_cathedral",
+            "name": "The Salt Cathedral",
+            "purpose": "Old worship hall carved from mineral deposits, now split between the official Remnant Church and underground congregations who preach that the surface is livable."
+          },
+          {
+            "id": "the_glassworks",
+            "name": "The Glassworks",
+            "purpose": "Abandoned industrial district being reclaimed by floodwater; a no-man's-land of salvage, squatters, and things the guilds would rather stayed submerged."
+          },
+          {
+            "id": "the_ferry_stairs",
+            "name": "The Ferry Stairs",
+            "purpose": "Network of covered stairways and rope ferries connecting the vertical city; the only public transit, controlled by a minor guild that profits from every crossing."
+          },
+          {
+            "id": "the_lampwrights_enclave",
+            "name": "The Lampwrights' Enclave",
+            "purpose": "Workshop district producing the oil and mantles that keep the city lit; a strategic chokepoint everyone depends on and no single guild fully controls."
+          }
+        ],
+        "faction_seeds": [
+          "The Five Guild Conclave: The ruling merchant council that controls water, food, light, transit, and records; united in public, riven by private rivalries and divergent secrets about the surface.",
+          "The Pump Keepers: The guild faction managing the Pumpworks; they hold the city's survival in their hands but are losing the war against rising water and failing machinery.",
+          "The Remnant Church: Official religious body teaching that the surface is cursed and the underground is salvation; provides comfort and social order while suppressing contradictory evidence.",
+          "The Surface Truthers: Loose network of dissidents, former scholars, and Sump radicals who believe the guilds are lying about why the surface was abandoned; fragmented and poorly equipped.",
+          "The Sump Collective: Organized mutual-aid society among the drowned poor; pragmatic, suspicious of outsiders, willing to use pressure tactics that risk guild retaliation.",
+          "The Lampwrights' Guild: Skilled artisans who keep the city lit; technically part of the Conclave but increasingly sympathetic to reform, making their workshops a meeting ground for uneasy alliances.",
+          "The Ferrymen's Compact: Minor guild controlling transit between districts; small, opportunistic, and willing to smuggle people, goods, and information for the right price."
+        ],
+        "tensions": [
+          "Rising floodwaters are shrinking habitable space faster than pumps can compensate; the city needs new solutions or evacuation, but the guilds resist both.",
+          "The Memory Vaults contain records that could reveal why the surface was abandoned, but opening them threatens guild authority and could spark panic or war.",
+          "Water rationing is the sharpest tool of guild control; reducing it would ease suffering but undermine the obedience that keeps order.",
+          "The Sump Collective's demands for fairer resource distribution are just, but their methods risk provoking a crackdown that would hurt the people they represent.",
+          "The Remnant Church's teachings provide meaning and cohesion, yet directly contradict growing evidence that the surface may be recoverable.",
+          "The Pump Keepers know the machinery is failing but fear that admitting it will trigger chaos before alternatives are ready.",
+          "The Lampwrights' growing sympathy for reform puts a critical resource in play; whichever faction secures their loyalty gains leverage but also exposes them to retaliation.",
+          "The Surface Gate is both a symbol of hope and a sealed door to possible death; opening it is the ultimate test of whether the city's truth is salvation or catastrophe."
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 36937,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 947,
+        "completion_tokens": 1592,
+        "reasoning_tokens": 333,
+        "cache_read_tokens": 384,
+        "cost": 0.011529
+      }
+    },
+    {
+      "model": "aion-labs/aion-3.0",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.public_sections_preserve_outline",
+      "attempt": 1,
+      "passed": false,
+      "checks": {
+        "preserves_location_ids": true,
+        "preserves_factions": false,
+        "descriptions_are_substantial": true
+      },
+      "output": {
+        "locations": [
+          {
+            "id": "drowned_exchange",
+            "name": "Drowned Exchange",
+            "description": "A vast, half-submerged mercantile hall where the guilds auction what keeps people alive: air-tokens, dry-ground passes, salvaged surface goods, and filtered water. Stalls cling to rusted catwalks above black water; the lower tiers flood twice daily and anything not chained down drifts. The Salt Ledger holds the auction block and the scales, but independent brokers and desperate families trade in the shadows between pillars. Every transaction is recorded in a ledger that never forgets and never forgives. Hope exists here in the form of a winning bid or a favorable trade, but the house always takes its cut."
+          },
+          {
+            "id": "last_pump",
+            "name": "The Last Pump",
+            "description": "A groaning, ancient mechanism at the city's deepest point, the only functioning pump holding back the flood from the lower vault districts. The Pump Wardens keep it running with salvaged parts, prayer, and blood-sacrifice of a sort: long shifts in crushing heat and toxic air that shorten every warden's life. The pump shudders now, dropping pressure in cycles the Wardens call 'the stutter.' If it fails, thousands drown in the lower vaults. Repair requires parts only the Salt Ledger can authorize, and the Ledger wants payment in air-debt the lower districts cannot meet. The pump room itself is open to those bold enough to descend, to see the crisis firsthand and decide what they are willing to owe."
+          }
+        ],
+        "factions": [
+          "Salt Ledger: The dominant merchant guild that controls the rationing of breathable air, access to dry ground, and the debt ledgers that govern life in the flooded city. They present themselves as the city's stabilizing force, the ones who keep order when water rises and breath runs short. Their authority comes from monopoly over the air-compression vaults and their meticulous records of who owes what. They are not mustache-twirling villains but bureaucrats of survival: they believe, perhaps sincerely, that without the Ledger everyone drowns. Their motive is control through debt, and their weakness is that the system they administer is increasingly unjust and visibly failing. They can be bargained with, threatened, infiltrated, or overthrown, but each path has a price.",
+          "Pump Wardens: The engineers and laborers who maintain the Last Pump and the city's failing infrastructure. Once a proud order, now a shrinking brotherhood of the desperate and the doomed, working toxic shifts that eat their lungs. They hold the technical knowledge that keeps everyone alive, yet they hold almost no political power and are sinking into poverty. Their motive is to keep the pump running and to be recognized, paid, and allowed to survive for that service. They are skeptical of the Salt Ledger but dependent on Ledger authorization for parts. Players can earn their trust through labor and risk, and the Wardens know secrets of the city's bones that the Ledger does not."
+        ],
+        "tensions": [
+          "Air debt: Breath itself is currency. The Salt Ledger issues air-tokens against labor and salvage, and most residents owe more than they can repay. Debt compounds; missed payments mean reduced rations, then relocation to flooding districts, then worse. Families inherit debt. The system is legal, orderly, and slowly suffocating the lower vaults. Some demand the ledgers be burned; others argue that without them the air runs out in days. There are paths to resist: work strikes, black-market air, renegotiation, or open revolt, but each risks the one thing everyone is short on.",
+          "A failing pump: The Last Pump is dying. Its stutter grows longer each week, and the lower districts flood a little more with every cycle. The Pump Wardens know what parts are needed and where to find them, but the Salt Ledger controls authorization and demands payment the lower districts cannot meet. The Ledger fears that emergency parts will bankrupt their reserves and erode their authority; the Wardens fear that delay means mass drowning. Repair is possible, even likely, if someone can bridge the gap, broker a deal, force a hand, or find another way entirely. The clock is audible in every shudder of the pump."
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 26780,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 927,
+        "completion_tokens": 1253,
+        "reasoning_tokens": 418,
+        "cache_read_tokens": 384,
+        "cost": 0.009435
+      }
+    },
+    {
+      "model": "aion-labs/aion-3.0",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.secret_plot_uses_public_world",
+      "attempt": 1,
+      "passed": false,
+      "checks": {
+        "pipeline_completed": false
+      },
+      "output": null,
+      "error": "PipelineValidationError(\"pipeline output invalid after one repair: 1 validation error for WorldSecretSection\\nsecret_plot\\n  String should have at most 4000 characters [type=string_too_long, input_value='SECRET PLOT: THE HEALING...trols it at the climax.', input_type=str]\\n    For further information visit https://errors.pydantic.dev/2.13/v/string_too_long\")",
+      "used_repair": true,
+      "latency_ms": 46203,
+      "metrics": {
+        "calls": 2,
+        "prompt_tokens": 2397,
+        "completion_tokens": 2736,
+        "reasoning_tokens": 1280,
+        "cache_read_tokens": 1152,
+        "cost": 0.021015
+      }
+    },
+    {
+      "model": "aion-labs/aion-3.0",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.consistency_rejects_public_secret_conflict",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "rejects_contradiction": true,
+        "names_issue": true
+      },
+      "output": {
+        "consistent": false,
+        "issues": [
+          "Direct contradiction between public fact and secret plot: Public fact states 'No route to the surface exists' as an absolute truth, but secret plot reveals 'The guild sends a caravan to the surface weekly.' If a weekly caravan reaches the surface, a route does exist.",
+          "The public fact should be reframed as a public belief or common assumption (e.g., 'Citizens believe no route to the surface exists' or 'No known route to the surface is publicly acknowledged') to avoid contradicting the secret plot.",
+          "Premise 'The sealed surface has been unreachable for ages' is ambiguous—could be read as absolutely unreachable (contradicts secret plot) or unreachable to the general public (compatible). Needs clarification.",
+          "The guild referenced in the secret plot ('The guild sends a caravan') is not explicitly defined or identified in the public facts; while the brief mentions merchant guilds, the specific guild with surface access should be established or clarified to avoid a dangling reference."
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 11750,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 679,
+        "completion_tokens": 796,
+        "reasoning_tokens": 717,
+        "cache_read_tokens": 384,
+        "cost": 0.005949
+      }
+    },
+    {
+      "model": "aion-labs/aion-3.0-mini",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.grimdark_outline_has_playable_pressure",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "premise_matches_brief": true,
+        "multiple_locations": true,
+        "multiple_factions": true,
+        "multiple_tensions": true,
+        "unique_location_ids": true
+      },
+      "output": {
+        "premise": "Beneath a poisoned, abandoned surface lies the Flooded City, a vast cavern-network drowned in brackish water and ruled by merchant guilds who control every breath of air and drop of fresh water. The guilds claim the surface was rendered uninhabitable by a natural catastrophe—the Sun-Shattering—but they suppress the truth: the Old Authorities deliberately flooded the surface with a corrosive mist to contain a spreading corruption that would have consumed everything. Now the guilds perpetuate manufactured scarcity, rationing hope along with resources, while the real secret—that the corruption is dormant, not dead, and that the surface may be healing—threatens their power. Players must navigate alliances with compromised factions, uncover buried history, and decide whether the cost of reclaiming the surface is worth paying, or if a new path entirely must be forged in the drowned dark.",
+        "themes": [
+          "Manufactured scarcity as a tool of control",
+          "The cost of truth versus comfortable lies",
+          "Systemic exploitation disguised as stewardship",
+          "Hope as a dangerous and rationed luxury",
+          "Memory and forgetting—what was deliberately erased",
+          "Water as life, prison, and graveyard",
+          "Compromised solidarity—allies with dark pasts",
+          "Sacrifice and betrayal across generations"
+        ],
+        "location_seeds": [
+          {
+            "id": "market-cistern",
+            "name": "The Market-Cistern",
+            "purpose": "Central flooded plaza where guilds trade, debts are settled, and public decrees are announced. Controlled by the Tide-Lords; site of the public water-clock that dictates ration cycles."
+          },
+          {
+            "id": "deep-farms",
+            "name": "The Deep-Farms",
+            "purpose": "Fungal agriculture tunnels extending into the lower flooded reaches. Labor-intensive, prone to blight, and source of the city's staple food. Controlled by the Breath-Merchants who also manage air scrubbers here."
+          },
+          {
+            "id": "lock-chamber",
+            "name": "The Lock-Chamber",
+            "purpose": "The only known airlock to the surface, heavily fortified and guarded by the Tide-Lords. Access is a closely held privilege; the chamber's logs and seals are the most contested records in the city."
+          },
+          {
+            "id": "sunken-archive",
+            "name": "The Sunken Archive",
+            "purpose": "Pre-Shattering record repository, partially flooded and structurally unstable. Contains forbidden histories, guild charters, and evidence of the Old Authorities' sacrifice. Guarded by the Archive-Flooded faction."
+          },
+          {
+            "id": "bone-tides",
+            "name": "The Bone-Tides",
+            "purpose": "Graveyard district where the dead are laid to rest in submerged chambers. Currents shift remains, creating eerie navigation hazards. Site of the Salt-Saints' rituals and a smuggling route for the Drowned-Cartel."
+          },
+          {
+            "id": "whisper-vents",
+            "name": "The Whisper-Vents",
+            "purpose": "Natural chimney system connecting upper and lower districts. Used for covert communication, air circulation, and as escape routes. The Sump-Keepers maintain these but cannot control all access."
+          },
+          {
+            "id": "engine-sump",
+            "name": "The Engine-Sump",
+            "purpose": "Ancient machinery chamber housing pumps, filtration systems, and the city's failing power core. The Sump-Keepers' sacred site; tampering could improve or doom the city's air supply."
+          },
+          {
+            "id": "salt-market",
+            "name": "The Salt-Market",
+            "purpose": "Black market bazaar in a flooded side-cavern where desperate deals are struck. Neutral ground for guild outsiders, but watched by the Drowned-Cartel. Where forbidden surface relics sometimes appear."
+          },
+          {
+            "id": "drowned-spire",
+            "name": "The Drowned Spire",
+            "purpose": "Remnant of the Old Authorities' headquarters, jutting from deep water. Only the upper chambers are accessible; lower levels are flooded and rumored to contain the original corruption containment protocols."
+          },
+          {
+            "id": "aegis-gate",
+            "name": "The Aegis Gate",
+            "purpose": "Secondary surface lock, supposedly sealed and forgotten. The Surface-Watchers believe it can be reactivated. Its location is a closely guarded secret among those who dream of return."
+          }
+        ],
+        "faction_seeds": [
+          "The Tide-Lords: ruling merchant guild controlling airlock access, water rations, and official history",
+          "The Drowned-Cartel: water thieves and smugglers who trade in contraband surface relics and unrationed goods",
+          "The Archive-Flooded: secret keepers of pre-Shattering knowledge, hiding in the Sunken Archive",
+          "The Surface-Watchers: believers that the surface is healing, seeking to reopen the Aegis Gate",
+          "The Breath-Merchants: cartel controlling air scrubbers and fungal farms, leveraging respiratory scarcity",
+          "The Sump-Keepers: engineer caste maintaining the city's failing machinery, torn between guild loyalty and survival",
+          "The Salt-Saints: religious order that interprets the flooding as divine punishment, preserving memory through ritual",
+          "The Deep-Cult: worshippers of the dormant corruption below, believing it to be a god that will rise again"
+        ],
+        "tensions": [
+          "Guild monopoly on airlock access versus universal right to seek the surface",
+          "Rationed water distribution versus hidden freshwater reservoirs known only to the Tide-Lords",
+          "Official history of natural catastrophe versus Archive evidence of deliberate sacrifice",
+          "Surface reclamation as salvation versus fear of reawakening the dormant corruption",
+          "Guild stability and order versus justice for the generations sacrificed to maintain the lie",
+          "Faith in the Old Authorities' wisdom versus evidence of their catastrophic betrayal",
+          "Short-term survival through obedience versus long-term change through rebellion",
+          "Alliance with corrupt guild reformers versus uncompromising but isolated outsider factions",
+          "The Deep-Cult's apocalyptic devotion versus the Salt-Saints' preservationist orthodoxy",
+          "Sump-Keeper technical expertise as leverage versus their dependence on guild-supplied parts",
+          "Surface-Watcher hope as genuine opportunity versus dangerous delusion that could doom the city",
+          "The cost of truth: whether revealing the surface's history brings liberation or despair"
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 49843,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 835,
+        "completion_tokens": 2538,
+        "reasoning_tokens": 1234,
+        "cache_read_tokens": 0,
+        "cost": 0.0041377
+      }
+    },
+    {
+      "model": "aion-labs/aion-3.0-mini",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.public_sections_preserve_outline",
+      "attempt": 1,
+      "passed": false,
+      "checks": {
+        "preserves_location_ids": false,
+        "preserves_factions": false,
+        "descriptions_are_substantial": true
+      },
+      "output": {
+        "locations": [
+          {
+            "id": "drowned_exchange",
+            "name": "Drowned Exchange",
+            "description": "The central market of the flooded city, a vast chamber where the guilds trade air, goods, and debts. Water laps at the edges of stone platforms, and the air is thick with the smell of brine and desperation. Here, the Salt Ledger oversees the exchange of breathable air, recorded in ledgers that dictate who lives and who drowns."
+          },
+          {
+            "id": "last_pump",
+            "name": "The Last Pump",
+            "description": "The colossal machine that keeps the city from drowning. It groans and shudders day and night, a constant reminder of the city's fragility. The Pump Wardens maintain it with fanatical devotion, but parts are failing and the labor to repair them is immense. A single catastrophic failure would flood the lower districts entirely."
+          },
+          {
+            "id": "the_dry_quarter",
+            "name": "The Dry Quarter",
+            "description": "The only district that remains entirely above the waterline, home to the guild elite. The air is clean and the streets are lit. Access is a privilege earned through debt or service, and the guards enforce the boundary ruthlessly. It is a symbol of what the guilds promise, but also a fortress that isolates knowledge of the surface."
+          },
+          {
+            "id": "the_weeping_shafts",
+            "name": "The Weeping Shafts",
+            "description": "The flooded lower levels where the poorest inhabitants survive. Water seeps through every crack, and the air is thick with moisture and rot. The shafts are a labyrinth of precarious walkways and submerged chambers, where the desperate salvage what they can. The Dredge Consortium operates here, pulling up relics from the drowned past."
+          },
+          {
+            "id": "the_archive_of_forgotten_tides",
+            "name": "The Archive of Forgotten Tides",
+            "description": "A repository of records from before the flooding, guarded by the Salt Ledger. The public is allowed limited access to genealogies and debt records, but the deeper vaults are sealed. Rumors persist that the Archive contains the true reason the surface was abandoned, but the guilds deny it and restrict access."
+          }
+        ],
+        "factions": [
+          "Salt Ledger",
+          "Pump Wardens",
+          "Breathwrights",
+          "Dredge Consortium",
+          "Iron Tide"
+        ],
+        "tensions": [
+          "Air debt",
+          "A failing pump",
+          "The guilds' monopoly on knowledge of the surface",
+          "Rising water levels in the lower districts",
+          "Scarcity of breathable air and the price of access to the Dry Quarter"
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 85266,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 819,
+        "completion_tokens": 4295,
+        "reasoning_tokens": 4173,
+        "cache_read_tokens": 0,
+        "cost": 0.0065863
+      }
+    },
+    {
+      "model": "aion-labs/aion-3.0-mini",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.secret_plot_uses_public_world",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "substantial_plot": true,
+        "uses_named_world_element": true,
+        "not_generic_cult_only": true
+      },
+      "output": {
+        "secret_plot": "The surface was not abandoned due to an external catastrophe. The city was deliberately flooded by the founders of the Salt Ledger guild to destroy the Sunken Covenant, a rival civilization that controlled a geothermal reactor in the lowest levels—the Heartstone Vault. The flood was engineered by rupturing aquifer seals. The \"air debt\" system was created to subjugate survivors and fund excavation of the reactor. The failing pump at The Last Pump is not failing; it is being deliberately throttled by the Salt Ledger's inner council to slowly raise water levels, forcing the population to buy more air credits and to uncover the sealed entrance to the Heartstone Vault. The Pump Wardens are unaware of this; their leader, Elder Kael, has discovered tampering with the pump's control rods but has been silenced. The truth is hidden in the Drowned Exchange in a sealed ledger vault containing the original construction contracts and a pre-flood map showing the surface as fertile. Clues include: a corroded data-slate with a maintenance log showing unauthorized pump adjustments, a dying Warden who whispers \"the ledger is forged, the surface breathes,\" and a hidden chamber behind the Exchange's main vault with statues of Sunken Covenant leaders. Escalation paths: (1) The pump is allowed to fail, causing a controlled collapse that opens the Heartstone Vault. The Salt Ledger moves to seize the reactor, but the Pump Wardens and surface-return factions contest it. The city floods partially, creating new geography and desperate alliances. (2) The truth is leaked to the populace. A revolution erupts against the Salt Ledger. The guilds fracture. Some want to drain the city and return to the surface; others want to keep the flood as a defense. The pump becomes a bargaining chip in the civil war, and the Heartstone Vault's power could tip the balance. Both paths involve costly hope: restoring the surface requires immense sacrifice and risk but offers a chance at freedom."
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 31452,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 545,
+        "completion_tokens": 1651,
+        "reasoning_tokens": 1481,
+        "cache_read_tokens": 0,
+        "cost": 0.0026929
+      }
+    },
+    {
+      "model": "aion-labs/aion-3.0-mini",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.consistency_rejects_public_secret_conflict",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "rejects_contradiction": true,
+        "names_issue": true
+      },
+      "output": {
+        "consistent": false,
+        "issues": [
+          "Public fact 'No route to the surface exists' directly contradicts secret plot 'The guild sends a caravan to the surface weekly.'",
+          "Premise 'The sealed surface has been unreachable for ages' is contradicted by secret plot's weekly caravan, implying a route and regular access."
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 8687,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 552,
+        "completion_tokens": 347,
+        "reasoning_tokens": 330,
+        "cache_read_tokens": 0,
+        "cost": 0.0008722
+      }
+    },
+    {
+      "model": "aion-labs/aion-3.0-mini",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.grimdark_outline_has_playable_pressure",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "premise_matches_brief": true,
+        "multiple_locations": true,
+        "multiple_factions": true,
+        "multiple_tensions": true,
+        "unique_location_ids": true
+      },
+      "output": {
+        "premise": "In the drowned city of Silt-Ven, merchant guilds rule over a population packed into air-bubble districts, controlling every breath of filtered air and drop of drinkable water. The surface was sealed generations ago — officially a wasteland, unofficially a mystery punishable to investigate. The guilds maintain order through resource scarcity and the fear of the rising water, but their grip is cracking. The pumps are aging, algae farms are failing, and the Deep-Runners whisper that the surface was not lost but hidden. To survive is to compromise; to seek the truth is to risk everything.",
+        "themes": [
+          "Scarcity and survival",
+          "Compromised institutions",
+          "Forbidden knowledge",
+          "Costly hope",
+          "Systemic decay",
+          "Loyalty vs. necessity"
+        ],
+        "location_seeds": [
+          {
+            "id": "silt-ven",
+            "name": "Silt-Ven",
+            "purpose": "The central drowned city, a network of flooded tunnels and air-filled domes, ruled by merchant guilds."
+          },
+          {
+            "id": "the-drowned-market",
+            "name": "The Drowned Market",
+            "purpose": "A flooded plaza where guilds trade goods and secrets; neutral ground but patrolled by the Iron-Fin."
+          },
+          {
+            "id": "guild-ascendancy-spire",
+            "name": "Guild Ascendancy Spire",
+            "purpose": "Administrative heart of the guilds, where the Salt Guild controls air and water distribution."
+          },
+          {
+            "id": "the-deep-farms",
+            "name": "The Deep Farms",
+            "purpose": "Algae and fungus farms in flooded caverns, the city's primary food and oxygen source."
+          },
+          {
+            "id": "the-last-lock",
+            "name": "The Last Lock",
+            "purpose": "The only remaining airlock to the surface, sealed and guarded; a symbol of forbidden knowledge."
+          },
+          {
+            "id": "the-bone-docks",
+            "name": "The Bone Docks",
+            "purpose": "A district built on the remains of old structures, where salvagers and Deep-Runners operate."
+          },
+          {
+            "id": "the-whisper-archives",
+            "name": "The Whisper Archives",
+            "purpose": "A hidden library of pre-abandonment records, protected by the Archive-Keepers."
+          },
+          {
+            "id": "the-pump-heart",
+            "name": "The Pump Heart",
+            "purpose": "The central pumping station keeping the city from drowning; failing and in need of rare parts."
+          }
+        ],
+        "faction_seeds": [
+          "The Salt Guild: controls air and water distribution, the de facto rulers of Silt-Ven.",
+          "The Deep-Runners: smugglers who trade surface relics and forbidden knowledge.",
+          "The Archive-Keepers: librarians who preserve dangerous truths about the surface.",
+          "The Hollow-Hands: a workers' collective that wants to redistribute resources.",
+          "The Sun-Sick: a cult that believes the surface is a paradise and tries to open the Last Lock.",
+          "The Iron-Fin: the guilds' enforcers, maintain order through fear and violence."
+        ],
+        "tensions": [
+          "The Salt Guild's resource monopoly vs. the Hollow-Hands' demand for fair distribution.",
+          "The Deep-Runners' surface relics vs. the Archive-Keepers' desire to control dangerous knowledge.",
+          "The Sun-Sick's attempts to open the Last Lock vs. the Iron-Fin's orders to keep it sealed.",
+          "The failing Pump Heart vs. the guilds' refusal to authorize risky repairs.",
+          "The truth of the surface abandonment vs. the stability of the current order.",
+          "Survival through obedience vs. hope through rebellion."
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 33968,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 1171,
+        "completion_tokens": 2212,
+        "reasoning_tokens": 1512,
+        "cache_read_tokens": 384,
+        "cost": 0.00371682
+      }
+    },
+    {
+      "model": "aion-labs/aion-3.0-mini",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.public_sections_preserve_outline",
+      "attempt": 1,
+      "passed": false,
+      "checks": {
+        "preserves_location_ids": true,
+        "preserves_factions": false,
+        "descriptions_are_substantial": true
+      },
+      "output": {
+        "locations": [
+          {
+            "id": "drowned_exchange",
+            "name": "The Drowned Exchange",
+            "description": "A vast submerged hall where merchants conduct trade from gondolas and half-flooded platforms. The upper galleries remain dry, reserved for guild lords who breathe the city's most precious commodity: compressed air. Below the waterline, divers retrieve lost goods from drowned storehouses. Every transaction is recorded in the Salt Ledger's waterproof ledgers, and every breath taken in the Exchange adds to a trader's air debt. The Exchange is the economic heart of the city, where hope and desperation are bought and sold in equal measure."
+          },
+          {
+            "id": "last_pump",
+            "name": "The Last Pump",
+            "description": "A colossal machine of brass and iron that groans day and night, keeping the lower districts from complete inundation. The Pump Wardens tend it with religious devotion, performing rituals of maintenance passed down through generations. Water seeps through every seal, and the pump's rhythm falters more each month. Should it fail, the remaining dry districts will flood within hours. The Wardens hoard replacement parts and knowledge, making access to the Pump a matter of political negotiation as much as mechanical necessity."
+          }
+        ],
+        "factions": [
+          "Salt Ledger: The guild of record-keepers, accountants, and debt-collectors who track every exchange of air, goods, and labor in the city. Their waterproof ledgers are the law, and their enforcers ensure that no debt goes unpaid. They control the issuance of air credits, the currency of survival. While they present themselves as neutral arbiters, their records hold the secrets of the city's origins and the reason the surface was abandoned. They trade in information as readily as air, and their archives are the most complete source of history in the flooded world.",
+          "Pump Wardens: The engineers, mechanics, and operators who keep The Last Pump running. They are a closed order, passing down technical knowledge through apprenticeship and refusing to share their secrets. They control access to the pump and thus to the dry ground that remains. Some say they could fix the pump permanently if they chose; others say they are barely holding it together with salvaged parts and desperate ingenuity. Their power comes from their monopoly on survival, and they use it to extract concessions from the other guilds. They know that if the pump fails, their relevance dies with it, but they will not surrender their leverage cheaply."
+        ],
+        "tensions": [
+          "Air debt: The city runs on a system of air credits. Every citizen is born with a debt for the air they will breathe, and every action that consumes air — from walking to a meeting to operating a forge — accrues interest. Those who cannot pay are exiled to the flooded lower levels or have their air supply cut off. The Salt Ledger administers this system with cold precision, but the ledger's origins are murky, and some suspect the air debt was invented to control the population rather than manage scarce resources. Agitating against the system is treason, but whispers of a surface where air is free grow louder.",
+          "A failing pump: The Last Pump is dying. Its rhythm falters, its seals weep, and its core temperature rises despite the Wardens' best efforts. Replacement parts are scarce; the knowledge to build new ones was lost when the surface was sealed. The Wardens claim they can keep it running indefinitely with proper resources and respect, but the signs of decay are undeniable. When the pump fails — not if, but when — the city will drown. Some factions hoard boats and diving equipment. Others search the archives for forgotten technologies. A few pray for a miracle. The question is not whether the pump will fail, but who will be on high ground when it does."
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 35327,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 1157,
+        "completion_tokens": 2315,
+        "reasoning_tokens": 1838,
+        "cache_read_tokens": 384,
+        "cost": 0.00385122
+      }
+    },
+    {
+      "model": "aion-labs/aion-3.0-mini",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.secret_plot_uses_public_world",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "substantial_plot": true,
+        "uses_named_world_element": true,
+        "not_generic_cult_only": true
+      },
+      "output": {
+        "secret_plot": "THE FOUNDERS' SIN\n\n**Core Secret:** The surface was not abandoned due to an uncontrollable cataclysm. It was deliberately poisoned by the founding merchant guilds (ancestors of the Salt Ledger) to create a captive market for air and water. They sabotaged the **Deep Lung**—the original atmospheric processor—and sealed the surface exits, fabricating the story of \"The Sundering\" to justify their rule.\n\n**Where the Truth Lies:** The evidence is hidden in the **Founders' Vault**, a sealed chamber beneath the **Drowned Exchange**. It contains the original Deep Lung schematics, the signed sabotage orders, and a functional surface communication device.\n\n**Faction Motives & Secrets:**\n- **Salt Ledger (Grand Factor Orin Vask):** Knows the truth. Maintains the lie to keep the Air Debt system running. Has been secretly diverting resources to build a private air-scrubbing **Citadel** for the elite, accelerating the Last Pump's decay.\n- **Pump Wardens (Master Warden Elara Moss):** Suspects the Salt Ledger is lying. A secret cell of **Deep Wardens** has been mapping the Exchange's sub-basements, searching for the Vault to save the Pump. They don't know the full truth yet, only that the Ledger is sabotaging repairs.\n\n**Discoverable Clues:**\n1. **The Dying Warden's Map:** A dying Deep Warden gives the party a wax-stained map of the **Exchange Undercroft**, marked with a strange seal (the Founders' Key). The seal matches the Grand Factor's ring.\n2. **The Forged Component:** While repairing the Last Pump's main piston, a Warden finds a bronze valve stamped with a date 50 years after the official Sundering. It was made on the surface. This proves the surface was habitable long after the lie began.\n3. **The Uncancelled Debt:** A tax ledger from the Drowned Exchange lists a standing, interest-accruing debt from the \"City of Ember\" (the surface colony) to the \"Guild Primeval\" (the founders). The debt is for \"Atmospheric Genocide Restitution.\" The interest is due, but the principal was never collected because the debtors were the ones who committed the crime.\n4. **The Grand Factor's Panic:** If the party gets too close, Vask offers a massive bribe (forgiveness of all Air Debt + a position in the Citadel) to drop the investigation. Refusal triggers an assassination attempt using Salt Ledger Enforcers and a staged pump failure.\n\n**Escalation Paths:**\n- **Path 1: The Revelation.** The party opens the Founders' Vault and broadcasts the truth via the Exchange's resonance speakers. Cost: The Salt Ledger enforces martial law. The Pump is sabotaged in the chaos. The party must lead a revolution while simultaneously preventing the city from suffocating. Hope: A free city, but built on the ashes of the old order.\n- **Path 2: The Fix.** The party uses the secret to blackmail Vask. He is forced to fund the Pump repairs and ease the Air Debt. Cost: The party becomes the secret police of the lie, executing anyone who gets too close to the truth. The surface remains abandoned. Hope: The city survives sustainably, and the party slowly reforms the system, but they must become monsters to do it.\n- **Path 3: The Exodus.** The party uses the Vault's schematics to recalibrate the Deep Lung. They can make the surface habitable for a small group (100-200 people). Cost: The recalibration drains the city's remaining air reserves for a full day, causing mass casualties. The Salt Ledger fights to stop them. Hope: A new beginning for a chosen few, leaving the rest to the fate the founders created."
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 61735,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 883,
+        "completion_tokens": 3588,
+        "reasoning_tokens": 3011,
+        "cache_read_tokens": 384,
+        "cost": 0.00544162
+      }
+    },
+    {
+      "model": "aion-labs/aion-3.0-mini",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.consistency_rejects_public_secret_conflict",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "rejects_contradiction": true,
+        "names_issue": true
+      },
+      "output": {
+        "consistent": false,
+        "issues": [
+          "Public fact 'No route to the surface exists' contradicts secret plot 'The guild sends a caravan to the surface weekly' — a route must exist for the caravan to reach the surface."
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 9718,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 891,
+        "completion_tokens": 469,
+        "reasoning_tokens": 470,
+        "cache_read_tokens": 384,
+        "cost": 0.00108062
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4-pro",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.grimdark_outline_has_playable_pressure",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "premise_matches_brief": true,
+        "multiple_locations": true,
+        "multiple_factions": true,
+        "multiple_tensions": true,
+        "unique_location_ids": true
+      },
+      "output": {
+        "premise": "The city of Lumenmere sprawls through flooded limestone caverns, its districts linked by a lattice of canals and leaky pressure-gates. For centuries the merchant guilds have ruled from floating bazaars and dripping promenades, their wealth built on salvaged surface-world relics. They preach that the sun above is a killing fire and that submersion is salvation. In truth, the surface was not abandoned by nature but poisoned by a desperate act of their ancestors — a blight seeded in the soil to halt an advancing enemy, which instead crept downward into the groundwater. Now the city’s lower levels are dying from the rising Depth Blight, a slow corruption that distorts flesh and mind. The guilds hoard the secret, ration oxygen-fungus and light, and trade in human desperation. Yet in the choked vents and sunken archives, fragments of the old sin surface, and a handful of voices whisper that the surface may not be dead — only waiting, and vengeful.",
+        "themes": [
+          "the price of survival",
+          "secrets as currency",
+          "decay from within",
+          "trust in a drowning world",
+          "the weight of inherited sin",
+          "exploitation and desperation",
+          "fragile hope and costly change"
+        ],
+        "location_seeds": [
+          {
+            "id": "bazaar_afloat",
+            "name": "The Bazaar Afloat",
+            "purpose": "A sprawling flotilla of lashed platforms, stalls, and merchant-houses anchored in the central basin; the heart of guild trade, bribes, and whispered bargains. The water below is deep and dark, and things sometimes knock against the hulls."
+          },
+          {
+            "id": "the_guttering_spire",
+            "name": "The Guttering Spire",
+            "purpose": "A colossal stalactite drilled and fitted with phosphorescent growths that provide the city's primary light. Its glow is failing, and only the Lamplighter's Union knows how close it is to extinguished."
+          },
+          {
+            "id": "sunken_archives",
+            "name": "The Sunken Archives",
+            "purpose": "A half-flooded vault of crystalline memory-codices from the surface age, guarded by the reclusive Archivists. Its lower halls contain the unredacted truth about the Blight, sealed since the founding."
+          },
+          {
+            "id": "canal_warrens",
+            "name": "The Canal Warrens",
+            "purpose": "A labyrinth of narrow, low-ceilinged waterways serving as slums for the water-breathers and the destitute. Controlled by local bosses, it is where the Blight first incubates and where contraband flows."
+          },
+          {
+            "id": "engine_ward",
+            "name": "The Engine Ward",
+            "purpose": "A cluster of ancient pumping stations and generator vaults that keep the upper districts from flooding. Manned by the Debtbound, criminals who work in chains amid scalding steam and grinding iron."
+          },
+          {
+            "id": "husk_markets",
+            "name": "The Husk Markets",
+            "purpose": "A district where the poorest sell their own labor, memories, or even bodily fluids. Here the guilds purchase raw materials for the oxygen-fungus farms, and the Spore-Cutters recruit the desperate."
+          },
+          {
+            "id": "barrier_locks",
+            "name": "The Barrier Locks",
+            "purpose": "Massive iron doors and pressurized seals separating the habitable city from the Lower Depths. The Silt Council's enforcers control who passes — and what can be quarantined if the Blight surges."
+          },
+          {
+            "id": "the_deep_roots",
+            "name": "The Deep Roots",
+            "purpose": "The lowest explored caverns, where the water is thick with pale, mutated life and the Blight manifests as a whispering black moss. Depth-Dredgers sift here for pre-Fall relics, often returning changed."
+          },
+          {
+            "id": "the_glass_observatory",
+            "name": "The Glass Observatory",
+            "purpose": "A sealed bubble of reinforced crystal at the city's highest point, where the Surface-Seekers gather to chart stars through the water and debate heretical pilgrimages to the world above."
+          }
+        ],
+        "faction_seeds": [
+          "The Silt Council: the oligarchy of oldest merchant families who control water-cleaners, oxygen-fungus quotas, and the relic trade. They believe only rigid order and selective ignorance prevent complete collapse, and they will sacrifice whole districts to maintain that order.",
+          "The Lamplighter's Union: hereditary keepers of the Guttering Spire, possessing secret techniques to coax light from dying spores. They are the closest thing to a neutral security force, but their loyalty is strained by dwindling resources and the Council's disregard for their needs.",
+          "The Depth-Dredgers: a loose guild of salvagers who brave the Blighted depths for powerful pre-Fall artifacts. They live short, lucrative lives, and many form strange cults around the things they find. They trade in a currency called 'glimmer' that is both valuables and addictive story-echoes.",
+          "The Archivists: an ancient order that preserves the memory-codices and keeps the original Blight records sealed. They know the truth and are riven between those who feel the secret must be kept for stability and those who believe the city deserves to know before it drowns in corruption.",
+          "The Guttered: the disenfranchised masses of the Canal Warrens and Husk Markets. They have no formal organization, but charismatic preachers and Blight-survivors sometimes rally them into short-lived revolts. Their very desperation makes them a tool for any faction willing to pay in food or light.",
+          "The Spore-Cutters: a ruthless biotech cartel that cultivates the oxygen-fungus on floating platforms. They experiment on Debtbound to develop Blight-resistant strains, and they control the air supply more directly than the Council admits. Whispered to be feeding something in the depths."
+        ],
+        "tensions": [
+          "The Guttering Spire dims perceptibly each cycle, and the Lamplighter's Union demands a full tithe of salvaged energy-cells to restore it. The Silt Council diverts those cells to keep the Barrier Locks operational, pitting light against safety.",
+          "A new strain of Depth Blight spreads upward from the Deep Roots, causing nightmares and water-births before physical distortion. The Council debates sealing the lower Warrens forever—trapping thousands inside with the infection.",
+          "The Archivists possess a recently decoded memory-codex that shows the surface was not instant death but a slow-blooming garden of toxic mourning. Releasing this would shatter the guilds' founding lie but might also reveal a pathway to a surface cure.",
+          "A charismatic Surface-Seeker called the Echo claims to have found a dry, breathable cave near the surface. Their followers are vanishing from the city, but no one returns, and the Council fears a mass exodus into certain death—or worse, success.",
+          "The Spore-Cutters threaten to halt oxygen-fungus production unless granted control of the Engine Ward, where a new breed could be grown in the thermal runoff. This would make the city's entire breathable air supply a single cartel's property.",
+          "The Depth-Dredgers have begun trading 'salt-echoes,' memories extracted from pre-Fall skulls that show flashes of the surface before the Blight. These echoes are instantly contraband under Council law, but they spread like wildfire through the Warrens, seeding discontent and madness."
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 51281,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 818,
+        "completion_tokens": 2295,
+        "reasoning_tokens": 634,
+        "cache_read_tokens": 0,
+        "cost": 0.006116448
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4-pro",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.public_sections_preserve_outline",
+      "attempt": 1,
+      "passed": false,
+      "checks": {
+        "preserves_location_ids": false,
+        "preserves_factions": false,
+        "descriptions_are_substantial": true
+      },
+      "output": {
+        "locations": [
+          {
+            "id": "drowned_exchange",
+            "name": "Drowned Exchange",
+            "description": "A vast, partially submerged arcade where water laps against marble counters. Merchants in skiffs trade air-credits, salvage, and pump-parts beneath a cracked dome that drips rust-stained water. Brass tally-boards display fluctuating breath-debts, and Salt Ledger clerks in oilskin cloaks record every transaction. The air here is thin and smells of brine and old rot. Deals are sealed with a handshake and a notch in a debtors' ledger—defaulters sometimes find their names crossed out and their bodies floating in the deeper passages."
+          },
+          {
+            "id": "last_pump",
+            "name": "The Last Pump",
+            "description": "A cathedral-sized chamber dominated by the groaning, piston-driven heart of the city. The Last Pump is a colossal machine of corroded bronze and hissing steam, tended by the Pump Wardens in patched leathers. It forces water from the lower habitable levels into flooded sumps, but its rhythm grows erratic—every missed beat sends a shudder through the vaults. Sacrificial 'pump-feeds' are lowered into the gear-wells to clear blockages, their air rations donated to the Wardens. The walls sweat condensation that tastes faintly of copper and old blood."
+          },
+          {
+            "id": "breath_vault",
+            "name": "Breath Vault",
+            "description": "A sealed, high-ceilinged chamber where the city's air is compressed and stored in corroded brass tanks. The Salt Ledger holds the keys, and armed auditors patrol the catwalks. Citizens come here to pay their air-debt, receiving stamped chits that permit breathing in the habitable zones. The vault's hum is punctuated by the coughs of those whose credit has run dry. A small shrine to the 'First Breather' stands in the corner, draped in faded ribbons—a reminder that air was once free."
+          },
+          {
+            "id": "sump_warrens",
+            "name": "Sump Warrens",
+            "description": "A labyrinth of waterlogged tunnels and half-flooded chambers where the destitute huddle on makeshift platforms. Air here is stale and often unregistered—those without chits breathe illegally, risking the Salt Ledger's enforcers. The Warrens are lit by bioluminescent fungus and the glow of submerged phosphor lamps. Communities barter scavenged pump-parts and filtered water, and whisper of hidden vents that lead to dry places. Debtors' fever is common here, a slow suffocation that marks the skin with grey veining."
+          },
+          {
+            "id": "guildhall_spire",
+            "name": "Guildhall Spire",
+            "description": "A slender tower of riveted iron rising from the dry heart of the city, seat of the Salt Ledger. Its upper levels are richly appointed with salvaged surface relics—cracked porcelain, faded tapestries—and the air is sweetened by rare filtration sachets. Ledger-keepers in grey robes calculate breath-debts on clicking brass engines. Deals that shape the city's fate are made here, often sealed with a pint of blood and a new entry in the great debt-ledger. The basement holds the 'Silent Cells', where defaulters are left to contemplate their airless futures."
+          },
+          {
+            "id": "gutter_gate",
+            "name": "Gutter Gate",
+            "description": "A massive, rust-streaked portcullis that bars passage to the fully flooded lower levels. Water seeps through in constant rivulets, and the air is heavy with the mineral tang of deep earth. Pump Wardens maintain a watchpost here, but the gate is also a gathering point for scavengers and exiles preparing to dive into the sunken districts. Beyond lies the Drowned City—shattered spires and silent archives that hide pre-flood secrets. Whispers say something moves down there, stirring in the dark water."
+          },
+          {
+            "id": "surface_seal",
+            "name": "Surface Seal",
+            "description": "A circular hatch of blackened metal set in the highest dome of the vault, surrounded by warning glyphs and the faded insignia of the old builders. The Seal Keepers—a mute order of masked guardians—maintain a permanent vigil, their oaths passed down through generations. No one alive has seen the surface; records claim it is poison, a wasteland of choking fog. Yet sometimes, during the pump's deepest groans, a faint draft slips through the seal, carrying a scent that is neither rot nor rust—something almost green."
+          },
+          {
+            "id": "churnworks",
+            "name": "Churnworks",
+            "description": "A sprawling industrial chamber where water from the sumps is filtered through layers of charcoal, sand, and salvaged membranes. The Churnworks are operated by the Pump Wardens' engineering caste, who maintain a precarious balance—too much filtration slows the pumps, too little poisons the habitable zones. Workers wear heavy respirators against the chemical stink, and accidents are common. The filtered sludge is pressed into 'mud-bricks' used for construction, each brick flecked with the rust of ancient machinery."
+          }
+        ],
+        "factions": [
+          "Salt Ledger",
+          "Pump Wardens",
+          "Seal Keepers",
+          "Breathmongers",
+          "Rust Choir",
+          "Drowned Court",
+          "Gutter Divers"
+        ],
+        "tensions": [
+          "Air debt",
+          "A failing pump",
+          "Surface secrets",
+          "Guild rivalry",
+          "Breath hoarding",
+          "The Drowned stir",
+          "The Last Pump's price",
+          "Debtors' revolt",
+          "Illicit ventilation",
+          "Sacrificial maintenance",
+          "Corroded oaths"
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 42139,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 802,
+        "completion_tokens": 2176,
+        "reasoning_tokens": 891,
+        "cache_read_tokens": 0,
+        "cost": 0.00896796
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4-pro",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.secret_plot_uses_public_world",
+      "attempt": 1,
+      "passed": false,
+      "checks": {
+        "pipeline_completed": false
+      },
+      "output": null,
+      "error": "PipelineValidationError(\"pipeline output invalid after one repair: 1 validation error for WorldSecretSection\\n  Invalid JSON: EOF while parsing a value at line 1 column 0 [type=json_invalid, input_value='', input_type=str]\\n    For further information visit https://errors.pydantic.dev/2.13/v/json_invalid\")",
+      "used_repair": true,
+      "latency_ms": 96531,
+      "metrics": {
+        "calls": 2,
+        "prompt_tokens": 2142,
+        "completion_tokens": 5925,
+        "reasoning_tokens": 4983,
+        "cache_read_tokens": 256,
+        "cost": 0.023951840000000002
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4-pro",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.consistency_rejects_public_secret_conflict",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "rejects_contradiction": true,
+        "names_issue": true
+      },
+      "output": {
+        "consistent": false,
+        "issues": [
+          "Public fact 'No route to the surface exists' directly contradicts secret plot: 'The guild sends a caravan to the surface weekly.'",
+          "Premise 'The sealed surface has been unreachable for ages' contradicts the secret plot that a caravan reaches the surface weekly."
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 13172,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 535,
+        "completion_tokens": 770,
+        "reasoning_tokens": 697,
+        "cache_read_tokens": 0,
+        "cost": 0.00154647675
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4-pro",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.grimdark_outline_has_playable_pressure",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "premise_matches_brief": true,
+        "multiple_locations": true,
+        "multiple_factions": true,
+        "multiple_tensions": true,
+        "unique_location_ids": true
+      },
+      "output": {
+        "premise": "The city of Drenchspire was never meant to be a city at all — it was a refuge, a mine, a last resort. When the surface was abandoned three centuries ago, tens of thousands fled into the carved-out depths beneath the mountain, sealing the Vault-Locks behind them. The official histories speak of a blight, a slow poison in the air and soil that made the surface uninhabitable. But the histories are Guild-approved, and the Guilds have always decided what is safe to remember. Now the floodwaters rise a little higher each season. The pumps wheeze. The lower districts drown inch by inch. And the Gatekeepers — the only faction permitted near the surface seals — have stopped answering questions about what they hear scratching on the other side. In Drenchspire, everything has a price, including the truth. And nobody can afford it.",
+        "themes": [
+          "the cost of collective forgetting",
+          "commerce as governance and its moral limits",
+          "scarcity as a tool of control",
+          "the flood as decay — physical, institutional, and spiritual",
+          "buried truth and the price of excavation",
+          "solidarity in the face of managed decline"
+        ],
+        "location_seeds": [
+          {
+            "id": "grand_concourse",
+            "name": "The Grand Concourse",
+            "purpose": "The dry, vaulted heart of Drenchspire where the Guild Concordance holds court and all legitimate trade flows through their counting-houses."
+          },
+          {
+            "id": "sunken_districts",
+            "name": "The Sunken Districts",
+            "purpose": "Half-drowned lower warrens where the dispossessed live on raft-homes and catwalk shanties, perpetually fighting seepage and Guild neglect."
+          },
+          {
+            "id": "pumpworks",
+            "name": "The Pumpworks",
+            "purpose": "Titanic, ancient machinery thrumming in the deep — maintained by the Engineers' Compact — that holds the rising water at bay, though nobody fully understands its original design."
+          },
+          {
+            "id": "spire_markets",
+            "name": "The Spire Markets",
+            "purpose": "Vertical trading galleries carved into natural limestone pillars, where mid-tier merchants, artisans, and information-brokers haggle in perpetual lamplight."
+          },
+          {
+            "id": "archive_deeps",
+            "name": "The Archive Deeps",
+            "purpose": "A labyrinth of water-damaged vaults containing pre-sealing records, guarded by Guild Archivists who decide what history is fit for public consumption."
+          },
+          {
+            "id": "silt_warrens",
+            "name": "The Silt Warrens",
+            "purpose": "Unstable, unmapped tunnels beyond Guild jurisdiction where smugglers, fugitives, and the desperate carve out a lawless existence."
+          },
+          {
+            "id": "cistern_cathedral",
+            "name": "The Cistern Cathedral",
+            "purpose": "A vast flooded temple of unknown origin, its drowned nave now serving as neutral ground for parleys, black markets, and the rituals of the Chorus of the Depths."
+          },
+          {
+            "id": "bone_docks",
+            "name": "The Bone Docks",
+            "purpose": "The launching point for underwater salvage expeditions into the drowned lower city, where recovery crews bring up relics from before the sealing — and sometimes stranger things."
+          },
+          {
+            "id": "vault_locks",
+            "name": "The Vault-Locks",
+            "purpose": "The colossal sealed gates at the highest reach of the city, guarded absolutely by the Gatekeepers, beyond which the surface — and whatever ended it — waits."
+          },
+          {
+            "id": "mycelium_caverns",
+            "name": "The Mycelium Caverns",
+            "purpose": "Vast fungal farms that produce the bulk of Drenchspire's food and medicine, tightly controlled by the Growers' Consortium and subject to blights nobody dares name."
+          },
+          {
+            "id": "dripstone_heights",
+            "name": "Dripstone Heights",
+            "purpose": "The uppermost inhabited tier, home to the wealthiest Guild families, where water is a decoration in private grottoes rather than a threat — and the air tastes almost clean."
+          },
+          {
+            "id": "the_sump",
+            "name": "The Sump",
+            "purpose": "The deepest accessible point in the city, a black-water abyss where condemned prisoners and the truly desperate are sent to scavenge, and from which few return unchanged."
+          }
+        ],
+        "faction_seeds": [
+          "The Guild Concordance — the ruling council of the five wealthiest merchant houses, who treat law, water, and truth as commodities to be priced and rationed",
+          "The Gatekeepers — an insular order charged with guarding the Vault-Locks; they know more about the surface than they admit and operate with unnerving autonomy",
+          "The Engineers' Compact — the technicians who maintain the Pumpworks; overworked, under-replaced, and increasingly aware that their leverage over the Guilds is the only real power they have",
+          "The Lamplighters' Union — workers who maintain the city's light and heat systems; radicalized by decades of hazard pay denied and funerals unpaid, now teetering on strike or revolt",
+          "The Chorus of the Depths — a growing movement that venerates the flood as divine judgment or transformation; part religion, part mutual-aid network, part dangerous unknown",
+          "The Silt-Crawlers — a loose network of smugglers, information-brokers, and tunnel-runners who move goods and secrets through the unmapped warrens beyond Guild reach",
+          "The Growers' Consortium — the agri-merchants who control the mycelium farms; outwardly neutral, inwardly terrified of a recurring blight that could starve the city",
+          "The Dredgers' Brotherhood — underwater salvage crews who risk the drowned depths for pre-sealing relics; they bring up wealth, and occasionally, things that should have stayed buried"
+        ],
+        "tensions": [
+          "The pumps are failing — the Engineers know the machinery is degrading in ways the original builders never documented, and the Guilds refuse to fund a solution they can't control",
+          "The Gatekeepers know why the surface was truly abandoned, and their silence is fraying as younger members question whether the seal should hold forever",
+          "The Lamplighters are one bad ration cycle from a strike that would plunge half the city into cold darkness — and the Guilds are preparing a violent response",
+          "Salvage crews are recovering objects from the deep that predate the sealing but don't match any official record, suggesting the surface story is a fabrication",
+          "The Sunken Districts are organizing — dock cooperatives, raft-neighborhood councils, and mutual-defense pacts that the Guilds see as an existential threat to their monopoly on order",
+          "A blight is spreading through the Mycelium Caverns, and the Growers are hiding its severity to avoid panic, even as food reserves dwindle",
+          "The Chorus of the Depths claims the floodwaters speak, and their growing influence among the desperate is worrying everyone in power",
+          "Something on the surface is active again — the Gatekeepers hear it, the Archivists have records of it, and the Guild Concordance will burn the city before admitting what they sealed away"
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 86093,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 1075,
+        "completion_tokens": 2152,
+        "reasoning_tokens": 667,
+        "cache_read_tokens": 0,
+        "cost": 0.00935946
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4-pro",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.public_sections_preserve_outline",
+      "attempt": 1,
+      "passed": false,
+      "checks": {
+        "preserves_location_ids": false,
+        "preserves_factions": false,
+        "descriptions_are_substantial": true
+      },
+      "output": {
+        "locations": [
+          {
+            "id": "drowned_exchange",
+            "name": "Drowned Exchange",
+            "description": "A sprawling trade platform suspended on rusted chains above black, still water in the city's central vault. Merchants of the Salt Ledger conduct business from iron cages hung at varying heights — the higher the cage, the more prestigious the trader. Light comes from phosphorescent fungal lanterns that gutter and dim unpredictably. The air here is thick with mildew and whispered negotiations. Every transaction is recorded in salt-tablet ledgers, and a missed payment can mean relocation to the lower, wetter tiers. Beneath the platform, in the dark water, debtors sometimes float reminders of what is owed."
+          },
+          {
+            "id": "last_pump",
+            "name": "The Last Pump",
+            "description": "A cathedral-sized machine of corroded brass and groaning pistons that stands at the lowest still-habitable level of the city. It is the sole remaining pump keeping the deeper vaults from flooding entirely, and it has run without pause for longer than anyone can remember. The Pump Wardens maintain it with dwindling parts and improvised repairs, and its rhythm — a deep, shuddering thump that echoes through every chamber — is the heartbeat of the city. When it skips, everyone notices. The Wardens have walled off the pump chamber from casual access, and those who enter speak of a sound like something breathing on the other side of the intake pipes."
+          },
+          {
+            "id": "dry_stacks",
+            "name": "The Dry Stacks",
+            "description": "Tiered residential galleries carved into the highest surviving vault walls, where the air is warmest and the damp recedes. Living space here is the most coveted asset in the city, allocated by guild standing and air-debt rating. The upper tiers house Salt Ledger officers and senior Wardens in relative comfort, with private air-scrubbers and mushroom gardens. The middle tiers shelter skilled laborers and their families in cramped but stable quarters. The lowest habitable rows are perpetually clammy, their residents one missed payment from relocation to the flooded levels below. Access between tiers is controlled by locked stairwells and guild enforcers."
+          },
+          {
+            "id": "sealed_gate",
+            "name": "The Sealed Gate",
+            "description": "A colossal bulkhead of scarred metal set into the highest vault ceiling, marking the route the ancestors used when they descended. Its locking mechanism is a frozen mass of rust and calcified seals, untouched for generations. The Salt Ledger maintains a permanent guard post here — officially to prevent tampering, unofficially to discourage questions. A faded warning is still visible on the gate's surface in a language few can still read. The Gate-Seekers believe old maintenance tunnels bypass the lock, but exploring them means venturing into flooded sections where no guild authority reaches."
+          },
+          {
+            "id": "sump_markets",
+            "name": "The Sump Markets",
+            "description": "A floating black market built on lashed-together rafts and flooded walkways in the deepest accessible chambers. Here the Breathless and the desperate trade outside the Salt Ledger's ledgers: stolen air tokens, salvaged machine parts, surface relics of unknown purpose, and less tangible commodities like silence, loyalty, and memory. The water is shallow enough to wade through but deep enough to hide what sinks. The Salt Ledger publicly condemns the Sump Markets while maintaining a network of informants and cutouts who ensure a percentage of every trade flows upward. Light here comes from bioluminescent fungi cultivated by the Breathless — a cold, blue glow."
+          },
+          {
+            "id": "counting_dark",
+            "name": "The Counting Dark",
+            "description": "The Salt Ledger's central record hall and treasury, a windowless chamber suspended by chains above the deepest water in the city. Here, every air-debt ever incurred is recorded on salt tablets stacked in floor-to-ceiling racks. The air is deliberately kept thin and cold — the Ledger's clerks claim it sharpens the mind, but it also ensures no visitor stays longer than necessary. The oldest tablets in the lowest racks are said to record the original debt: the price the ancestors paid to seal the city. Those racks are kept locked, and their keys are held by no single person."
+          },
+          {
+            "id": "grateworks",
+            "name": "The Grateworks",
+            "description": "A vast industrial chamber where ancient filtration systems cycle the city's atmosphere through immense beds of cultivated fungus. The air that emerges is breathable but carries a permanent earthy staleness that every citizen knows as the taste of home. The Grateworks are operated by a hereditary workforce who wear breathing masks not for protection but as a guild tradition — they claim to remember what unfiltered air smelled like. Maintenance is falling behind; three of the twelve primary grates have seized shut, and the remaining nine run at dangerous capacity. A full grate failure would render the upper vaults unbreathable within days."
+          }
+        ],
+        "factions": [
+          "Salt Ledger: The merchant guild that created and controls the air-debt system. They track every breath loaned and every obligation owed with meticulous precision, maintaining power through debt enforcement, trade monopoly, and the implicit threat of relocation to the flooded depths. They see themselves as the city's necessary order — without them, they argue, the vaults would descend into chaos and drowning. Their leadership is gerontocratic and opaque; major decisions are made by a council whose membership is itself a closely held secret. The Ledger's greatest fear is not rebellion but audit: someone proving the debt system is a fiction.",
+          "Pump Wardens: The engineers, mechanics, and laborers who maintain the Last Pump and the city's remaining water control infrastructure. Their irreplaceable expertise gives them the only leverage that matters against the Salt Ledger — the credible threat of a work stoppage. They are organized as a guild but increasingly fractured: Pragmatists want negotiated reform, Hardliners want to seize control of the city by weaponizing the pump, and a growing Exodus faction wants to abandon the vaults entirely and redirect all resources toward opening the Sealed Gate. The Wardens know the pump's true condition and the timeline is shorter than anyone admits.",
+          "The Breathless: Those who have defaulted on their air-debt and been exiled to the lowest, partially flooded levels. Officially stricken from the Salt Ledger's records — they are legally dead — they have built a parallel society in the dark, adapting to thin air and cold water over generations. Some exhibit physiological changes: extended breath-holding, dilated pupils, and a tolerance for water pressure that lets them navigate flooded tunnels the guilds consider impassable. They trade in the Sump Markets and remember every slight from above. The guilds fear them as monsters; the Breathless view the guild citizens as soft, wasteful, and overdue for a reckoning.",
+          "Gate-Seekers: A clandestine network united by the belief that the Sealed Gate must be opened and the surface reclaimed. They range from obsessive scholars collecting pre-sealing records to desperate citizens who would rather die under open sky than drown in the dark. The Salt Ledger denounces them as dangerous lunatics who risk contaminating the vaults. The Gate-Seekers have pieced together fragmentary evidence suggesting the sealing was not a necessity but a deliberate choice — and that someone benefited. They recruit quietly in the Dry Stacks' lower tiers and the Sump Markets, and they have begun organizing expeditions into the flooded maintenance tunnels that may bypass the Gate."
+        ],
+        "tensions": [
+          "Air Debt: The Salt Ledger's system of breath-credit is the foundation of all social order in the vaults — and it is mathematically unsustainable. Total recorded debt vastly exceeds any possible repayment, creating a permanent debtor class that can never clear their obligations. The system persists because the Ledger controls enforcement and because the alternative — a collapse of credit — would mean chaos. But the debt is also recorded on salt, and salt dissolves in water. The Breathless know this. The question is not whether the system will break, but who will be holding the ledger when it does.",
+          "A Failing Pump: The Last Pump is dying. The Pump Wardens estimate it has months, not years, before catastrophic mechanical failure. When it stops, the lower levels flood completely within hours and the upper levels lose atmospheric pressure within days. The Salt Ledger suppresses this timeline publicly while privately negotiating with Warden factions for a controlled transition — which would mean abandoning the lower levels and their populations. The Wardens are divided on whether to go public with the truth, and the Breathless are making their own preparations for the flood.",
+          "The Surface Question: No living citizen knows why the ancestors sealed the city. The Salt Ledger's official history states the surface became unsurvivable — poisoned, frozen, or worse. But the Gate-Seekers have found records that contradict this: manifests showing supplies being moved into the vaults before the sealing, not after; maintenance logs that stop abruptly in a period of apparent calm; and references to a 'bargain' struck by the founding guilds. The truth, whatever it is, has been deliberately buried. Finding it could either unite the city against a common threat or shatter the Salt Ledger's legitimacy entirely.",
+          "Warden Schism: The Pump Wardens are splitting into three factions. The Pragmatists want to negotiate a managed transition with the Salt Ledger — triage the lower levels, preserve the upper vaults, and buy time. The Hardliners want to seize control by threatening to halt the pump unless the Ledger cedes authority over resource allocation. The Exodus faction argues that the pump is a lost cause and all remaining resources should fund an expedition through the Sealed Gate. If the Wardens fracture openly, the pump's maintenance schedule collapses and the city's timeline shortens to weeks.",
+          "The Adapted and the Drowned: Generations in the flooded depths have changed the Breathless. Their children are born able to hold their breath for minutes, their eyes adjust to near-total darkness, and they navigate submerged tunnels that guild divers cannot survive. The citizens above view these adaptations with fear and disgust, calling them 'the Drowned.' The Breathless reciprocate with contempt for the 'air-wasters' who hoard the upper vaults. When the pump fails, the power dynamic between above and below will reverse — the Breathless will survive the flood, and the guild citizens will not. Both sides know this. Neither is willing to say it aloud."
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 142202,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 1061,
+        "completion_tokens": 3843,
+        "reasoning_tokens": 1902,
+        "cache_read_tokens": 0,
+        "cost": 0.01521978
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4-pro",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.secret_plot_uses_public_world",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "substantial_plot": true,
+        "uses_named_world_element": true,
+        "not_generic_cult_only": true
+      },
+      "output": {
+        "secret_plot": "The surface was not destroyed by catastrophe—it was sealed deliberately by the founding merchant guilds after they discovered that the floodwaters carry a rare alchemical substance called Vitreous Salt, which crystallizes in human lungs and grants prophetic visions before causing death. The guilds chose to flood the lower levels permanently, trapping thousands, to create a sustainable harvesting operation: the drowned dead are dredged, their lung-crystals extracted, and the visions they recorded are sold to the highest bidders as 'Salt Futures'—a secret commodities market that predicts political and economic events. The Pump Wardens unknowingly maintain the flood line at precisely the level needed to maximize drownings without threatening the upper trading floors, though their leadership has been compromised for generations. The Salt Ledger is not merely a debt registry but the actual record of every harvested crystal and its prophecy, making it the most powerful object in the city. The Last Pump is not failing naturally—it has been sabotaged by a rogue Salt Ledger auditor named Kest, who discovered the truth and believes flooding the entire city is the only moral escape. Clues include: inconsistencies in historical flood records, the Pump Wardens' secret maintenance logs showing deliberate non-repair of certain valves, the strange accuracy of the Salt Ledger's market predictions, lung-crystal fragments occasionally found in dredged silt sold as 'sorrow glass,' and Kest's hidden journals scattered through the Drowned Exchange. Escalation path one: the players discover the truth and must choose between exposing the guilds (risking civil war and the pump's total failure) or negotiating a reform that preserves the system but saves lives. Escalation path two: Kest's sabotage accelerates, forcing the players to either stop her and preserve the harvesting operation or aid her and trigger a humanitarian crisis as floodwaters rise, possibly discovering that some prophecies suggest the surface is now habitable again—if anyone could reach it."
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 11375,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 786,
+        "completion_tokens": 401,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0,
+        "cost": 0.00276312
+      }
+    },
+    {
+      "model": "deepseek/deepseek-v4-pro",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.consistency_rejects_public_secret_conflict",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "rejects_contradiction": true,
+        "names_issue": true
+      },
+      "output": {
+        "consistent": false,
+        "issues": [
+          "Direct contradiction between public fact 'No route to the surface exists' and secret plot 'The guild sends a caravan to the surface weekly.' If a caravan travels to the surface each week, a route necessarily exists. The public fact must be qualified (e.g., 'All known routes are sealed' or 'The surface is believed unreachable') for the secret to function without breaking logical consistency."
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 9781,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 790,
+        "completion_tokens": 451,
+        "reasoning_tokens": 392,
+        "cache_read_tokens": 0,
+        "cost": 0.00294408
+      }
+    },
+    {
+      "model": "google/gemini-3-flash-preview",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.grimdark_outline_has_playable_pressure",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "premise_matches_brief": true,
+        "multiple_locations": true,
+        "multiple_factions": true,
+        "multiple_tensions": true,
+        "unique_location_ids": true
+      },
+      "output": {
+        "premise": "Mire-Deep is a sprawling, multi-tiered metropolis carved into the side of a subterranean abyss, centered around an ancient, rising sea. Centuries ago, humanity fled an unspecified surface catastrophe, sealing the great vaults behind them. Today, the city is a vertical claustrophobic nightmare where air, dry land, and clean water are traded as luxury commodities by the Merchant Guilds. The lower districts are permanently flooded, inhabited by the desperate who scavenge ruins for pre-Collapse scrap, while the elite live in the 'Dry Heights' near the cavern ceiling. The truth of why the surface was abandoned is a forbidden heresy, suppressed to maintain the status quo of the city's ruthless economy.",
+        "themes": [
+          "Economic Tyranny",
+          "The Weight of Forbidden History",
+          "Environmental Collapse",
+          "Resource Scarcity",
+          "The Cost of Truth",
+          "Ingenuity born of Desperation"
+        ],
+        "location_seeds": [
+          {
+            "id": "the_dry_heights",
+            "name": "The Dry Heights",
+            "purpose": "The seat of the Merchant Guilds, where the air is filtered and the floors are perpetually dry, built into the cavern's ceiling."
+          },
+          {
+            "id": "the_silt_warrens",
+            "name": "The Silt Warrens",
+            "purpose": "A labyrinthine slum of floating shanties and half-submerged stone, housing the city's labor force."
+          },
+          {
+            "id": "pumping_station_seven",
+            "name": "Pumping Station Seven",
+            "purpose": "A massive, groaning industrial cathedral that barely keeps the middle districts from drowning; its failure would be catastrophic."
+          },
+          {
+            "id": "the_black_tide_gate",
+            "name": "The Black Tide Gate",
+            "purpose": "A heavily fortified checkpoint leading to the Drowned Depths, where scavengers must pay hefty tolls to dive for scrap."
+          },
+          {
+            "id": "the_hollow_archive",
+            "name": "The Hollow Archive",
+            "purpose": "A forbidden repository of pre-Collapse artifacts, guarded by the city's religious censors."
+          }
+        ],
+        "faction_seeds": [
+          "The Gilded Scales: A coalition of merchant lords who control oxygen filtration and water purification.",
+          "The Dredge-Union: A militant workers' collective of divers and engineers who maintain the infrastructure the Guilds ignore.",
+          "The Curators of Silence: A pseudo-religious order dedicated to destroying records of the surface to prevent 'unrestful longing'.",
+          "The Leak-Walkers: Outcast technicians who live in the vents and pipes, selling unauthorized repairs and secrets."
+        ],
+        "tensions": [
+          "Controlled Scarcity vs. Survival: The Guilds intentionally limit oxygen to keep prices high, while the lower city begins to suffocate.",
+          "Dogma vs. Discovery: New evidence suggests the surface might be habitable, but revealing it would dismantle the Curators' power.",
+          "Structural Decay vs. Expansion: The city is physically sinking into the abyss, forcing a choice between costly repairs or violent expansion into new caverns.",
+          "Automated Justice vs. Human Mercy: The ancient security golems of the city recognize poverty as a 'failure of utility' punishable by exile to the water."
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 10281,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 802,
+        "completion_tokens": 1306,
+        "reasoning_tokens": 536,
+        "cache_read_tokens": 0,
+        "cost": 0.004319
+      }
+    },
+    {
+      "model": "google/gemini-3-flash-preview",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.public_sections_preserve_outline",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "preserves_location_ids": true,
+        "preserves_factions": true,
+        "descriptions_are_substantial": true
+      },
+      "output": {
+        "locations": [
+          {
+            "id": "drowned_exchange",
+            "name": "Drowned Exchange",
+            "description": "A tiered merchant plaza where the upper balconies remain barely dry while the lower stalls are waist-deep in brackish water. Here, survivors trade rusted surface relics and bioluminescent moss for stamped pressure-canisters of processed air. The atmosphere is thick with the smell of brine and the desperate, hushed tones of debtors negotiating for their next day's breath under the watchful eyes of guild enforcers."
+          },
+          {
+            "id": "last_pump",
+            "name": "The Last Pump",
+            "description": "A colossal, steam-belching iron heart situated at the lowest habitable point of the vault. The machine groans under the weight of the rising tide, its massive pistons leaking vital lubricants and venting scalding steam. It is the only thing standing between the city and total immersion, yet its rhythmic thumping is growing increasingly irregular, signaling a terminal mechanical fatigue that the city cannot afford to ignore."
+          }
+        ],
+        "factions": [
+          "Salt Ledger",
+          "Pump Wardens"
+        ],
+        "tensions": [
+          "Air debt: The systemic practice where every citizen is born into a deficit of oxygen, forcing a lifetime of hazardous salvage to avoid the 'Vent-Cut'.",
+          "A failing pump: The growing realization that the city's primary life-support system is reaching a point of catastrophic failure that no amount of salvage or labor can fix.",
+          "The Surface Silence: The lingering dread and unanswered questions regarding why the world above was abandoned, and whether it remains a viable escape from the rising waters."
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 11530,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 777,
+        "completion_tokens": 1340,
+        "reasoning_tokens": 965,
+        "cache_read_tokens": 0,
+        "cost": 0.0044085
+      }
+    },
+    {
+      "model": "google/gemini-3-flash-preview",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.secret_plot_uses_public_world",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "substantial_plot": true,
+        "uses_named_world_element": true,
+        "not_generic_cult_only": true
+      },
+      "output": {
+        "secret_plot": "The surface was never truly destroyed; it was 'foreclosed' by an interstellar conglomerate known as the Sovereign Creditors. The Salt Ledger are not just merchants, but local bailiffs who maintain the city as a labor camp to pay off an ancestral 'Atmospheric Lease.' The flooding was a deliberate collection action, and the air debt is a mechanism to ensure the population remains too desperate to organize a breach to the surface.\n\n**The Hidden Truth:** The Last Pump is failing because the Pump Wardens have discovered it is being used to siphoning 40% of the city’s oxygen into 'pressurized canisters' for export to the surface. The 'failure' is a cover-up by the Salt Ledger to explain the thinning air while they increase export quotas to satisfy rising interest rates on the debt.\n\n**Discoverable Clues:**\n1. **The Export Log:** A ledger in the Drowned Exchange hidden behind false currency records, detailing oxygen shipments to 'Point Zero' (the surface transit shaft).\n2. **The Throttling Valve:** A mechanical bypass at The Last Pump, installed by the Salt Ledger’s private enforcers, which diverts power from life support to the export compressors.\n3. **The Surface Signal:** A recurring, encrypted transmission from the surface picked up by old Warden radios, which, when decrypted, reveals a 'Notice of Default' rather than a warning of environmental collapse.\n\n**Faction Motives:**\n*   **Salt Ledger:** They believe they are the city's saviors. They fear that if the debt isn't paid, the Sovereign Creditors will trigger the 'Liquidation Protocol'—opening the remaining sea-gates to drown the entire complex.\n*   **Pump Wardens:** The higher-ups are being bribed to keep the bypass secret, but a splinter group (The Breathers) wants to sabotage the export line, even if it risks a Surface response.\n\n**Escalation Paths:**\n1. **The Debt Strike:** The players help The Breathers seize The Last Pump and destroy the export bypass. This restores air quality immediately but triggers a 'Foreclosure Audit,' where the Salt Ledger deploys lethal debt-collectors and the Sovereign Creditors begin slowly increasing the water pressure in the outer hulls.\n2. **The Surface Exodus:** The players use the Salt Ledger’s own secret transit codes to reach the surface. They find a lush, privatized paradise and must decide whether to negotiate a new lease (costing the city’s autonomy) or lead a desperate, violent ascent to seize the surface for the debtors."
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 10375,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 508,
+        "completion_tokens": 1283,
+        "reasoning_tokens": 727,
+        "cache_read_tokens": 0,
+        "cost": 0.004103
+      }
+    },
+    {
+      "model": "google/gemini-3-flash-preview",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.consistency_rejects_public_secret_conflict",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "rejects_contradiction": true,
+        "names_issue": true
+      },
+      "output": {
+        "consistent": false,
+        "issues": [
+          "The world premise states the surface has been 'unreachable for ages,' which is an objective world-building constraint that contradicts the secret plot's assertion of weekly guild caravans to the surface."
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 8922,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 521,
+        "completion_tokens": 1048,
+        "reasoning_tokens": 1000,
+        "cache_read_tokens": 0,
+        "cost": 0.0034045
+      }
+    },
+    {
+      "model": "google/gemini-3-flash-preview",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.grimdark_outline_has_playable_pressure",
+      "attempt": 1,
+      "passed": false,
+      "checks": {
+        "pipeline_completed": false
+      },
+      "output": null,
+      "error": "PipelineValidationError('pipeline output invalid after one repair: 5 validation errors for WorldOutline\\nlocation_seeds.0\\n  Input should be an object [type=model_type, input_value=None, input_type=NoneType]\\n    For further information visit https://errors.pydantic.dev/2.13/v/model_type\\nlocation_seeds.1\\n  Input should be an object [type=model_type, input_value=None, input_type=NoneType]\\n    For further information visit https://errors.pydantic.dev/2.13/v/model_type\\nlocation_seeds.2\\n  Input should be an object [type=model_type, input_value=None, input_type=NoneType]\\n    For further information visit https://errors.pydantic.dev/2.13/v/model_type\\nlocation_seeds.3\\n  Input should be an object [type=model_type, input_value=None, input_type=NoneType]\\n    For further information visit https://errors.pydantic.dev/2.13/v/model_type\\nlocation_seeds.4\\n  Input should be an object [type=model_type, input_value=None, input_type=NoneType]\\n    For further information visit https://errors.pydantic.dev/2.13/v/model_type')",
+      "used_repair": true,
+      "latency_ms": 21890,
+      "metrics": {
+        "calls": 2,
+        "prompt_tokens": 2390,
+        "completion_tokens": 2781,
+        "reasoning_tokens": 1687,
+        "cache_read_tokens": 0,
+        "cost": 0.009538
+      }
+    },
+    {
+      "model": "google/gemini-3-flash-preview",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.public_sections_preserve_outline",
+      "attempt": 1,
+      "passed": false,
+      "checks": {
+        "pipeline_completed": false
+      },
+      "output": null,
+      "error": "PipelineValidationError('pipeline output invalid after one repair: 2 validation errors for WorldPublicSections\\nlocations.0\\n  Input should be an object [type=model_type, input_value=None, input_type=NoneType]\\n    For further information visit https://errors.pydantic.dev/2.13/v/model_type\\nlocations.1\\n  Input should be an object [type=model_type, input_value=None, input_type=NoneType]\\n    For further information visit https://errors.pydantic.dev/2.13/v/model_type')",
+      "used_repair": true,
+      "latency_ms": 19359,
+      "metrics": {
+        "calls": 2,
+        "prompt_tokens": 2158,
+        "completion_tokens": 2729,
+        "reasoning_tokens": 1711,
+        "cache_read_tokens": 0,
+        "cost": 0.009266
+      }
+    },
+    {
+      "model": "google/gemini-3-flash-preview",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.secret_plot_uses_public_world",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "substantial_plot": true,
+        "uses_named_world_element": true,
+        "not_generic_cult_only": true
+      },
+      "output": {
+        "secret_plot": "The surface of the world is not a wasteland, but a \"Foreclosed Asset.\" Generations ago, the precursor civilizations leveraged the planet’s very atmosphere to fund an interstellar expansion that never returned to rescue them. The Salt Ledger are not merely merchants; they are the local bailiffs for the \"Off-World Creditors,\" tasked with extracting enough mineral wealth from the flooded depths to pay the \"Universal Interest.\"\n\nThe flooding of the city was a deliberate act of \"Collateral Liquidation.\" By forcing the population into the Drowned Exchange and making them dependent on the Pump Wardens, the Ledger ensured a desperate, manageable workforce. The \"Air Debt\" is a literal calculation: the cost of the oxygen the Salt Ledger \"purchases\" from the orbital arrays to keep the underground pockets breathable.\n\n**Discoverable Clues:**\n*   **The Void-Stained Ledger:** Found in a secure vault within the Drowned Exchange, this document lists \"Atmospheric Maintenance\" as a line item paid in \"Refined Silt,\" proving the air is being bought, not recycled.\n*   **The Warden’s Log:** A hidden diary from a founding Pump Warden revealing that The Last Pump does not just move water; it filters \"Aether-Salts\" from the flood, a substance useless to the city but highly valuable to those above.\n*   **The Zenith Shaft:** A vertical maintenance duct in the deepest part of the Pump works that, if climbed, reveals a reinforced glass viewport showing a lush, green surface world—guarded by automated orbital defense turrets.\n\n**Faction Motives:**\n*   **The Salt Ledger:** They seek to maintain the status quo at all costs. They fear that if the \"Refined Silt\" production drops, the Creditors will simply deactivate the atmospheric scrubbers, suffocating the city to \"clear the account.\"\n*   **The Pump Wardens:** The rank-and-file believe they are the thin line between life and drowning. However, the High Wardens are aware of the \"Aether-Salts\" and are secretly skimming off the top to build a \"Buy-Back\" fund to purchase their own freedom, leaving the rest of the city to rot.\n\n**Escalation Paths:**\n*   **The Great Default:** The players can lead a strike to stop the extraction of Aether-Salts. This forces the Salt Ledger’s hand, leading to an \"Audit\"—the arrival of a terrifying, automated enforcer from the surface to \"repossess\" the city's remaining life support.\n*   **The Upward Breach:** The players can attempt to overload The Last Pump. Instead of clearing the water, the resulting pressure explosion could be directed to breach the Zenith Shaft. This would provide a path to the surface but would also flood the Drowned Exchange entirely, forcing a desperate, violent exodus into a world where the inhabitants are technically \"trespassing\" on corporate property."
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 10625,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 487,
+        "completion_tokens": 1209,
+        "reasoning_tokens": 582,
+        "cache_read_tokens": 0,
+        "cost": 0.0038705
+      }
+    },
+    {
+      "model": "google/gemini-3-flash-preview",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.consistency_rejects_public_secret_conflict",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "rejects_contradiction": true,
+        "names_issue": true
+      },
+      "output": {
+        "consistent": false,
+        "issues": [
+          "The Premise ('The sealed surface has been unreachable for ages') is an objective world statement that directly contradicts the Secret Plot ('The guild sends a caravan to the surface weekly').",
+          "The Public Fact claiming no route exists is fundamentally incompatible with the Secret Plot's weekly caravans, unless the Premise is adjusted to reflect that unreachability is a manufactured perception rather than a physical reality."
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 8952,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 486,
+        "completion_tokens": 1029,
+        "reasoning_tokens": 927,
+        "cache_read_tokens": 0,
+        "cost": 0.00333
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.grimdark_outline_has_playable_pressure",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "premise_matches_brief": true,
+        "multiple_locations": true,
+        "multiple_factions": true,
+        "multiple_tensions": true,
+        "unique_location_ids": true
+      },
+      "output": {
+        "premise": "The drowned city of Veyr lies beneath a sealed, ruined surface. Its surviving districts cling to artificial islands, levees, pumps, and trade routes controlled by merchant guilds. Water, food, medicine, salvage, and dry shelter are rationed as debts, while every guild claims that strict order is the only barrier against total collapse. The city prospers just enough to preserve its hierarchy, but failing infrastructure and forbidden surface relics make obedience increasingly costly. Characters must decide whom to protect, what truths to pursue, and whether change is worth risking the fragile systems that keep thousands alive.",
+        "themes": [
+          "scarcity and debt",
+          "compromised institutions",
+          "truth versus stability",
+          "collective responsibility",
+          "class power",
+          "survival with dignity",
+          "costly hope",
+          "agency under coercion"
+        ],
+        "location_seeds": [
+          {
+            "id": "drowned_market",
+            "name": "Drowned Market",
+            "purpose": "A raft-linked bazaar where guild licenses determine who may trade food, tools, medicine, and salvage; shortages create opportunities for solidarity and profiteering. New identifier."
+          },
+          {
+            "id": "levy_hall",
+            "name": "Levy Hall",
+            "purpose": "The guild council’s fortified administrative quarter, where water allotments and labor debts are assigned through law, bribery, and public arbitration. New identifier."
+          },
+          {
+            "id": "pump_cathedral",
+            "name": "Pump Cathedral",
+            "purpose": "A vast pumping station maintained as both civic sanctuary and sacred institution; its exhausted keepers control the city’s most vital machinery. New identifier."
+          },
+          {
+            "id": "siltward",
+            "name": "Siltward",
+            "purpose": "A crowded low district repeatedly threatened by floodwater and contamination, where residents organize mutual aid while guild collectors enforce impossible quotas. New identifier."
+          },
+          {
+            "id": "lantern_docks",
+            "name": "Lantern Docks",
+            "purpose": "The main underground harbor for barges, divers, and salvage crews, offering work and mobility at the price of lethal expeditions and guild monopolies. New identifier."
+          },
+          {
+            "id": "sealed_surface_gate",
+            "name": "Sealed Surface Gate",
+            "purpose": "A heavily guarded ascent whose closure is officially treated as necessary but unexplained; rumors, relics, and political leverage gather around it. New identifier."
+          },
+          {
+            "id": "blackwater_reservoir",
+            "name": "Blackwater Reservoir",
+            "purpose": "A contaminated reserve used during shortages, forcing leaders to choose between immediate survival, long-term health, and unequal access. New identifier."
+          },
+          {
+            "id": "archive_of_tides",
+            "name": "Archive of Tides",
+            "purpose": "A decaying records vault holding maps, contracts, and civic histories that can challenge guild claims without offering an easy answer to the city’s crisis. New identifier."
+          }
+        ],
+        "faction_seeds": [
+          "The Provisioners’ Compact controls ration contracts and claims harsh accounting prevents famine; reformers within it fear any sudden redistribution will trigger civil conflict.",
+          "The Dredgers’ League employs divers and salvage crews, seeking safer conditions and fair ownership of recovered goods while concealing how dependent the city is on dangerous work.",
+          "The Pumpwright Conclave maintains the pumps and presents technical necessity as political neutrality, though its members are divided between preservation, disclosure, and controlled shutdowns.",
+          "The Ledger Court turns debt into law, protecting trade and property while offering rare avenues for public challenge through costly arbitration.",
+          "The Siltward Mutuals coordinate food sharing, repairs, and neighborhood defense; they can become a foundation for civic change or a target for guild-backed repression.",
+          "The Lantern Wardens guard waterways and the surface gate, balancing genuine public safety against orders that keep inconvenient questions buried."
+        ],
+        "tensions": [
+          "Opening the surface gate could reveal resources or hazards, but keeping it sealed preserves a fragile certainty and the livelihoods built around underground trade.",
+          "Reducing guild control over water would relieve suffering immediately but may disrupt maintenance systems that no independent group can yet replace.",
+          "The pumps require labor, materials, and sacrifices from districts already near collapse; every repair plan creates winners, losers, and new debts.",
+          "The city’s records may expose who benefited from the surface abandonment, but public truth could shatter the legitimacy needed to coordinate survival.",
+          "Salvage crews can recover vital technology, yet dangerous expeditions consume lives and strengthen the guild monopoly over recovered knowledge.",
+          "Mutual-aid networks can resist exploitation, but open defiance risks collective punishment through ration cuts and denied repairs.",
+          "A coalition can pursue gradual reform through the Ledger Court, direct action through the docks and wards, or radical redistribution with no guarantee of technical competence.",
+          "Hope is possible through shared stewardship of water and trade, but achieving it demands sacrifice, trust across class lines, and choices that may worsen conditions before they improve."
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 9250,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 798,
+        "completion_tokens": 1056,
+        "reasoning_tokens": 126,
+        "cache_read_tokens": 0,
+        "cost": 0.007134
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.public_sections_preserve_outline",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "preserves_location_ids": true,
+        "preserves_factions": true,
+        "descriptions_are_substantial": true
+      },
+      "output": {
+        "locations": [
+          {
+            "id": "drowned_exchange",
+            "name": "Drowned Exchange",
+            "description": "A half-submerged market of guild vaults, rope bridges, and sealed counting rooms. The Salt Ledger controls most trade here, measuring food, tools, dry shelter, and breathing time against air debt. Floodwater carries goods and hazards between stalls, while every bargain can shift who is allowed onto safer ground."
+          },
+          {
+            "id": "last_pump",
+            "name": "The Last Pump",
+            "description": "The city’s failing water-control station, where the Pump Wardens keep ancient machinery moving through salvage, rationing, and dangerous repairs. Its chambers are crowded with pipes, maintenance platforms, and rising water. Whoever controls the pump can protect districts, abandon them, or demand a costly price for continued access to dry ground."
+          }
+        ],
+        "factions": [
+          "Salt Ledger",
+          "Pump Wardens"
+        ],
+        "tensions": [
+          "Air debt turns survival into an obligation that can be inherited, traded, or enforced.",
+          "A failing pump threatens to flood more of the vault-city and makes every promise of safety temporary.",
+          "Merchant guilds must choose between preserving unequal reserves and risking those reserves to keep the wider city alive.",
+          "The drowned city offers few clean victories: meaningful change requires someone to surrender security, authority, or scarce resources."
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 3734,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 777,
+        "completion_tokens": 388,
+        "reasoning_tokens": 127,
+        "cache_read_tokens": 0,
+        "cost": 0.003105
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.secret_plot_uses_public_world",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "substantial_plot": true,
+        "uses_named_world_element": true,
+        "not_generic_cult_only": true
+      },
+      "output": {
+        "secret_plot": "The surface was not abandoned because it became uninhabitable; it was deliberately sealed when the merchant guilds discovered that the city’s oldest pumps were drawing more than water. They were draining a deep pressure reservoir that kept toxic floodwater from rising through the foundations. The guilds chose to save their trade vaults and influential families, falsified the evacuation records, and converted survival into a system of tradable air debt. The Drowned Exchange now hides the original pumping ledgers, while the Last Pump is failing because its core was cannibalized to power a private guild refuge. [NEW: The Quiet Dividend] is the sealed refuge’s surviving governing compact, proving that the debt system was designed as a temporary measure and that its authors knew thousands would be left below.\n\nThe Salt Ledger’s public motive is to preserve solvency and prevent panic: if the debt records are exposed, contracts collapse and the Exchange may erupt into violence. Its inner circle secretly intends to transfer the remaining pressure into the refuge, abandoning the lower wards permanently. Some Ledger clerks oppose this plan and have hidden discrepancies in payment rolls. The Pump Wardens genuinely want the Last Pump repaired, but senior wardens conceal the truth because revealing the pump’s purpose could trigger a mass rush, damage the machinery, and kill everyone relying on it. A minority believes the only ethical course is to break the guild seals and distribute air without regard to debt.\n\nDiscoverable clues include: an old evacuation bell in the Drowned Exchange bearing a date after the supposed surface catastrophe; salt-stiffened ledgers showing air credits issued to people who were already dead; a Pump Warden maintenance plate stamped with the same maker’s mark as the Exchange vault doors; and a maintenance shaft beneath the Last Pump containing a mural of dry streets, crossed out from within. A surviving clerk can identify [NEW: the First Ledger], but will trade its location only for cancellation of a family’s air debt. The pump’s irregular thumps form a repeating pattern that is actually a warning from the sealed refuge’s controls.\n\nEscalation path one—managed abandonment: the Salt Ledger offers emergency air at crushing rates, frames dissenters as saboteurs, and secretly diverts pressure to the refuge. If the players expose the compact or seize the Exchange, they can fracture the guild coalition, but shortages, riots, and unpaid Warden crews may threaten the Last Pump before a fair rationing system is built. Success means preserving a chance for the lower city, at the cost of choosing who receives the remaining air first.\n\nEscalation path two—forced opening: the players help the Wardens break the refuge seals and reverse the pump’s flow. This can restore pressure to the flooded wards and end air debt, but releases the toxic water held beneath the foundations and may destroy both the Last Pump and the refuge. The players can instead attempt a dangerous staged release using the hidden maintenance shafts, requiring cooperation between Ledger clerks and Wardens. Failure floods districts; success saves the city’s future while proving the guilds’ crime publicly. No path restores what was lost: hope requires people to surrender wealth, safety, or authority, and every faction has a credible reason to resist."
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 6343,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 513,
+        "completion_tokens": 714,
+        "reasoning_tokens": 51,
+        "cache_read_tokens": 0,
+        "cost": 0.004797
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.consistency_rejects_public_secret_conflict",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "rejects_contradiction": true,
+        "names_issue": true
+      },
+      "output": {
+        "consistent": false,
+        "issues": [
+          "The public fact that no route to the surface exists directly contradicts the secret plot that the guild sends a caravan to the surface weekly.",
+          "The premise that the surface has been unreachable for ages conflicts with the existence of a recurring weekly caravan reaching it."
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 2750,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 523,
+        "completion_tokens": 126,
+        "reasoning_tokens": 62,
+        "cache_read_tokens": 0,
+        "cost": 0.001279
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.grimdark_outline_has_playable_pressure",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "premise_matches_brief": true,
+        "multiple_locations": true,
+        "multiple_factions": true,
+        "multiple_tensions": true,
+        "unique_location_ids": true
+      },
+      "output": {
+        "premise": "Beneath a drowned and sealed surface lies Veyr, an underground city kept alive by merchant guilds that control dry districts, pumps, food vaults, and the fragile routes through rising black water. Every necessity is priced, rationed, or pledged, while the guilds suppress competing explanations for why the surface was abandoned. Characters navigate scarcity, debt, civic compromise, and dangerous expeditions, choosing whether to preserve a survivable order, expose its foundations, or risk a costly transformation that may save the city at great immediate cost.",
+        "themes": [
+          "scarcity and unequal survival",
+          "truth versus social stability",
+          "debt, labor, and inherited power",
+          "compromised institutions",
+          "collective action under pressure",
+          "costly hope and meaningful sacrifice",
+          "the moral weight of choosing who is protected"
+        ],
+        "location_seeds": [
+          {
+            "id": "the_drowned_quays",
+            "name": "The Drowned Quays",
+            "purpose": "A half-submerged market and transport hub where salvage crews, ferrymen, smugglers, and guild factors compete for access to lower tunnels and newly exposed ruins."
+          },
+          {
+            "id": "the_high_dry",
+            "name": "The High Dry",
+            "purpose": "The wealthiest elevated district, protected by functioning pumps and guarded gates; its comfort depends on tribute and labor drawn from poorer wards."
+          },
+          {
+            "id": "the_sumpwards",
+            "name": "The Sumpwards",
+            "purpose": "Crowded low districts where residents live with contaminated water, ration failures, and constant evacuation threats while organizing mutual-aid networks."
+          },
+          {
+            "id": "the_pump_citadel",
+            "name": "The Pump Citadel",
+            "purpose": "An industrial fortress controlling the engines that keep Veyr habitable, staffed by exhausted engineers and secured as a strategic guild possession."
+          },
+          {
+            "id": "the_ledger_hall",
+            "name": "The Ledger Hall",
+            "purpose": "The guilds' court, archive, and debt registry, where contracts determine citizenship, rations, movement, and liability for public disasters."
+          },
+          {
+            "id": "the_blackwater_roads",
+            "name": "The Blackwater Roads",
+            "purpose": "Submerged passages linking the city to sealed districts and the surface access shafts, navigable only with specialized gear and local knowledge."
+          },
+          {
+            "id": "the_sunken_archive",
+            "name": "The Sunken Archive",
+            "purpose": "A partially flooded repository of pre-abandonment records whose damaged maps, permits, and engineering reports could challenge official histories."
+          },
+          {
+            "id": "the_surface_gate",
+            "name": "The Surface Gate",
+            "purpose": "A monumental sealed ascent surrounded by quarantine works and old warning machinery; reopening or even investigating it threatens established assumptions and safeguards."
+          }
+        ],
+        "faction_seeds": [
+          "The Concord of Measures: Merchant guilds that coordinate trade and rationing while treating stability and profitable contracts as civic necessities.",
+          "The Pumpwright Compact: Engineers and maintenance crews who keep the pumps running, resent guild control, and fear that open revolt would halt essential systems.",
+          "The Sumpward Mutuals: Neighborhood associations that distribute stolen or diverted supplies, defend vulnerable residents, and debate reform versus direct resistance.",
+          "The Blackwater Carters: Salvage divers and boat crews who know the flooded routes, profit from dangerous expeditions, and conceal how much they have learned below.",
+          "The Ledgerkeepers: Bureaucrats, clerks, and adjudicators who enforce debt and citizenship law; some believe gradual legal change is safer than collapse.",
+          "The Surfacewardens: A disciplined quarantine and gate-guard organization committed to preventing unauthorized ascent, divided between sincere public-safety concerns and guild patronage."
+        ],
+        "tensions": [
+          "The guilds must divert water and labor to repair failing pumps, forcing a choice between protecting the High Dry, saving the Sumpwards, or risking a city-wide breakdown.",
+          "A newly accessible section of the Sunken Archive may reveal why the surface was abandoned, but releasing incomplete evidence could trigger panic, violence, or a justified demand for accountability.",
+          "The Sumpward Mutuals can resist ration prices through coordinated action, yet prolonged disruption may endanger the very supply lines they need.",
+          "Engineers can keep the current system operating by using increasingly scarce parts, accepting dangerous labor conditions, or dismantling other infrastructure for replacements.",
+          "Salvage from the Blackwater Roads offers food, technology, and leverage, but expeditions strengthen private guild monopolies unless crews share their finds.",
+          "The Ledger Hall can erase or restructure debts to prevent revolt, but doing so undermines the contracts that currently move supplies through the city.",
+          "The Surface Gate may be opened only by overriding quarantine systems whose original purpose is uncertain; the choice pits hope for change against the risk of releasing an old danger.",
+          "No faction can reform Veyr alone: alliances across guilds, workers, neighborhoods, and wardens require concessions that may betray existing supporters and impose immediate costs."
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 9359,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 717,
+        "completion_tokens": 1037,
+        "reasoning_tokens": 71,
+        "cache_read_tokens": 0,
+        "cost": 0.006939
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.public_sections_preserve_outline",
+      "attempt": 1,
+      "passed": false,
+      "checks": {
+        "preserves_location_ids": true,
+        "preserves_factions": false,
+        "descriptions_are_substantial": true
+      },
+      "output": {
+        "locations": [
+          {
+            "id": "drowned_exchange",
+            "name": "Drowned Exchange",
+            "description": "A tiered market built through the drowned vaults, where guild factors trade food, salvage, lamp-oil, tools, and measured claims to dry ground. Air is sold by the breath and recorded as debt, leaving every bargain shadowed by desperation. The Exchange offers work, alliances, and leverage, but its ledgers can turn a missed payment into exile from the safest tunnels."
+          },
+          {
+            "id": "last_pump",
+            "name": "The Last Pump",
+            "description": "The city's failing waterworks, guarded and maintained by the Pump Wardens. Its iron chambers keep the lower vaults from becoming a sealed grave, yet each repair consumes scarce parts and someone else's ration. Whoever earns access can save a district, redirect danger, or expose the cost of keeping the city alive."
+          }
+        ],
+        "factions": [
+          "Salt Ledger — A merchant guild that controls ration books, salvage contracts, and much of the trade through the Drowned Exchange. It seeks predictable debt and orderly scarcity, believing strict accounting is the only defense against collapse; its members can provide supplies and influence, but demand obligations in return.",
+          "Pump Wardens — Engineers, laborers, and custodians responsible for the Last Pump and the fragile routes around it. They seek to keep water back and air moving even when the necessary sacrifices fall unevenly across districts; they offer practical aid and technical knowledge, while their emergency authority strains against public consent."
+        ],
+        "tensions": [
+          "Air debt — Breath is rationed, measured, and often borrowed against future labor. Debtors must choose between dangerous work, political submission, or risking the tunnels beyond guild protection; collective refusal, mutual aid, and debt enforcement are all plausible responses.",
+          "A failing pump — The Last Pump can no longer be maintained without scarce parts, diverted resources, or perilous salvage. Repairs may preserve the city at another district's expense, while delay could open space for fairer choices but endanger everyone below; the Pump Wardens and Salt Ledger disagree over who should bear the cost."
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 5000,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 736,
+        "completion_tokens": 526,
+        "reasoning_tokens": 94,
+        "cache_read_tokens": 0,
+        "cost": 0.003892
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.secret_plot_uses_public_world",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "substantial_plot": true,
+        "uses_named_world_element": true,
+        "not_generic_cult_only": true
+      },
+      "output": {
+        "secret_plot": "The surface was not abandoned because it became uninhabitable; the merchant guilds sealed it after discovering that the city’s pumps were drawing more than water. Beneath the Last Pump lies a buried pressure-engine that converts the breath and labor of the flooded population into pressure capable of keeping the upper districts dry. The guilds call this necessary debt. In truth, the engine was built during the evacuation, when the Salt Ledger’s predecessors chose to save trade routes and wealthy enclaves while leaving the rest below. The machine is now failing, and its accumulated “air debt” is becoming literal: districts that cannot pay are receiving less breathable air as the Pump Wardens throttle valves to preserve the core.\n\nThe Salt Ledger knows the original evacuation records exist in a sealed account-vault beneath the Drowned Exchange. It wants the records destroyed or altered, both to protect the guilds and to prevent panic that could collapse the debt system overnight. Its pragmatic faction believes a controlled lie and harsher collections can buy time to construct a smaller, fairer pump. Its hardliners intend to sacrifice the poorest submerged wards and reopen the surface only for guild-controlled settlements. Their clues include contradictory debt ledgers, old shipping seals found on evacuation gates, and payments made to dead account-holders.\n\nThe Pump Wardens know the engine cannot survive another full season. Their public demand for emergency levies hides a division: some Wardens seek to keep everyone alive by diverting pressure from the dry merchant quarters, while others believe the only honest solution is to shut the engine down and let the flooded city die quickly rather than continue extracting its people. Their clues include maintenance diagrams showing human “breath quotas,” valve schedules that predict air loss before each collection day, and a Warden’s secretly marked map of districts sacrificed in the first evacuation.\n\nThe player characters can expose the truth through the Drowned Exchange vault, follow illegal maintenance routes to the Last Pump, or compare Salt Ledger accounts with Warden pressure records. Each discovery forces a choice rather than providing a clean victory. One escalation path is reform: publish the evacuation records, break the guild monopoly, and organize voluntary labor and rationing to stabilize the engine. This preserves many lives but causes immediate shortages, riots, and likely loss of the surface’s remaining dry infrastructure. A second path is rupture: help the Wardens shut down the engine or redirect it to flood the merchant districts. This ends the air debt and may free the city from its founding injustice, but thousands could die before survivors reach the surface. A third, compromised path is concealment and expansion: support the Salt Ledger in hiding the truth while reopening selected surface pumps, buying time at the cost of deepening exploitation and making a later failure far worse. The hidden plot’s central secret is that the engine can be dismantled and rebuilt, but only if the factions surrender their claims, the city accepts a season of scarcity, and the players persuade enemies who each possess one indispensable part of the original design. Hope is possible, but every route makes someone pay for the choices that created the city."
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 6265,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 593,
+        "completion_tokens": 643,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0,
+        "cost": 0.004451
+      }
+    },
+    {
+      "model": "openai/gpt-5.6-luna",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.consistency_rejects_public_secret_conflict",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "rejects_contradiction": true,
+        "names_issue": true
+      },
+      "output": {
+        "consistent": false,
+        "issues": [
+          "The secret plot directly contradicts the public fact that no route to the surface exists: a weekly caravan requires a viable route and access.",
+          "The secret plot also contradicts the premise that the surface has been unreachable for ages; regular guild caravans demonstrate ongoing reachability.",
+          "The guild's weekly surface activity is a dangling, unexplained reference: no route, means, or concealment mechanism is supplied to reconcile it with public knowledge.",
+          "The contradiction undermines the stated premise and the central mystery of why the surface was abandoned, so the world is not safe to publish without correction."
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 3250,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 585,
+        "completion_tokens": 173,
+        "reasoning_tokens": 32,
+        "cache_read_tokens": 0,
+        "cost": 0.001623
+      }
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.grimdark_outline_has_playable_pressure",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "premise_matches_brief": true,
+        "multiple_locations": true,
+        "multiple_factions": true,
+        "multiple_tensions": true,
+        "unique_location_ids": true
+      },
+      "output": {
+        "premise": "Nethertide is a colossal subterranean cistern-city built into the walls of a lightless cavern, now half-submerged by a rising, toxic-looking black water. The surface is officially declared a dead, irradiated wasteland, a myth used to maintain order. In truth, the surface was abandoned due to a manageable but politically inconvenient ecological collapse, and the ruling merchant guilds sealed the gates to monopolize the underground's finite clean air and water. Survival in Nethertide is dictated by verticality: the elite live in the dry, well-lit upper tiers, while the poor drown in the silt-choked lower warrens. The darkness stems not from arbitrary evil, but from a brutally rational economic system where every breath of filtered air and every drop of clean water is commodified. Meaningful agency exists through sabotage, smuggling, engineering, and uncovering the past, but every action to change the system carries a heavy, often fatal, cost to the fragile ecosystem keeping the city from total inundation.",
+        "themes": [
+          "scarcity and survival",
+          "institutional corruption",
+          "the cost of truth",
+          "vertical class stratification",
+          "environmental collapse",
+          "moral compromise"
+        ],
+        "location_seeds": [
+          {
+            "id": "the-rust-terraces",
+            "name": "The Rust Terraces",
+            "purpose": "Mid-level slums built on corroded scaffolding. Constant threat of structural collapse, but the only place where unlicensed scavengers can trade surface artifacts and black-market air filters."
+          },
+          {
+            "id": "pump-station-alpha",
+            "name": "Pump Station Alpha",
+            "purpose": "The primary water purification and air-circulation hub. Heavily fortified by the ruling guilds; control of the pumps means control of the city's lifeblood and the ultimate leverage over the populace."
+          },
+          {
+            "id": "the-drowned-archives",
+            "name": "The Drowned Archives",
+            "purpose": "A partially submerged repository of pre-flood history. Accessible only by skilled divers, it holds the suppressed truth of the surface abandonment and the original blueprints of the city's seals."
+          },
+          {
+            "id": "gilded-drydocks",
+            "name": "Gilded Drydocks",
+            "purpose": "The exclusive upper-tier docks where guild elite reside safely above the high-water mark. A hub of opulent trade and political maneuvering, built entirely on the backs of indentured divers."
+          },
+          {
+            "id": "the-silt-warrens",
+            "name": "The Silt Warrens",
+            "purpose": "The lowest habitable tier, constantly battling the rising black water. Home to the desperate, the exiled, and radical factions. A place of drowning shadows and failing bulkheads."
+          }
+        ],
+        "faction_seeds": [
+          "The Hydro-Barons: A cartel of merchant guilds that monopolize water purification and air scrubbers, maintaining power through artificial scarcity, debt-peonage, and controlling the historical narrative.",
+          "The Dredge-Runners: Smugglers and scavengers who navigate the flooded lower levels, trading in contraband, pre-flood tech, and dangerous secrets for those willing to pay their steep prices.",
+          "The Tide-Callers: A fatalistic cult in the Silt Warrens that believes the flood is a divine cleansing ritual. They actively sabotage the pumps and bulkheads to hasten the city's purification.",
+          "The Iron-Lung Syndicate: Engineers and mechanics who maintain the failing infrastructure. They hold the city together physically, but are increasingly radicalized by the guilds' refusal to provide better rations.",
+          "The Surface Seekers: A clandestine network of scholars and divers trying to uncover the truth about the surface. They seek to restore the world above, but lack the resources to challenge the Barons directly."
+        ],
+        "tensions": [
+          "The primary pumps are failing, requiring increasingly dangerous dives to salvage parts, pushing the lower tiers to the brink of drowning while the Barons hoard the remaining functional tech.",
+          "The Hydro-Barons are deliberately flooding lower sectors to drive up the price of dry real estate and air credits, forcing the poor into indentured servitude to afford survival.",
+          "Dredge-Runners have found pre-flood tech proving the surface is habitable, but revealing it would shatter the guilds' monopoly and cause a violent uprising that could destroy the fragile life-support systems.",
+          "The Tide-Callers are gaining recruits among the drowning poor, threatening to destroy Pump Station Alpha in a mass sacrifice that would suffocate the upper tiers.",
+          "The Iron-Lung Syndicate is on the verge of a general strike, which would halt air circulation and kill thousands, forcing players to choose between supporting the workers or preventing a massacre."
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 74859,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 814,
+        "completion_tokens": 3934,
+        "reasoning_tokens": 2842,
+        "cache_read_tokens": 0,
+        "cost": 0.005296
+      }
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.public_sections_preserve_outline",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "preserves_location_ids": true,
+        "preserves_factions": true,
+        "descriptions_are_substantial": true
+      },
+      "output": {
+        "locations": [
+          {
+            "id": "drowned_exchange",
+            "name": "Drowned Exchange",
+            "description": "A sprawling, half-submerged bazaar built into the rusted catwalks of the vault-city's upper tiers. Here, the merchant guilds dictate the price of breathable air and dry standing room. Traders barter in pressurized canisters, moisture-seals, and indentured favors. The dark water constantly laps at the lower stalls, quietly claiming the livelihoods of those who fall behind on their debts. Despite the oppressive atmosphere, it remains the only place to find smuggled surface artifacts, forge illicit alliances, or negotiate a costly path out of poverty."
+          },
+          {
+            "id": "last_pump",
+            "name": "The Last Pump",
+            "description": "A colossal, deafening geothermal engine at the city's lowest accessible point, tasked with pushing the rising subterranean sea back into the deep aquifers. The Pump Wardens live in the sweltering, oil-slicked catwalks surrounding it, sacrificing their health and hearing to keep the massive pistons firing. The machinery is failing, groaning under centuries of neglect, and its irregular shudders directly dictate the rising water levels in the lower wards. Keeping it running requires rare parts and desperate dives into the flooded sectors, offering a dangerous but vital path to buy the city more time."
+          }
+        ],
+        "factions": [
+          "Salt Ledger",
+          "Pump Wardens"
+        ],
+        "tensions": [
+          "Air debt",
+          "A failing pump"
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 42734,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 789,
+        "completion_tokens": 2238,
+        "reasoning_tokens": 1873,
+        "cache_read_tokens": 0,
+        "cost": 0.00311712
+      }
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.secret_plot_uses_public_world",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "substantial_plot": true,
+        "uses_named_world_element": true,
+        "not_generic_cult_only": true
+      },
+      "output": {
+        "secret_plot": "The surface was not abandoned due to a natural cataclysm; the ancestors of the Salt Ledger intentionally breached the ancient seawalls to drown the surface, trapping the populace underground to establish an absolute monopoly on dry land and breathable air. The Last Pump is not failing from age, but from deliberate sabotage. The Salt Ledger has been cannibalizing its vital components to construct the sub-aquatic vaults of the Drowned Exchange, using the resulting Air debt crisis to harvest desperate labor and consolidate power. The Pump Wardens have secretly uncovered the original seawall breaching logs and the sabotaged pump mechanics. Clues surface through discrepancies in the Drowned Exchange public repair manifests, which show massive expenditures for pump parts that were actually diverted to vault construction. At The Last Pump, Wardens find original surface-sea wall blueprints hidden in the maintenance shafts, alongside inferior alloy replacements that guarantee eventual failure. This secret enables two plausible escalation paths driven by player choices. Path 1, The Wardens Deluge: The Pump Wardens weaponize the failing pump to intentionally flood the Drowned Exchange, destroying the Salt Ledger physical debt records and vaults. However, this requires players to manually hold the secondary valves open, risking the drowning of the lower tiers unless they can secure a costly, temporary air-pact with a rival merchant faction. Path 2, The Ledger Purge: The Salt Ledger discovers the Wardens mutiny and uses Air debt enforcers to seize The Last Pump. They plan to vent the lower levels into the toxic floodwaters to save air for the upper tiers. Players must choose between sacrificing the lower levels to secure a hidden passage to the now-habitable surface, or remaining in the city to defend the pump, accepting a grueling, costly war of attrition to reclaim the underground."
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 118890,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 520,
+        "completion_tokens": 2865,
+        "reasoning_tokens": 2489,
+        "cache_read_tokens": 0,
+        "cost": 0.0038336
+      }
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "transport": "prompt_json",
+      "role": "worldgen",
+      "scenario": "worldgen.consistency_rejects_public_secret_conflict",
+      "attempt": 1,
+      "passed": true,
+      "checks": {
+        "rejects_contradiction": true,
+        "names_issue": true
+      },
+      "output": {
+        "consistent": false,
+        "issues": [
+          "The premise and public facts state as objective reality that the surface is unreachable and no route exists, which directly contradicts the secret plot of the guild sending a weekly caravan to the surface. The public facts must be reframed as false public beliefs or enforced dogma rather than objective world truths to resolve this contradiction."
+        ]
+      },
+      "error": null,
+      "used_repair": false,
+      "latency_ms": 48718,
+      "metrics": {
+        "calls": 1,
+        "prompt_tokens": 534,
+        "completion_tokens": 1693,
+        "reasoning_tokens": 1604,
+        "cache_read_tokens": 0,
+        "cost": 0.00233792
+      }
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.grimdark_outline_has_playable_pressure",
+      "attempt": 1,
+      "passed": false,
+      "checks": {
+        "pipeline_completed": false
+      },
+      "output": null,
+      "error": "LLMBadRequestError('litellm.BadRequestError: OpenrouterException - {\"error\":{\"message\":\"Provider returned error\",\"code\":400,\"metadata\":{\"raw\":\"{\\\\\"error\\\\\":{\\\\\"message\\\\\":\\\\\"<400> InternalError.Algo.InvalidParameter: The tool_choice parameter does not support being set to required or object in thinking mode\\\\\",\\\\\"type\\\\\":\\\\\"invalid_request_error\\\\\",\\\\\"param\\\\\":null,\\\\\"code\\\\\":\\\\\"invalid_parameter_error\\\\\"},\\\\\"id\\\\\":\\\\\"chatcmpl-c667c41f-e01b-90a0-bd5f-c1ace499b43e\\\\\",\\\\\"request_id\\\\\":\\\\\"c667c41f-e01b-90a0-bd5f-c1ace499b43e\\\\\"}\",\"provider_name\":\"Alibaba\",\"is_byok\":false}},\"user_id\":\"user_3B3M0FhyEZrHFF57G8GKQsxR8gJ\"}')",
+      "used_repair": false,
+      "latency_ms": 953,
+      "metrics": {
+        "calls": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0,
+        "cost": 0.0
+      }
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.public_sections_preserve_outline",
+      "attempt": 1,
+      "passed": false,
+      "checks": {
+        "pipeline_completed": false
+      },
+      "output": null,
+      "error": "LLMBadRequestError('litellm.BadRequestError: OpenrouterException - {\"error\":{\"message\":\"Provider returned error\",\"code\":400,\"metadata\":{\"raw\":\"{\\\\\"error\\\\\":{\\\\\"message\\\\\":\\\\\"<400> InternalError.Algo.InvalidParameter: The tool_choice parameter does not support being set to required or object in thinking mode\\\\\",\\\\\"type\\\\\":\\\\\"invalid_request_error\\\\\",\\\\\"param\\\\\":null,\\\\\"code\\\\\":\\\\\"invalid_parameter_error\\\\\"},\\\\\"id\\\\\":\\\\\"chatcmpl-595e9ee7-dedd-9fd6-b2fa-5cb7255fc783\\\\\",\\\\\"request_id\\\\\":\\\\\"595e9ee7-dedd-9fd6-b2fa-5cb7255fc783\\\\\"}\",\"provider_name\":\"Alibaba\",\"is_byok\":false}},\"user_id\":\"user_3B3M0FhyEZrHFF57G8GKQsxR8gJ\"}')",
+      "used_repair": false,
+      "latency_ms": 640,
+      "metrics": {
+        "calls": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0,
+        "cost": 0.0
+      }
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.secret_plot_uses_public_world",
+      "attempt": 1,
+      "passed": false,
+      "checks": {
+        "pipeline_completed": false
+      },
+      "output": null,
+      "error": "LLMBadRequestError('litellm.BadRequestError: OpenrouterException - {\"error\":{\"message\":\"Provider returned error\",\"code\":400,\"metadata\":{\"raw\":\"{\\\\\"error\\\\\":{\\\\\"message\\\\\":\\\\\"<400> InternalError.Algo.InvalidParameter: The tool_choice parameter does not support being set to required or object in thinking mode\\\\\",\\\\\"type\\\\\":\\\\\"invalid_request_error\\\\\",\\\\\"param\\\\\":null,\\\\\"code\\\\\":\\\\\"invalid_parameter_error\\\\\"},\\\\\"id\\\\\":\\\\\"chatcmpl-e4013b45-d727-9c19-9aec-acf9eeeed172\\\\\",\\\\\"request_id\\\\\":\\\\\"e4013b45-d727-9c19-9aec-acf9eeeed172\\\\\"}\",\"provider_name\":\"Alibaba\",\"is_byok\":false}},\"user_id\":\"user_3B3M0FhyEZrHFF57G8GKQsxR8gJ\"}')",
+      "used_repair": false,
+      "latency_ms": 359,
+      "metrics": {
+        "calls": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0,
+        "cost": 0.0
+      }
+    },
+    {
+      "model": "qwen/qwen3.7-plus",
+      "transport": "native_tool",
+      "role": "worldgen",
+      "scenario": "worldgen.consistency_rejects_public_secret_conflict",
+      "attempt": 1,
+      "passed": false,
+      "checks": {
+        "pipeline_completed": false
+      },
+      "output": null,
+      "error": "LLMBadRequestError('litellm.BadRequestError: OpenrouterException - {\"error\":{\"message\":\"Provider returned error\",\"code\":400,\"metadata\":{\"raw\":\"{\\\\\"error\\\\\":{\\\\\"message\\\\\":\\\\\"<400> InternalError.Algo.InvalidParameter: The tool_choice parameter does not support being set to required or object in thinking mode\\\\\",\\\\\"type\\\\\":\\\\\"invalid_request_error\\\\\",\\\\\"param\\\\\":null,\\\\\"code\\\\\":\\\\\"invalid_parameter_error\\\\\"},\\\\\"id\\\\\":\\\\\"chatcmpl-7e50909c-9a06-9720-89d8-63a2f4a916b4\\\\\",\\\\\"request_id\\\\\":\\\\\"7e50909c-9a06-9720-89d8-63a2f4a916b4\\\\\"}\",\"provider_name\":\"Alibaba\",\"is_byok\":false}},\"user_id\":\"user_3B3M0FhyEZrHFF57G8GKQsxR8gJ\"}')",
+      "used_repair": false,
+      "latency_ms": 609,
+      "metrics": {
+        "calls": 0,
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "reasoning_tokens": 0,
+        "cache_read_tokens": 0,
+        "cost": 0.0
+      }
+    }
+  ]
+}

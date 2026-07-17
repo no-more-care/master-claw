@@ -1,4 +1,37 @@
-# MasterClaw — CLAUDE.md
+# MasterClaw v2 — Claude Code project context
+
+> **Current runtime:** the active `develop-v2` implementation is the Python service under
+> `src/masterclaw/`. The microClaw souls/skills/configuration described later in this file are
+> archived v1 reference material, not the runtime architecture or deployment target.
+
+MasterClaw v2 is a deterministic Discord game-master service for BlackBirdPie. Code owns routing,
+dice, revisions, persistence and validation; narrowly typed LLM pipelines use OpenHands SDK through
+OpenRouter. SQLite provides the durable inbox, domain state, telemetry and transactional outbox.
+
+Canonical v2 documents:
+
+- `docs/openhands-refactoring-plan.md` — architecture and scope decisions;
+- `docs/v2-implementation-status.md` — implemented vertical slices and remaining acceptance work;
+- `docs/v2-deployment.md` — Linux/Docker operations and staging checklist;
+- `docs/v2-discord-formatting.md` — Discord output contract.
+
+Development checks:
+
+```bash
+python -m pip install uv==0.9.26
+uv sync --locked --extra dev
+uv run python -m ruff check src tests
+uv run python -m ruff format --check src tests
+uv run python -m pytest --cov=masterclaw --cov-report=term-missing -q
+uv run masterclaw doctor
+```
+
+`masterclaw doctor` is an offline SDK/configuration check. `masterclaw model-smoke` makes real
+OpenRouter calls and requires deployment credentials. Do not treat `souls/`, `skills/`, `locales/`,
+`working_dir/`, `microclaw.config.example.yaml`, or the old `develop` deployment instructions as v2
+application code.
+
+## Archived v1 guidance
 
 ## What is this project?
 
@@ -136,6 +169,11 @@ working_dir/shared/GameMaster/
 ## Model tier notes
 
 MasterClaw's skills are prompt-heavy (lots of rules, procedures, templates). Model capability directly shapes session quality. Informal observations from playtesting:
+
+> The tables below are historical results for the legacy agent workflow. The v2 runtime uses
+> separate state, reasoning and narrative roles and verifies native terminal tools versus prompt
+> JSON per model. Use `docs/llm-pipeline-contract.md` and the latest report in `docs/benchmarks/`
+> for current routing decisions.
 
 - **Free tier** (free OpenRouter models, small self-hosted like Llama/Qwen): currently **not viable** for MasterClaw. Verified across two playtest passes (5 distinct models — glm-4.5-air, qwen3-next, llama-3.3, gpt-oss-120b, minimax-m2.5). Provider rate limits or outages knock out half the candidates on any given day. The ones that *do* respond either stall in tool-loops without emitting final text, or break the character/game schema (no trait levels, wrong reserve, invented enum values for `narrative_style` / `narrator_rights_level`, missing flags). Even the best-of-free (minimax-m2.5) loses to cheap-tier grok-4.1-fast on every dimension. Recheck periodically: the bar for "free" rises over time, and temporary promo / gift-credit models occasionally land. Until then, useful only for smoke-testing pipeline wiring.
 - **Cheap tier** (roughly $0.05–$1 per M output): uneven. See the cheap-tier playtest notes below — **most cheap models fabricate dice rolls** (skip `scripts/roll.py` and invent results) and **mangle the character YAML schema**. Only Grok-4.1-fast passed the baseline 3-turn test cleanly and is the current cheap-tier recommendation. Retest before adopting anything else from this tier.

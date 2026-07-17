@@ -30,6 +30,12 @@ souls/*.bak2
 # Temp and Python files
 *.tmp
 .pytest_cache/
+.pytest_tmp*/
+.pytest-basetemp-*/
+.codex-pytest-*/
+pytest-*/
+.uv-cache/
+.coverage
 .venv/
 __pycache__/
 *.py[cod]
