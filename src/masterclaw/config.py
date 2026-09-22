@@ -6,6 +6,8 @@ from typing import Literal
 from pydantic import BaseModel, Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from masterclaw.classifiers.policy import ClassifierConfig
+
 
 class ModelRole(StrEnum):
     STATE = "state"
@@ -45,6 +47,8 @@ class Settings(BaseSettings):
     prompt_path: str = "prompts"
     discord_debounce_seconds: float = Field(default=1.5, ge=0.1, le=10)
     llm_max_concurrency: int = Field(default=4, ge=1, le=64)
+    classifier: ClassifierConfig = ClassifierConfig()
+    classifier_api_key: SecretStr | None = None
     state_model: ModelConfig
     state_fallback_model: ModelConfig = ModelConfig(
         model="openrouter/google/gemini-3-flash-preview",

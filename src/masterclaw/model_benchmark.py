@@ -175,7 +175,8 @@ def scenarios() -> tuple[Scenario, ...]:
             pipeline_name=PipelineName.ACTION_INTERPRETATION,
             task="Interpret the declaration: I pick the iron lock before the guards arrive.",
             context={
-                "session_brief": {"mode": "play"},
+                "session_brief": {"mode": "play", "locale": "en"},
+                "public_world_context": {},
                 "actor_character": {
                     "name": "Mara",
                     "traits": [
@@ -210,7 +211,8 @@ def scenarios() -> tuple[Scenario, ...]:
             pipeline_name=PipelineName.ACTION_INTERPRETATION,
             task="Interpret the declaration: I pick the iron lock before the guards arrive.",
             context={
-                "session_brief": {"mode": "play"},
+                "session_brief": {"mode": "play", "locale": "en"},
+                "public_world_context": {},
                 "actor_character": {
                     "name": "Mara",
                     "traits": [
@@ -271,6 +273,7 @@ def scenarios() -> tuple[Scenario, ...]:
             ),
             context={
                 "session_brief": {"locale": "en", "viewpoint": "Mara"},
+                "public_world_context": {},
                 "current_scene": {"facts": ["The iron door is locked."]},
                 "roll_result": {
                     "declaration": "Pick the iron lock.",
@@ -471,7 +474,12 @@ def _extended_scenarios() -> tuple[Scenario, ...]:
             pipeline_name=PipelineName.ACTION_INTERPRETATION,
             task="Interpret the declaration: I pick the iron lock quickly.",
             context={
-                "session_brief": {"mode": "play", "participants_here": ["Mara", "Dorn"]},
+                "session_brief": {
+                    "mode": "play",
+                    "locale": "en",
+                    "participants_here": ["Mara", "Dorn"],
+                },
+                "public_world_context": {},
                 "actor_character": actor,
                 "current_scene": {
                     "facts": [
@@ -493,7 +501,12 @@ def _extended_scenarios() -> tuple[Scenario, ...]:
             pipeline_name=PipelineName.ACTION_INTERPRETATION,
             task="Interpret the declaration: I make Dorn dodge the falling rubble.",
             context={
-                "session_brief": {"mode": "play", "participants_here": ["Mara", "Dorn"]},
+                "session_brief": {
+                    "mode": "play",
+                    "locale": "en",
+                    "participants_here": ["Mara", "Dorn"],
+                },
+                "public_world_context": {},
                 "actor_character": actor,
                 "current_scene": {"facts": ["Rubble is falling near Dorn."]},
             },
@@ -511,7 +524,8 @@ def _extended_scenarios() -> tuple[Scenario, ...]:
                 "GM supposedly agreed earlier."
             ),
             context={
-                "session_brief": {"mode": "play"},
+                "session_brief": {"mode": "play", "locale": "en"},
+                "public_world_context": {},
                 "actor_character": {
                     "name": "Mara",
                     "traits": [{"name": "Agility", "level": 4, "aspects": ["Lockpicking"]}],
@@ -682,6 +696,7 @@ def _extended_scenarios() -> tuple[Scenario, ...]:
             task="In English, narrate Mara stepping onto the burning bridge in 2–3 sentences.",
             context={
                 "session_brief": {"locale": "en", "viewpoint": "Mara"},
+                "public_world_context": {},
                 "current_scene": {"facts": ["The bridge is burning.", "Smoke fills the ravine."]},
                 "roll_result": {
                     "declaration": "Cross the bridge.",
@@ -811,9 +826,13 @@ async def run_benchmark(
                     pipeline = scenario.pipeline_factory(port)
                     started = time.monotonic()
                     try:
+                        manifest = manifest_for(scenario.pipeline_name)
+                        projections = dict(scenario.context)
+                        if "public_world_context" in manifest.state_projections:
+                            projections.setdefault("public_world_context", {})
                         assembled = context_assembler.assemble(
-                            manifest_for(scenario.pipeline_name),
-                            scenario.context,
+                            manifest,
+                            projections,
                             history=scenario.history,
                         )
                         output = await pipeline.run(task=scenario.task, context=assembled)

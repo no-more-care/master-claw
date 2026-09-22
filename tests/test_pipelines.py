@@ -11,6 +11,7 @@ from masterclaw.pipelines.base import (
     PipelineValidationError,
     strict_output_schema,
 )
+from masterclaw.pipelines.consequence import OutcomePatch
 from masterclaw.pipelines.state_decision import command_of, create_state_decision_pipeline
 
 
@@ -75,11 +76,15 @@ def test_pipeline_fails_closed_after_one_repair() -> None:
     assert len(fake.calls) == 2
 
 
-def test_strict_schema_preserves_pydantic_required_and_default_semantics() -> None:
+def test_strict_schema_requires_every_property_for_provider_compatibility() -> None:
     schema = strict_output_schema(ActionInterpretation)
-    assert set(schema["required"]) == {"resolution", "evidence"}
+    assert set(schema["required"]) == set(schema["properties"])
     assert schema["additionalProperties"] is False
     assert "default" not in json.dumps(schema)
+
+    nested = strict_output_schema(OutcomePatch)["$defs"]["PlotItemDraft"]
+    assert set(nested["required"]) == set(nested["properties"])
+    assert nested["additionalProperties"] is False
 
 
 class TransportCompletion:

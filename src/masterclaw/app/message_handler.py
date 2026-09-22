@@ -19,10 +19,7 @@ from masterclaw.app.progression_service import ProgressionService
 from masterclaw.app.status_panels import render_status_panel
 from masterclaw.app.worldgen_service import WorldGenerationService
 from masterclaw.context.assembler import ContextAssembler
-from masterclaw.domain.models import (
-    HandlerResponse,
-    IncomingMessage,
-)
+from masterclaw.domain.models import HandlerResponse, IncomingMessage
 from masterclaw.domain.routing import ModeRouter
 from masterclaw.pipelines.action import ActionInterpretation
 from masterclaw.pipelines.base import BoundedJsonPipeline
@@ -118,6 +115,7 @@ class MessageApplication(
         self._roll_confirmation_pipeline = roll_confirmation_pipeline
 
     async def __call__(self, message: IncomingMessage) -> str:
+        locale_token = self._bind_message_locale(message.content)
         trace_token = bind_trace(
             self._store,
             trace_id=f"message:{message.event_id}",
@@ -128,7 +126,8 @@ class MessageApplication(
         try:
             with stage_span("message.total", component="application", operation="handle_message"):
                 with stage_span("db.initial_state", component="sqlite", operation="channel_state"):
-                    channel = self._store.channel_state(message.channel_id)
+                    live_channel = self._store.channel_state(message.channel_id)
+                    channel = self._channel_for_message(message)
                 game_token = bind_game(channel.game_id)
                 with stage_span(
                     "application.dispatch", component="message_handler", operation="dispatch"
@@ -137,20 +136,66 @@ class MessageApplication(
                         response = tr(self._locale(channel.game_id), "message_too_long")
                     else:
                         response = await self._dispatch(message, channel)
+                    if (
+                        message.has_routing_snapshot
+                        and channel.game_id is not None
+                        and self._store.cancel_source_pending_if_origin_unbound(
+                            game_id=channel.game_id,
+                            player_id=message.author_id,
+                            origin_channel_id=message.channel_id,
+                            source_event_id=message.event_id,
+                        )
+                    ):
+                        notice = tr(
+                            self._locale(channel.game_id),
+                            "stale_route_pending_cancelled",
+                        )
+                        if isinstance(response, HandlerResponse):
+                            response = HandlerResponse(
+                                f"{response.text}\n\n{notice}".strip(),
+                                response.deliveries,
+                                response.completion_game_id,
+                                response.render_live_status,
+                            )
+                        else:
+                            response = f"{response}\n\n{notice}".strip()
                 with stage_span(
                     "response.status_panel",
                     component="response_format",
                     operation="render_status_panel",
                 ):
+                    # Preserve an ingress snapshot only when the live binding had already diverged
+                    # before this turn ran. If both matched at dispatch time, render the state
+                    # produced by this very message (for example world selection or `/game new`).
+                    panel_channel_state = (
+                        channel
+                        if (
+                            message.has_routing_snapshot
+                            and channel != live_channel
+                            and not (
+                                isinstance(response, HandlerResponse)
+                                and response.render_live_status
+                            )
+                        )
+                        else None
+                    )
                     panel = render_status_panel(
                         self._store,
                         channel_id=message.channel_id,
                         player_id=message.author_id,
+                        locale=self._locale(channel.game_id),
+                        channel_state=panel_channel_state,
                     )
                 if isinstance(response, HandlerResponse):
-                    return HandlerResponse(f"{panel}\n\n{response.text}", response.deliveries)
+                    return HandlerResponse(
+                        f"{panel}\n\n{response.text}",
+                        response.deliveries,
+                        response.completion_game_id,
+                        response.render_live_status,
+                    )
                 return f"{panel}\n\n{response}"
         finally:
             if game_token is not None:
                 reset_game(game_token)
             reset_trace(trace_token)
+            self._reset_message_locale(locale_token)

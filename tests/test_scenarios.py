@@ -8,6 +8,7 @@ from masterclaw.app.scenarios import (
     CommandSafety,
     ScenarioId,
     match_explicit,
+    preparation_has_multiple_intents,
     resolve_scenario,
 )
 from masterclaw.context.assembler import ContextAssembler, ContextHistory
@@ -35,6 +36,8 @@ from masterclaw.domain.models import OperatingMode
         ),
         (OperatingMode.PREPARATION, None, None, False, ScenarioId.PREPARATION),
         (OperatingMode.PLAY, None, None, False, ScenarioId.PLAY),
+        (OperatingMode.PAUSED, None, None, False, ScenarioId.PAUSED),
+        (OperatingMode.FINISHED, None, None, False, ScenarioId.FINISHED),
         (
             OperatingMode.PLAY,
             None,
@@ -88,6 +91,8 @@ def test_same_phrase_has_scenario_specific_meaning() -> None:
         ScenarioId.WORLD_EDITING_REVIEW,
         ScenarioId.PREPARATION,
         ScenarioId.PLAY,
+        ScenarioId.PAUSED,
+        ScenarioId.FINISHED,
         ScenarioId.PLAY_PENDING_POOL,
         ScenarioId.PLAY_PENDING_NARRATION,
         ScenarioId.PLAY_PENDING_OTHER,
@@ -100,6 +105,10 @@ def test_help_rules_and_clarify_exist_in_every_interactive_scenario(scenario_id)
             if scenario_id.value.startswith("world")
             else OperatingMode.PREPARATION
             if scenario_id is ScenarioId.PREPARATION
+            else OperatingMode.PAUSED
+            if scenario_id is ScenarioId.PAUSED
+            else OperatingMode.FINISHED
+            if scenario_id is ScenarioId.FINISHED
             else OperatingMode.PLAY
         ),
         workspace_stage=(
@@ -161,10 +170,12 @@ def test_game_start_has_deterministic_explicit_phrases() -> None:
     ("content", "expected"),
     [
         ("/advance raise Скрытность", CommandId.REQUEST_ADVANCEMENT),
-        ("/advance", CommandId.REQUEST_ADVANCEMENT),
-        ("/advance status", CommandId.REQUEST_ADVANCEMENT),
+        ("/advance", CommandId.SHOW_XP),
+        ("/advance status", CommandId.SHOW_XP),
         ("/advance teleport", None),
-        ("/help <@123>", CommandId.OFFER_HELP),
+        ("/help <@123>", CommandId.SHOW_HELP),
+        ("/assist <@123>", CommandId.OFFER_HELP),
+        ("/roll-help <@123>", CommandId.OFFER_HELP),
         ("/world generate id brief", None),
     ],
 )
@@ -208,7 +219,8 @@ def test_every_scenario_builds_its_declared_state_context_and_history() -> None:
         ("/game status", CommandId.SHOW_GAME_STATUS),
         ("/xp status", CommandId.SHOW_XP),
         ("/character status", CommandId.SHOW_CHARACTER_SHEET),
-        ("/help <@123>", CommandId.OFFER_HELP),
+        ("/help <@123>", CommandId.SHOW_HELP),
+        ("/assist <@123>", CommandId.OFFER_HELP),
     ],
 )
 def test_pending_scenarios_keep_information_slash_commands(content, expected) -> None:
@@ -228,3 +240,71 @@ def test_pending_scenarios_have_deterministic_cancellation() -> None:
     ):
         assert match_explicit(SCENARIOS[scenario_id], "отмена") is CommandId.CANCEL_PENDING
         assert match_explicit(SCENARIOS[scenario_id], "cancel") is CommandId.CANCEL_PENDING
+
+
+@pytest.mark.parametrize(
+    ("scenario_id", "content", "expected"),
+    [
+        (
+            ScenarioId.WORLD_EDITING_COLLECTING,
+            "Пожалуйста, сгенерируй мир",
+            CommandId.GENERATE_WORLD,
+        ),
+        (
+            ScenarioId.WORLD_EDITING_REVIEW,
+            "Да, подтверждаю мир, всё хорошо",
+            CommandId.CONFIRM_WORLD,
+        ),
+        (ScenarioId.PREPARATION, "Пожалуйста, начать игру", CommandId.START_GAME),
+        (ScenarioId.PREPARATION, "Да, всё готово, начинаем игру", CommandId.START_GAME),
+        (ScenarioId.PLAY, "Пожалуйста, поставь игру на паузу", CommandId.PAUSE_GAME),
+        (ScenarioId.PAUSED, "Продолжить игру, пожалуйста", CommandId.RESUME_GAME),
+    ],
+)
+def test_explicit_mutations_accept_bounded_polite_wrappers(scenario_id, content, expected) -> None:
+    assert match_explicit(SCENARIOS[scenario_id], content) is expected
+
+
+@pytest.mark.parametrize(
+    ("scenario_id", "content"),
+    [
+        (ScenarioId.WORLD_EDITING_COLLECTING, "Не сгенерируй мир"),
+        (ScenarioId.WORLD_EDITING_REVIEW, "«Подтверждаю мир»"),
+        (ScenarioId.PREPARATION, "Если все готовы, начать игру"),
+        (ScenarioId.PLAY, "Не ставь игру на паузу"),
+        (ScenarioId.PAUSED, "Он сказал: «продолжить игру»"),
+        (ScenarioId.PLAY, "`finish_game`"),
+        (ScenarioId.PLAY, "```finish_game```"),
+        (ScenarioId.PLAY, "> finish_game"),
+        (ScenarioId.PLAY, "~~finish_game~~"),
+        (ScenarioId.PLAY, "[finish_game](https://example.test/docs)"),
+        (ScenarioId.PLAY, "- finish_game"),
+        (ScenarioId.PLAY, "**finish_game**"),
+        (ScenarioId.PLAY, "_finish_game_"),
+    ],
+)
+def test_negated_quoted_or_conditional_mutations_are_not_explicit(scenario_id, content) -> None:
+    assert match_explicit(SCENARIOS[scenario_id], content) is None
+
+
+@pytest.mark.parametrize(
+    "content",
+    [
+        "Enable XP and let players narrate significant changes",
+        "I want a hero and enable XP",
+        "Включи опыт и дай игрокам значительные права рассказчика",
+    ],
+)
+def test_preparation_multi_intent_guard_covers_natural_setting_synonyms(content) -> None:
+    assert preparation_has_multiple_intents(content)
+
+
+def test_lifecycle_commands_are_explicit_only() -> None:
+    for command in (
+        CommandId.PAUSE_GAME,
+        CommandId.RESUME_GAME,
+        CommandId.FINISH_GAME,
+        CommandId.UNBIND_GAME,
+        CommandId.NEW_SESSION,
+    ):
+        assert SCENARIOS[ScenarioId.PLAY].command_safety(command) is CommandSafety.EXPLICIT_ONLY

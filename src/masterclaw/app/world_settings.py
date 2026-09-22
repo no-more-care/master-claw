@@ -127,9 +127,17 @@ def render_world_settings(
     complete, complete_sources = complete_world_settings(settings, sources)
     title = "НАСТРОЙКИ МИРА" if locale == "ru" else "WORLD SETTINGS"
     source_labels = (
-        {"player": "задано игроком", "default": "по умолчанию"}
+        {
+            "player": "задано игроком",
+            "inferred": "определено по языку сообщения",
+            "default": "по умолчанию",
+        }
         if locale == "ru"
-        else {"player": "player supplied", "default": "default"}
+        else {
+            "player": "player supplied",
+            "inferred": "inferred from message language",
+            "default": "default",
+        }
     )
     rows = [f"## ⚙️ {title}"]
     for group, fields in WORLD_SETTING_GROUPS:

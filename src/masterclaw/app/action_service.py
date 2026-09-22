@@ -38,12 +38,18 @@ class ActionService:
         proposal: PoolProposal,
         prompt: str,
         declaration: str = "",
+        source_event_id: str | None = None,
+        origin_channel_id: str | None = None,
+        root_source_event_id: str | None = None,
     ) -> PendingInteraction:
         if proposal.reserve_spent != 0:
             raise ValueError("reserve is selected only in the confirmation response")
         character = self._store.character_for_player(game_id=game_id, player_id=player_id)
         if character is None:
             raise ValueError("player has no character in this game")
+        scene = self._store.scene_projection(game_id=game_id, player_id=player_id)
+        if scene is None or scene["scene_id"] != scene_id:
+            raise ValueError("player is not located in the proposed roll scene")
         pool = validate_pool(character.sheet, proposal)
         pending = PendingInteraction(
             interaction_id=str(uuid.uuid4()),
@@ -55,6 +61,8 @@ class ActionService:
             payload={
                 "character_id": character.character_id,
                 "character_revision": character.revision,
+                "scene_revision": int(scene["scene_revision"]),
+                "location_revision": int(scene["location_revision"]),
                 "trait_names": list(proposal.trait_names),
                 "aspect_names": list(proposal.aspect_names),
                 "flag": proposal.flag,
@@ -64,7 +72,15 @@ class ActionService:
                 "validated_difficulty": pool.difficulty,
                 "pool_size": pool.size,
                 "declaration": declaration.strip(),
+                "deferred_confirmation_event_id": source_event_id,
+                "prompt_source_event_id": source_event_id,
+                **(
+                    {"root_source_event_id": root_source_event_id}
+                    if root_source_event_id is not None
+                    else {}
+                ),
             },
+            origin_channel_id=origin_channel_id,
         )
         self._store.put_pending(pending)
         return pending
@@ -98,6 +114,13 @@ class ActionService:
             raise ValueError("pending interaction character mismatch")
         if character.revision != payload["character_revision"]:
             raise ValueError("character changed after pool confirmation request")
+        scene = self._store.scene_projection(game_id=pending.game_id, player_id=player_id)
+        if scene is None or scene["scene_id"] != pending.scene_id:
+            raise ValueError("player scene changed after pool confirmation request")
+        if int(scene["scene_revision"]) != int(payload.get("scene_revision", -1)):
+            raise ValueError("scene changed after pool confirmation request")
+        if int(scene["location_revision"]) != int(payload.get("location_revision", -1)):
+            raise ValueError("player location changed after pool confirmation request")
         proposal = PoolProposal(
             trait_names=tuple(payload["trait_names"]),
             aspect_names=tuple(payload["aspect_names"]),

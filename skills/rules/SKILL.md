@@ -69,9 +69,11 @@ WRONG: "All 6 aspects of Sneak apply" — only aspects that logically fit THIS a
 | 4 | Hard | Alert enemies, adverse conditions |
 | 5 | Very hard | Expert opposition, near-impossible odds |
 | 6 | Extreme | Legendary difficulty |
-| 7+ | Nearly impossible | One-in-a-million |
+| 7 | Nearly impossible | One-in-a-million |
 
-Set difficulty fast. Pace over accuracy.
+Base difficulty is bounded to 2–7. A canonical one-use `difficulty_reduction` bonus may reduce a
+validated base difficulty of 2 to an effective difficulty of 1. Set difficulty fast. Pace over
+accuracy.
 
 ---
 
@@ -107,7 +109,7 @@ Compare hits to difficulty.
 
 ## 5. TRAITS
 
-- Each character has 3–7 traits.
+- Each character has 3–9 traits.
 - Total points across all traits = exactly 18.
 - Each trait has a level from 2 to 6.
 - Trait level = number of aspects that trait has.
@@ -158,13 +160,13 @@ Removal:
 
 | Action | Cost |
 |---|---|
-| Raise trait from level N to N+1 | N experience points |
+| Raise trait from level N to N+1 | N+1 experience points (the new level) |
 | New trait at level 2 | 3 experience points |
 
-- Raising existing trait: any time during play.
-- New trait: between sessions only (exception: flashback with justification).
+- All advancement requires a safe situation with meaningful downtime.
+- A new trait additionally requires a plausible justification of where and how it was learned.
 - When raising a trait: add 1 new aspect to match new level.
-- Experience rate: GM awards, recommended 1 point per 30 minutes.
+- Experience rate: code automatically awards 1 point to every character for each full 30 minutes of credited active play when progression is enabled.
 
 ---
 
@@ -188,7 +190,7 @@ After a roll, who describes what happened:
 ### When player narrates success ("yes, and...") — LIMITS APPLY:
 - May place character in advantageous position for the CURRENT or NEXT scene
 - May add minor details to the immediate environment
-- May establish a small mechanical bonus (+1 die in a specific future situation)
+- May establish a narrow one-use +1 die benefit for one specifically named future roll
 - May remove or reduce one existing condition on their character
 
 ### When player narrates failure with silver lining ("no, but...") — LIMITS APPLY:
@@ -236,7 +238,7 @@ Narrator rights are GM-only.
 
 ### Level: `minor` (default)
 Current default scope. Player on "Yes, and..." may choose ONE of:
-- +1 die on a specific named future roll
+- One-use +1 die on one specifically named future roll
 - −1 difficulty on a single upcoming check (worth more — use sparingly, roughly equivalent to +2 dice)
 - Remove or reduce one active condition on their character
 
@@ -245,7 +247,7 @@ Plus they may describe HOW success/failure happens within the immediate scene. H
 ### Level: `significant`
 In addition to minor-level bonuses, player may also:
 - Introduce minor NPCs (a helpful passerby, a named vendor) — GM can take them over later
-- Grant themselves session-long small bonuses (+1 die in specific situations for the rest of the session)
+- Mechanical +1 die benefits remain narrow and one-use for one specifically named future roll
 - Describe mini-triumphs scoped to one encounter ("disarm all three thugs in one swing", "the chase ends on the rooftop")
 - Modify secondary scene details (weather, architecture, unimportant items present)
 - Gain modest items that fit the scene (a coin, a scroll, a rope)
@@ -285,8 +287,9 @@ Works exactly like physical conflict — roll dice against a difficulty.
 - Convince neutral party: difficulty 3
 - Convince opponent: difficulty 4
 - Convince enemy: difficulty 5
-- Advantageous deal: +1 to base difficulty
-- Unfavourable deal: −1 to base difficulty
+- `DealPosition` describes the position of the target/counterparty, not the acting character.
+- Target/counterparty in an advantageous position: +1 to base difficulty
+- Target/counterparty in an unfavourable position: −1 to base difficulty
 
 ---
 

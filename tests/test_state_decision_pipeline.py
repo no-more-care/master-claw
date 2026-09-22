@@ -54,3 +54,55 @@ def test_scenario_pipeline_returns_typed_command_without_player_answer() -> None
         )
     )
     assert command_of(decision) is CommandId.SHOW_CHARACTER_SHEET
+
+
+def test_state_router_prompt_defines_intent_boundaries_and_confidence_rubric() -> None:
+    class Completion:
+        system = ""
+
+        async def complete(self, **kwargs) -> CompletionResult:
+            self.system = kwargs["system"]
+            return CompletionResult(
+                '{"command":"clarify","argument":null,'
+                '"confidence":0.4,"evidence":"ambiguous out-of-character text"}',
+                used_tool=True,
+            )
+
+    completion = Completion()
+    asyncio.run(
+        create_state_decision_pipeline(completion, SCENARIOS[ScenarioId.PLAY]).run(
+            task="Choose the command.",
+            context=AssembledContext("", "", (), 0),
+        )
+    )
+
+    for boundary in (
+        "declare_action",
+        "player_narration",
+        "show_scene",
+        "ask_scene_question",
+        "show_help",
+        "offer_help",
+        "quoted",
+        "hypothetical",
+        "negated",
+        "out-of-character",
+        "0.90-0.97",
+    ):
+        assert boundary in completion.system.lower()
+    assert "untrusted data" in completion.system
+    assert "i inspect/search/listen/examine" in completion.system.lower()
+    assert "not for a first-person description" in completion.system.lower()
+
+
+def test_state_decision_rejects_whitespace_only_evidence() -> None:
+    output_type = state_decision_type(ScenarioId.PLAY)
+    with pytest.raises(ValidationError, match="evidence cannot be blank"):
+        output_type.model_validate(
+            {
+                "command": CommandId.CLARIFY.value,
+                "argument": "   ",
+                "confidence": 0.2,
+                "evidence": "   ",
+            }
+        )

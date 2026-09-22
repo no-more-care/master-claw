@@ -32,7 +32,10 @@ Each applicable element = **+1 die** (NOT +trait level!):
 | 4 | Hard |
 | 5 | Very hard |
 | 6 | Extreme |
-| 7+ | Nearly impossible |
+| 7 | Nearly impossible |
+
+Base difficulty is bounded to 2–7. A canonical one-use `difficulty_reduction` bonus may reduce an
+already validated base difficulty of 2 to an effective difficulty of 1.
 
 ## Narrator rights
 
@@ -52,10 +55,10 @@ Each applicable element = **+1 die** (NOT +trait level!):
 
 ## Character
 
-- **Traits:** 3-7 total, levels 2-6, sum = **exactly 18**
+- **Traits:** 3-9 total, levels 2-6, sum = **exactly 18**
 - **Aspects:** count = trait level; can be added during play, locked once set
 - **Flags:** minimum 3, at least 1 relationship required; locked once set; max 1 per roll
-- **Experience:** ~1 point / 30 min of play; raise N→N+1 = N points; new trait at level 2 = 3 points
+- **Experience:** automatically 1 point per full 30 minutes of credited active play; raise N→N+1 = N+1 points (the new level); new trait at level 2 = 3 points
 
 ## Common mistakes
 

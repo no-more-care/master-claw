@@ -113,6 +113,126 @@ def test_prompt_json_transport_is_explicit_fallback() -> None:
 
 
 @pytest.mark.asyncio
+async def test_prompt_json_transport_requests_strict_provider_schema() -> None:
+    from openhands.sdk import Message, TextContent
+
+    class FakeLLM:
+        model = "openrouter/test/model"
+        metrics = SimpleNamespace(accumulated_cost=0.0)
+
+        def completion(self, messages, tools, **kwargs):
+            assert tools is None
+            assert len(messages) == 4
+            response_format = kwargs["response_format"]
+            assert response_format["type"] == "json_schema"
+            assert response_format["json_schema"]["name"] == "submit_play_decision"
+            assert response_format["json_schema"]["strict"] is True
+            schema = response_format["json_schema"]["schema"]
+            assert schema["additionalProperties"] is False
+            assert set(schema["required"]) == {
+                "argument",
+                "command",
+                "confidence",
+                "evidence",
+            }
+            return SimpleNamespace(
+                id="response-1",
+                message=Message(
+                    role="assistant",
+                    content=[
+                        TextContent(
+                            text=(
+                                '{"command":"declare_action","argument":null,'
+                                '"confidence":0.9,"evidence":"structured"}'
+                            )
+                        )
+                    ],
+                ),
+                raw_response=SimpleNamespace(usage=None),
+                metrics=SimpleNamespace(accumulated_cost=0.0),
+            )
+
+    class FakeRegistry:
+        def create(self, role):
+            assert role is ModelRole.STATE
+            return FakeLLM()
+
+    port = OpenHandsCompletionPort(
+        FakeRegistry(),
+        ModelRole.STATE,
+        output_transport=OutputTransport.PROMPT_JSON,
+    )
+    result = await port.complete(
+        system="system",
+        context="context",
+        task="task",
+        output_type=state_decision_type(ScenarioId.PLAY),
+        tool_name="submit_play_decision",
+    )
+
+    assert result.used_tool is False
+    assert "structured" in result.payload
+
+
+@pytest.mark.asyncio
+async def test_prompt_json_downgrades_when_provider_rejects_response_format() -> None:
+    from openhands.sdk import Message, TextContent
+    from openhands.sdk.llm.exceptions import LLMBadRequestError
+
+    class FakeLLM:
+        model = "openrouter/test/model"
+        metrics = SimpleNamespace(accumulated_cost=0.0)
+
+        def __init__(self) -> None:
+            self.calls: list[dict[str, object]] = []
+
+        def completion(self, messages, tools, **kwargs):
+            self.calls.append(kwargs)
+            if "response_format" in kwargs:
+                raise LLMBadRequestError("structured output unavailable")
+            return SimpleNamespace(
+                id="response-1",
+                message=Message(
+                    role="assistant",
+                    content=[
+                        TextContent(
+                            text=(
+                                '{"command":"declare_action","argument":null,'
+                                '"confidence":0.9,"evidence":"prompt fallback"}'
+                            )
+                        )
+                    ],
+                ),
+                raw_response=SimpleNamespace(usage=None),
+                metrics=SimpleNamespace(accumulated_cost=0.0),
+            )
+
+    llm = FakeLLM()
+
+    class FakeRegistry:
+        def create(self, role):
+            return llm
+
+    port = OpenHandsCompletionPort(
+        FakeRegistry(),
+        ModelRole.STATE,
+        output_transport=OutputTransport.PROMPT_JSON,
+    )
+    result = await port.complete(
+        system="system",
+        context="context",
+        task="task",
+        output_type=state_decision_type(ScenarioId.PLAY),
+        tool_name="submit_play_decision",
+    )
+
+    assert len(llm.calls) == 2
+    assert "response_format" in llm.calls[0]
+    assert "response_format" not in llm.calls[1]
+    assert "prompt fallback" in result.payload
+
+
+@pytest.mark.asyncio
 async def test_provider_retries_use_backoff_and_raise_typed_transient_error(monkeypatch) -> None:
     class FailingLLM:
         model = "openrouter/test/model"

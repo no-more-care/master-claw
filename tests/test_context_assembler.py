@@ -18,13 +18,14 @@ def test_context_contains_only_declared_fragments_and_projections() -> None:
             "session_brief": {"scene": "gate"},
             "actor_character": {"name": "Hero"},
             "current_scene": {"facts": ["closed door"]},
-            "gm_world_context": {"secret_plot": "hidden truth"},
+            "public_world_context": {"premise": "a public truth"},
             "undeclared_state": {"killer": "hidden"},
         },
     )
     assert "closed door" in context.dynamic_context
     assert "killer" not in context.dynamic_context
-    assert "hidden truth" in context.dynamic_context
+    assert "a public truth" in context.dynamic_context
+    assert "secret_plot" not in context.dynamic_context
     assert "Classify whether" in context.static_rules
     assert context.output_token_budget == manifest.output_token_budget
     assert "closed door" not in context.static_rules
@@ -32,6 +33,7 @@ def test_context_contains_only_declared_fragments_and_projections() -> None:
         "declaration_validation",
         "difficulty",
         "equipment",
+        "core_mechanics",
     }
 
 
@@ -62,8 +64,9 @@ def test_context_includes_only_manifest_bounded_recent_history() -> None:
         manifest,
         {
             "session_brief": {},
+            "actor_character": {"player_id": "alice", "name": "Hero"},
             "current_scene": {},
-            "gm_world_context": {},
+            "public_world_context": {},
             "roll_result": {},
         },
         history=ContextHistory(
@@ -82,6 +85,7 @@ def test_live_narrator_rights_fragment_defines_every_configured_level() -> None:
         manifest_for(PipelineName.PLAYER_NARRATION_REVIEW),
         {
             "session_brief": {"locale": "en"},
+            "actor_character": {"player_id": "alice", "name": "Hero"},
             "current_scene": {},
             "public_world_context": {},
             "roll_result": {},
@@ -91,6 +95,23 @@ def test_live_narrator_rights_fragment_defines_every_configured_level() -> None:
     for level in ("disabled", "minor", "significant", "madness"):
         assert f"`{level}`" in context.static_rules
     assert "`gm_automatic`" in context.static_rules
+
+
+def test_rules_question_receives_complete_canonical_core_mechanics() -> None:
+    context = ContextAssembler(PROMPTS).assemble(
+        manifest_for(PipelineName.RULES_QUESTION),
+        {
+            "session_brief": {"locale": "en"},
+            "player_question": "How do pools, hits, reserve, and help work?",
+        },
+    )
+
+    rules = context.static_rules
+    assert "Each applicable trait contributes exactly one die" in rules
+    assert "Every d6 result of 4, 5, or 6 is one hit" in rules
+    assert "Reserve starts at 7 and cannot exceed 7" in rules
+    assert "explicitly contributes exactly one die" in rules
+    assert "unreduced base difficulty is an integer from 2 through 7" in rules
 
 
 def test_context_budget_uses_configured_model_tokenizer(monkeypatch) -> None:
@@ -135,3 +156,19 @@ def test_context_budget_degrades_history_and_long_projection_before_failing() ->
     )
     assert '"sequence":4' in context.dynamic_context
     assert '"sequence":3' not in context.dynamic_context
+
+
+def test_projection_truncation_preserves_latest_later_wins_revision() -> None:
+    value = (
+        "Original premise that must remain recognizable.\n"
+        + "middle " * 500
+        + "\nLater player revision (takes precedence): latest tone is hopeful."
+    )
+
+    truncated = ContextAssembler._truncate_projection(value, max_string_chars=1000)
+
+    assert isinstance(truncated, str)
+    assert len(truncated) <= 1000
+    assert "Original premise" in truncated
+    assert "latest tone is hopeful" in truncated
+    assert "[middle omitted]" in truncated

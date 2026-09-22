@@ -196,6 +196,7 @@ def test_player_facing_gm_prompts_use_character_names_only_for_ambiguity(factory
     assert "character name" in completion.system
     assert "Never insert a Discord user mention" in completion.system
     assert "do not prefix a routine single-recipient reply" in completion.system
+    assert "participant order" in completion.system
 
 
 def test_state_router_uses_character_mapping_without_discord_mentions() -> None:

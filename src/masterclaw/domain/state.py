@@ -87,6 +87,7 @@ class PendingInteraction:
     status: PendingStatus = PendingStatus.OPEN
     revision: int = 0
     created_at: datetime | None = field(default=None, compare=False)
+    origin_channel_id: str | None = None
 
 
 class InvalidTransition(ValueError):

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import StrEnum
 
@@ -9,6 +9,8 @@ class OperatingMode(StrEnum):
     WORLD_MANAGEMENT = "world_management"
     PREPARATION = "preparation"
     PLAY = "play"
+    PAUSED = "paused"
+    FINISHED = "finished"
 
 
 class GameLifecycle(StrEnum):
@@ -34,12 +36,30 @@ class ChannelState:
 
 
 @dataclass(frozen=True, slots=True)
+class IncomingAttachment:
+    attachment_id: str
+    filename: str
+    content_type: str | None = None
+    size: int | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class IncomingMessage:
     event_id: str
     channel_id: str
     author_id: str
     content: str
     created_at: datetime
+    guild_id: str | None = None
+    parent_channel_id: str | None = None
+    reply_to_event_id: str | None = None
+    reply_to_author_id: str | None = None
+    reply_context: str | None = None
+    attachments: tuple[IncomingAttachment, ...] = ()
+    routing_game_id: str | None = field(default=None, compare=False)
+    routing_lifecycle: GameLifecycle | None = field(default=None, compare=False)
+    routing_scene_id: str | None = field(default=None, compare=False)
+    has_routing_snapshot: bool = field(default=False, compare=False)
 
     def __post_init__(self) -> None:
         if not self.event_id or not self.channel_id or not self.author_id:
@@ -60,6 +80,7 @@ class IncomingMessage:
 class AddressedResponse:
     author_id: str
     text: str
+    source_event_id: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -73,6 +94,8 @@ class OutboundDelivery:
 class HandlerResponse:
     text: str
     deliveries: tuple[OutboundDelivery, ...] = ()
+    completion_game_id: str | None = None
+    render_live_status: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -80,6 +103,7 @@ class ResponseBatch:
     channel_id: str
     items: tuple[AddressedResponse, ...]
     deliveries: tuple[OutboundDelivery, ...] = ()
+    completion_game_id: str | None = None
 
     def render_discord(self) -> str:
         return "\n\n".join(item.text for item in self.items)

@@ -65,6 +65,12 @@ def test_trait_level_does_not_increase_dice_count() -> None:
     assert pool.size == 1
 
 
+@pytest.mark.parametrize("difficulty", (0, 1, 8, 99))
+def test_pool_rejects_difficulty_outside_the_canonical_scale(difficulty: int) -> None:
+    with pytest.raises(MechanicsError, match="between 2 and 7"):
+        validate_pool(sheet(), PoolProposal(trait_names=("Body",), difficulty=difficulty))
+
+
 def test_pool_counts_each_selected_source_once() -> None:
     pool = validate_pool(
         sheet(),
@@ -119,6 +125,13 @@ def test_social_conflict_difficulty_is_computed_without_llm() -> None:
     assert social_difficulty(SocialRelation.ENEMY) == 5
     assert social_difficulty(SocialRelation.OPPONENT, DealPosition.ADVANTAGEOUS) == 5
     assert social_difficulty(SocialRelation.OPPONENT, DealPosition.UNFAVOURABLE) == 3
+    assert social_difficulty(SocialRelation.FRIEND, DealPosition.UNFAVOURABLE) == 2
+    assert social_difficulty(SocialRelation.ENEMY, DealPosition.ADVANTAGEOUS) == 6
+    assert all(
+        2 <= social_difficulty(relation, position) <= 7
+        for relation in SocialRelation
+        for position in DealPosition
+    )
 
 
 def test_extra_die_temporary_bonus_is_an_explicit_pool_component() -> None:
@@ -170,7 +183,7 @@ def test_difficulty_reduction_temporary_bonus_never_reduces_below_one() -> None:
         rewarded,
         PoolProposal(
             trait_names=("Mind",),
-            difficulty=1,
+            difficulty=2,
             bonus_ids=("known-weakness",),
         ),
     )

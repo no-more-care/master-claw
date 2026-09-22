@@ -70,7 +70,7 @@ change_log:
 Run these checks before saving any character change:
 
 ### Traits
-- Count: 3–7 traits total
+- Count: 3–9 traits total
 - Each level: 2–6
 - traits_points_total must equal exactly 18
 - Aspect count per trait must equal trait level

@@ -118,6 +118,19 @@ def test_healthcheck_rejects_incomplete_or_unsupported_application_schema(tmp_pa
     assert unsupported.read_bytes() == before
 
 
+def test_healthcheck_rejects_database_without_event_operations_ledger(tmp_path) -> None:
+    database = tmp_path / "missing-event-operations.sqlite3"
+    SQLiteStore(database).initialize()
+    with sqlite3.connect(database) as connection:
+        connection.execute("DROP TABLE event_operations")
+
+    with pytest.raises(
+        SystemExit,
+        match=r"required application tables are missing.*event_operations",
+    ):
+        main(["healthcheck", "--database", str(database)])
+
+
 def test_service_completion_uses_production_retry_schedule(monkeypatch) -> None:
     captured = {}
     sentinel = object()

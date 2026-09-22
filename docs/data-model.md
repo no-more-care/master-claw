@@ -20,6 +20,12 @@ InboxMessage[] ──> application ──> OutboxMessage[]
 LLMCall[] ──> optional Game
 ```
 
+An inbox message freezes its game and scene audience at ingress. Its lifecycle is stamped
+atomically on first claim, rather than enqueue: this lets a queued message behind `/game start`
+observe the newly active game, while a retry of the start event retains its original preparation
+route. Schema-v7 migration dead-letters already-attempted legacy rows whose historical lifecycle
+cannot be recovered safely; untouched rows snapshot normally when claimed.
+
 ## World
 
 `worlds` is the reusable setting container. It stores `world_id`, title, draft/publication status,
@@ -101,12 +107,20 @@ exhausted, the active workspace and any prior review draft remain unchanged.
 - locale and narrative Discord channel;
 - optimistic revision.
 
-`channel_bindings` maps a Discord channel to a game. `session_activity` holds the activity clock and
-credited XP intervals. These are deterministic application state, not LLM memory.
+`channel_bindings` maps a Discord channel to a game. Inherited thread rows retain their parent
+provenance so reconciliation cannot overwrite or delete a later explicit child binding.
+`session_activity` holds the activity clock and credited XP intervals. These are deterministic
+application state, not LLM memory. Detaching the last channel pauses the clock, cancels open
+interactions and refunds uncommitted helper dice; detaching one of several channels leaves the
+shared game session running.
 
 `monitored_channels` is the independent Discord ingress allowlist. A row means ordinary player
-messages from that channel are accepted even without mentioning the bot. Adding or removing this
-row never creates, deletes or detaches a game in `channel_bindings`.
+messages from that channel are accepted even without mentioning the bot. Inherited monitoring also
+retains parent provenance, while an explicit child enable—or starting/resuming a world project in
+that child—promotes the row to independent state. Enabling monitoring does not create a game
+binding. Disabling an explicit parent removes only rows and bindings that still carry that parent's
+inheritance provenance; explicitly promoted children remain independent. Any inherited binding
+removed by that cascade performs the normal detach cleanup for its former game.
 
 ## Scene state
 
@@ -137,8 +151,12 @@ the model cannot invent missing equipment.
 ## Pending actions and immutable results
 
 `pending_interactions` stores restart-safe player decisions such as pool confirmation, player
-narration and clarification. At most one interaction can be open for a player in a game. Payloads
-carry revision-bound proposals rather than mutable model conversations.
+narration and clarification. It retains the originating channel so a continuation in one channel
+cannot consume a same-player decision opened in another. At most one interaction can be open for a
+player in a game. Payloads carry revision-bound proposals rather than mutable model conversations.
+They also retain the root inbox causation separately from synthetic compound-part ids and record the
+event that resolved, cancelled or expired a step, allowing a crash replay to reconstruct the
+terminal response instead of interpreting the same text as a new turn.
 
 Confirmed results are immutable rows in `rolls`, keyed by both interaction and Discord confirmation
 event. Dice, hits, difficulty, narrator rights and reserve-after are stored for audit and safe resume.
@@ -147,20 +165,48 @@ Per-game rules are stored separately from mutable scene state. `game_rules` reco
 `reserve_recovery_mode` (`safe_rest`, `roleplay_award`, or `both`). There is no separate human GM
 identity.
 The system game-master pipeline adjudicates recovery from canonical scene/outcome context, and
-deterministic code writes a domain event containing its evidence and the exact before/after values.
+the first validated decision is checkpointed as canonical safe-rest/award targets before any dice
+change. A replay reloads those targets rather than consulting the model again; deterministic code
+then writes domain events containing evidence and exact before/after values.
 Recovery never relies on an inferred session boundary or a direct player request.
 `roll_helpers` records contributing characters without modifying the immutable result.
 
 ## Event and delivery boundaries
 
 `inbox_messages` is the durable Discord ingress queue with pending/processing/processed/failed
-states. `outbox_messages` is the idempotent transactional delivery queue; `embed_json` optionally
-stores the deterministic Discord rich-embed presentation alongside ordinary message content.
-`domain_events` records
-committed facts with unique causation ids. `llm_calls` records model role, tokens, cache usage,
+states. It retains the ingress and effective game snapshots plus the message-time scene audience,
+so FIFO replay, channel rebinding and later player movement cannot reinterpret an already received
+turn or expose scene history retroactively. It also retains guild/thread, reply and attachment
+metadata, durable channel-availability backoff and the first exact successful handler result. The
+result journal is written before inbox/outbox completion, so a completion failure reuses the same
+text, deliveries and response metadata without invoking handlers or models again.
+`decision_checkpoints` stores the first validated typed output for each event/pipeline pair together
+with its game scope, output-schema fingerprint and optional semantic-input/CAS fingerprint. Callers
+validate a loaded payload against that schema and input identity, then checkpoint a fresh result
+before its first mutation. This prevents a retry from choosing a different valid branch or target
+after a partial commit, or silently rebinding an old decision to newer aggregate revisions.
+`event_operations` atomically journals deterministic event-scoped configuration and lifecycle
+mutations with their input fingerprints and exact result envelopes. A replay resolves the operation
+before consulting newer aggregate state.
+`discord_channels` records the observed guild and parent relation used to enforce thread
+inheritance and narrative-delivery scope. `assistant_responses` stores only player-facing answers,
+tied to the source inbox event and recipient; narrative/internal copies are deliberately excluded.
+`outbox_messages` is the transactional at-least-once delivery queue. It stores the source event,
+author, guild, delivery kind, stable Discord nonce, returned Discord message id and optional
+`embed_json` presentation alongside ordinary message content.
+`domain_events` records committed facts with unique causation ids. Outcome commits compare the
+actor, scene, actor-location revision and exact source-scene participants in one transaction.
+Event-scoped `activity_recorded` receipts identify the exact character revisions changed by an XP
+award, allowing crash replay to distinguish its own bookkeeping from an unrelated fiction change.
+`llm_calls` records model role, tokens, cache usage,
 latency, cost and success, optionally associated with a game and linked to available
 trace/channel/event keys. `stage_spans` stores the parent-linked timing tree for application, DB,
 context, pipeline, retry/repair, domain-gate and delivery work.
+`lexicon_candidates` is an append-only observation ledger keyed by Discord event id. It retains
+high-confidence normalized read-only `SHOW_*` phrases and context-bound pending replies such as
+`ANSWER_PENDING`, and supports frequency aggregation without double-counting inbox or handler
+replay. Promotion remains manual: an `ANSWER_PENDING` phrase must stay scenario-specific and must
+never become a global exact command.
 Every call also records a SHA-256 `prompt_fingerprint` over the actual cached system text, strict
 output schema, terminal-tool name and selected transport. This provides content-addressed prompt
 audit without maintaining prompt version numbers.
@@ -174,6 +220,7 @@ Each pipeline manifest selects a minimal projection, fixed rule fragments and sm
 recent events/messages. Secret or unrelated fields are omitted. The prompt is therefore a task-local
 view of canonical state, never a serialized database or a long-lived agent memory.
 
-When an acting player has a scene location, recent chat is limited to authors currently in that
-same scene, even if several independent scenes share one Discord channel. Preparation workflows
-without a player location do not receive unrelated channel history.
+When an acting player has a scene location, recent user and player-facing assistant turns are
+limited to authors currently in that same scene, even if several independent scenes share one
+Discord channel. Before scene placement, a player receives only their own user/assistant turns and
+never unrelated channel history.

@@ -44,6 +44,12 @@ are monitored without requiring a mention. To stop monitoring while preserving t
 mention it with `выключи этот канал для игры`. The allowlist is stored in SQLite, not `.env`, and
 survives restarts.
 
+A Discord thread inherits monitoring and the game binding from its enabled parent channel. A
+conflicting thread binding is rejected instead of silently crossing sessions. Narrative output is
+accepted only for a cached channel in the same Discord server and cannot be shared by two
+games or routed to a DM. Attachments are not interpreted: the bot sends an explicit localized
+unsupported notice and processes only the message's text, while reply metadata is retained.
+
 The first world description does not create a game. It opens a persistent input card, clearly
 marking player-supplied values and defaults. Players explicitly request draft generation, review
 and revise the public result, then approve it into the world catalogue. The bot shows the catalogue
@@ -66,7 +72,10 @@ The daemon does not dynamically route models by price or availability. Each pipe
 `.env.example` uses Nex Mini for state, Nex Pro for reasoning and Luna for narrative and the interim
 worldgen baseline. Worldgen remains independently configurable and defaults to `prompt_json` so
 narratively strong models with unreliable native tooling can still satisfy strict schemas. Transport is
-an explicit capability setting rather than an automatic retry across incompatible API formats.
+an explicit capability setting. For `prompt_json`, the adapter requests the provider's strict JSON
+schema response format when the selected route supports it. If that route deterministically rejects
+`response_format`, the adapter retries once without that option while retaining the exact same schema
+in the prompt; it never switches to native tools, another role or another model implicitly.
 
 ## Commands
 
@@ -82,18 +91,51 @@ docker compose logs -f masterclaw
 `doctor` validates settings, initializes/opens SQLite, loads the prompt manifest and constructs an
 OpenHands client for every configured role. It imports and validates the installed SDK contract but
 does not make an LLM request or spend tokens.
+`model-smoke` does spend provider tokens. It exercises state routing; action, compound-request,
+consequence and world-intake reasoning; narrative output; and both the creative and typed-structuring
+stages of world generation. In addition to schema validation, it checks the expected routing branch,
+preservation of every explicitly labelled world setting, absence of invented state for a passive
+look, compound-part order and the requested pregen count. The command stops on the first failed
+contract and is intended for deployment acceptance, not a frequent healthcheck.
 The Compose healthcheck uses `masterclaw healthcheck` instead. It requires an existing database,
 opens it with SQLite `mode=ro`, verifies required tables, the exact supported application schema
 version and `quick_check`, and never initializes or migrates it. Startup creates a fresh current
-schema or applies the supported migration to schema v3; it fails closed on a newer version. Take an
+schema or applies the supported migration to schema v10; it fails closed on a newer version. Take an
 online backup before deploying a version that can migrate the database.
+
+`mode=ro` describes the SQL connection, not the filesystem mount. A live WAL database may still
+need its directory to permit SQLite's transient `-shm` coordination file, so keep the data volume
+mounted read-write for `healthcheck` and `backup`; adding Docker `:ro` can fail with `unable to open
+database file`. These commands do not perform application mutations or migrations. A pre/post
+database checksum is the stricter acceptance check when proving that a backup smoke did not change
+the source file.
 
 ## Persistence and recovery
 
-SQLite runs in WAL mode. Discord events are persisted before processing. A clean or crashed restart returns any `processing` inbox records to `pending`. Domain completion and outbox creation share one transaction, so a committed response remains deliverable after restart.
+SQLite runs in WAL mode. Discord events are persisted before processing. A clean or crashed restart
+returns any `processing` inbox records to `pending`. Marking an inbox event processed and inserting
+its outbox records share one transaction. Domain handlers may commit canonical changes before that
+transaction. Since schema v8, a typed model decision journals its first
+validated output by event, pipeline key, game scope, output-schema fingerprint and, for
+revision-bound decisions, a fingerprint of the semantic request and CAS inputs. A later attempt
+must validate and reuse that output, and fails closed if those bound inputs changed. After the
+handler returns, its exact text, deliveries and response metadata are also journaled before inbox
+completion. Together with causation ids, immutable
+results and revision-aware replay guards, these checkpoints keep a recovered event on the same
+branch and reproduce the same response without reapplying the change. Discord delivery remains a
+separate boundary.
+
+Outbox delivery is **at least once**. Atomic claims prevent two daemon workers from sending the
+same row concurrently, and every retry reuses a stable Discord nonce plus the original source-event
+reference. Discord acceptance and the subsequent SQLite `delivered_at` update cannot be one atomic
+operation: a crash or database failure after `send` succeeds can resend that row. The stable nonce
+reduces ambiguity and preserves retry identity, but the supported Discord client does not provide an
+enforced deduplication acknowledgement, so this narrow duplicate window remains. Inbox/domain
+idempotency still prevents a duplicate roll, state transition, or assistant-history turn.
 
 Backups must capture the database consistently. `masterclaw backup` uses SQLite's online backup API
 and is safe with WAL mode; it copies the live database without first initializing or migrating it.
+The live data volume must nevertheless remain writable for WAL coordination as described above.
 Do not copy only the main `.sqlite3` file while the daemon is active. The systemd timer writes a
 new timestamped generation to the separate `masterclaw-backups` volume on every run instead of
 overwriting `latest.sqlite3`. Periodically export verified generations to another host or object
@@ -104,9 +146,11 @@ Retention and off-host replication remain operator policy.
 
 - `docker compose build` succeeds on the target Linux host;
 - `masterclaw doctor` initializes the current schema and loads the prompt manifest;
-- `masterclaw model-smoke` validates all four configured OpenRouter roles;
+- `masterclaw model-smoke` validates all four configured OpenRouter roles across the key typed
+  scenario matrix, including both world-generation stages;
 - a staging game produces mechanical output in the game channel and prose in the narrative channel;
-- duplicate Discord delivery does not duplicate a roll or response;
+- replayed ingress does not duplicate a roll or canonical response record, and a forced
+  send-success/mark-failure exercise documents the residual Discord-message duplicate window;
 - starting a second daemon against the same database is rejected;
 - restart with pending inbox/outbox records resumes delivery;
 - the container healthcheck succeeds without changing the database file or schema;
@@ -125,5 +169,18 @@ docker compose run --rm masterclaw masterclaw dead-letter outbox requeue <numeri
 ```
 
 Correct the external cause before requeueing. Requeueing preserves the original idempotency keys.
+Schema v7 adds a first-claim lifecycle snapshot. During upgrade, a game-bound inbox row that was
+already attempted under v6 has no trustworthy pre-transition lifecycle, so migration moves it to
+the inbox dead letter with an explicit `schema v7` diagnostic. Inspect the game's canonical
+lifecycle and the event's intended transition before explicitly requeueing it; requeue is the
+operator's acknowledgement that routing from the current lifecycle is safe. Untouched queued rows
+remain pending and snapshot lifecycle normally on their first claim.
+Schema v8 adds the typed-decision and exact-handler-result journals. Upgrading an already supported
+v7 database creates these empty structures without re-running the v7 dead-letter rule; existing v7
+pending or previously attempted rows retain their status and lifecycle snapshot.
+Schema v9 adds event-scoped deterministic mutation operations and a separate durable provider retry
+budget. Schema v10 adds the replay-safe lexicon-candidate observation ledger used by
+`routing-quality-report`; upgrading creates an empty ledger and does not reinterpret prior logs as
+candidate observations.
 If the database is damaged, restore the most recent verified backup into a new volume and retain the
 old volume for diagnosis. Never delete inbox, roll, domain-event or outbox rows to force a retry.

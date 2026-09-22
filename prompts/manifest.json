@@ -1,5 +1,9 @@
 {
   "fragments": {
+    "core_mechanics": {
+      "path": "rules/core_mechanics.md",
+      "scope": "play"
+    },
     "declaration_validation": {
       "path": "rules/declaration_validation.md",
       "scope": "play"

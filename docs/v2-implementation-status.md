@@ -133,21 +133,24 @@ Implemented:
 - configurable narrator-rights levels (`disabled`, `minor`, `significant`, `madness`),
   with `disabled` deterministically retaining narration in the GM pipeline;
 - Ruff lint/format gate and Linux CI workflow;
-- versioned SQLite schema v3 with idempotent initialization, the supported legacy workspace
-  migration and fail-closed handling for newer schemas;
+- versioned SQLite schema v10 with typed decision/handler replay journals, event-scoped mutation
+  operations, durable provider retry state and an idempotent lexicon-candidate ledger; initialization
+  and supported legacy migrations remain fail-closed for newer schemas;
 - dead-letter inspection and requeue commands for inbox/outbox recovery;
 - pre-migration WAL-safe backup command plus timestamped generations in a separate backup volume,
   systemd service and daily timer;
-- OpenRouter role smoke test covering state, reasoning, narrative and worldgen model contracts;
+- OpenRouter role smoke test covering state routing; action, compound, consequence and world-intake
+  reasoning; narrative output; and the creative plus typed-structuring worldgen contracts;
 - deterministic multiplayer help, conditions/plot-item projections and social difficulty rules;
 - independent-scene revision tests proving that unrelated scenes can commit without a shared lock;
-- persistent per-session LLM token, cost and latency telemetry;
+- persistent per-session LLM token, cost and latency telemetry, plus a weekly routing-quality report
+  for lexicon candidates and separately-denominated repair, invalid-result and model-fallback rates;
 - Discord typing status, terminal failure notices and logical 1800-character message chunks;
 - code-rendered Discord formats adapted from the legacy localized templates;
 - manifest-bounded recent domain-event and chat-message history in every LLM context;
 - an offline OpenHands SDK contract check in unit tests, `masterclaw doctor`, CI and the built image;
 - a cross-platform `uv.lock` with the OpenHands 1.33.0 compatibility set pinned;
-- pytest coverage reporting in CI (83% after follow-up adapter and workflow tests);
+- pytest coverage reporting in CI (84% across the 643-test final local suite on 2026-07-23);
 - model-role benchmark with corrected equipment-present/equipment-absent action scenarios and
   independent comparison of prompt JSON against native tool calling;
 - audited eight-model live matrix: 88 scenarios, two output transports, $0.063766 total provider
@@ -167,18 +170,22 @@ Implemented:
   narrator-rights, continuity, world-generation and character-creation cases;
 - a dedicated four-scenario worldgen quality suite and six-model candidate matrix, separated from
   frequent play-role evaluation;
-- 188 passing tests covering scenario routing, failure degradation, handler boundaries, lifecycle gates, staged worlds and performance
-  telemetry.
+- 643 passing tests covering scenario routing, failure degradation, handler boundaries, lifecycle
+  gates, crash/replay guards, staged worlds, prompt contracts and performance telemetry.
 
 The daemon now contains tested vertical slices for world setup, character preparation,
 automatic actions, roll-based actions, narrator-rights follow-up, progression and dual-channel output.
-The repository implementation is feature-complete for the agreed v2 scope. Promotion to a live campaign
-still requires environment validation with the real Discord token and configured OpenRouter models on the
-Linux droplet; those checks cannot be performed safely from a source checkout without deployment secrets.
+The repository implementation is feature-complete for the agreed v2 scope. Local acceptance on
+2026-07-23 built the pinned Linux container, ran `doctor`, read-only SQL health checks, an isolated
+online backup/restore cycle and the eight-contract OpenRouter model smoke with semantic post-checks.
+Promotion to a live campaign still requires the private Discord staging path and target-host
+operations listed below.
 
-## Deployment acceptance remaining
+## Production deployment acceptance remaining
 
-1. Build the pinned container on Linux and run the unit/lint suite.
-2. Run `masterclaw doctor` and `masterclaw model-smoke` with production model ids.
-3. Exercise a private Discord staging channel through setup, action, restart and outbox recovery.
-4. Take and restore an online backup before enabling the production service.
+1. Build this exact revision on the target Linux host and run the unit/lint suite plus `doctor`.
+2. Exercise a private Discord staging channel through setup, action, restart, outbox recovery and
+   the documented send-success/mark-failure duplicate window.
+3. Take and restore an online backup of the target deployment before enabling the production
+   service.
+4. Enable and inspect the systemd service and backup timer on the target host.

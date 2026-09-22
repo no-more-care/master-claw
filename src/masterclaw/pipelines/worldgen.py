@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from masterclaw.domain.mechanics import FlagType
 from masterclaw.pipelines.base import BoundedJsonPipeline, CompletionPort
@@ -104,6 +104,48 @@ class WorldConsistencyReview(BaseModel):
     issues: list[str] = Field(default_factory=list, max_length=20)
 
 
+class WorldSettingAdherenceClaim(BaseModel):
+    """Auditable, non-persisted evidence that one confirmed setting was applied."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    confirmed_value: str = Field(min_length=1, max_length=500)
+    applied_terms: list[str] = Field(min_length=1, max_length=6)
+    evidence: str = Field(min_length=10, max_length=1000)
+
+    @field_validator("confirmed_value", "evidence")
+    @classmethod
+    def strip_required_text(cls, value: str) -> str:
+        stripped = value.strip()
+        if not stripped:
+            raise ValueError("setting-adherence text cannot be blank")
+        return stripped
+
+    @field_validator("applied_terms")
+    @classmethod
+    def normalize_applied_terms(cls, values: list[str]) -> list[str]:
+        normalized = [value.strip() for value in values]
+        if any(not value for value in normalized):
+            raise ValueError("setting-adherence terms cannot be blank")
+        if any(sum(character.isalnum() for character in value) < 3 for value in normalized):
+            raise ValueError("setting-adherence terms must contain meaningful text")
+        if len({value.casefold() for value in normalized}) != len(normalized):
+            raise ValueError("setting-adherence terms must be unique")
+        return normalized
+
+
+class WorldSettingAdherence(BaseModel):
+    """Optional for old drafts; generation validation requires claims for supplied settings."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    locale: WorldSettingAdherenceClaim | None = None
+    genre: WorldSettingAdherenceClaim | None = None
+    tone: WorldSettingAdherenceClaim | None = None
+    scale: WorldSettingAdherenceClaim | None = None
+    player_role: WorldSettingAdherenceClaim | None = None
+
+
 class WorldDraft(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -114,6 +156,12 @@ class WorldDraft(BaseModel):
     tensions: list[str] = Field(default_factory=list, max_length=12)
     secret_plot: str = Field(min_length=1, max_length=4000)
     character_templates: list[PregeneratedCharacter] = Field(min_length=3, max_length=6)
+    # This is validation metadata, not public world content. `exclude=True` keeps existing
+    # persistence and projection contracts backward-compatible.
+    setting_adherence: WorldSettingAdherence = Field(
+        default_factory=WorldSettingAdherence,
+        exclude=True,
+    )
 
     @model_validator(mode="after")
     def require_consistent_cross_references(self) -> WorldDraft:
@@ -189,7 +237,9 @@ def create_world_creative_pipeline(
             "brief, with escalating conflicts, difficult choices, active factions, secrets, and "
             "multiple player-driven paths. Grimdark requests may be harsh and morally difficult, "
             "but must preserve player agency and avoid empty shock for its own sake. Write a raw "
-            "creative pitch; do not spend effort matching the final world schema."
+            "creative pitch; do not spend effort matching the final world schema. Treat every "
+            "confirmed genre, tone, theme, content boundary, player role, scale, and locale as "
+            "binding. A boundary is valid for hidden material as well as public material."
         ),
     )
 
@@ -206,14 +256,28 @@ def create_world_structuring_pipeline(
             "references, then distribute the result into the exact typed world schema. Keep the "
             "strongest ideas while making location ids unique and stable, faction names "
             "consistent, public material usable without exposing the secret plot, and every "
-            "secret tied to public clues. Propose the requested number (three to six) of public "
-            "fully playable pregenerated characters, honoring any supplied concepts; otherwise "
-            "create distinct concepts grounded in the premise. Each pregen must have a biography, "
+            "secret tied to public clues without copying secret sentences or distinctive secret "
+            "phrases into public fields. Write setting text in the confirmed locale and preserve "
+            "the confirmed tone. For every supplied locale, genre, tone, scale, and player-role "
+            "setting, populate setting_adherence with the exact confirmed value, one or more "
+            "terms actually used to realize it (translated when the locale requires that), and a "
+            "verbatim excerpt from a public field containing those terms. Evidence is audit data, "
+            "not permission to repeat instructions or secret material. Propose exactly the "
+            "requested number (three to six) of public "
+            "fully playable pregenerated characters. Map each supplied character concept to a "
+            "different template. A multi-term concept must retain at least two meaningful terms "
+            "or one distinctive multi-word phrase in that template's public text; one generic "
+            "shared word is insufficient. If no concepts are supplied, create distinct concepts "
+            "grounded in the premise. Each pregen must have "
+            "a biography, "
             "a valid 18-point starting trait sheet with unique trait and aspect names, flags, only "
             "existing faction affiliations, and at least one named positive relationship to "
             "another existing pregen. Mark every flag with is_positive; only positive relationship "
-            "flags may set it true. Location ids, faction identities, pregen names, and connection "
-            "targets must be internally consistent. Do not assign per-character starting "
+            "flags may set it true. Unless a supplied sheet already provides another valid "
+            "18-point distribution, use exactly six level-3 traits per generated pregen and "
+            "exactly three distinct aspects in every trait. Never pair a level with a shorter "
+            "aspect list. Location ids, faction identities, pregen names, and connection targets "
+            "must be internally consistent. Do not assign per-character starting "
             "placement: application code places every character together in the shared opening "
             "scene."
         ),

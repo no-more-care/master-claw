@@ -27,6 +27,7 @@ class ProgressionService:
         trait_name: str,
         new_aspect: str,
         permit: AdvancementPermit,
+        causation_id: str | None = None,
     ) -> CharacterState:
         character = self._require_authorized_character(
             game_id=game_id, player_id=player_id, permit=permit
@@ -43,6 +44,7 @@ class ProgressionService:
             sheet=result.sheet,
             xp_cost=result.xp_cost,
             description=result.description,
+            causation_id=causation_id,
         )
 
     def learn_character_trait(
@@ -54,6 +56,7 @@ class ProgressionService:
         aspects: tuple[str, str],
         justification: str,
         permit: AdvancementPermit,
+        causation_id: str | None = None,
     ) -> CharacterState:
         character = self._require_authorized_character(
             game_id=game_id, player_id=player_id, permit=permit
@@ -71,6 +74,7 @@ class ProgressionService:
             sheet=result.sheet,
             xp_cost=result.xp_cost,
             description=f"{result.description}; justification: {justification.strip()}",
+            causation_id=causation_id,
         )
 
     def _require_authorized_character(

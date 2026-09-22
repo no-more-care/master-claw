@@ -95,6 +95,10 @@ class TransientProviderError(RuntimeError):
     """A provider/network failure that is safe to retry without changing the request."""
 
 
+class DeterministicProviderError(RuntimeError):
+    """A provider rejection that cannot recover by replaying the identical request."""
+
+
 class BoundedJsonPipeline[OutputT: BaseModel]:
     """One initial completion and at most one schema-repair completion."""
 
@@ -110,6 +114,10 @@ class BoundedJsonPipeline[OutputT: BaseModel]:
         self._output_type = output_type
         self._static_system = static_system
         self._output_tool = output_tool or self._default_tool_name(output_type)
+
+    @property
+    def output_type(self) -> type[OutputT]:
+        return self._output_type
 
     async def run(self, *, task: str, context: AssembledContext) -> OutputT:
         with stage_span(
@@ -226,7 +234,7 @@ class BoundedJsonPipeline[OutputT: BaseModel]:
 
 
 def strict_output_schema(output_type: type[BaseModel]) -> dict[str, object]:
-    """Return the strict JSON Schema subset expected by native function calling."""
+    """Return the strict JSON Schema subset expected by structured-output providers."""
     schema = output_type.model_json_schema()
 
     def normalize(node: object) -> None:
@@ -235,6 +243,12 @@ def strict_output_schema(output_type: type[BaseModel]) -> dict[str, object]:
             properties = node.get("properties")
             if node.get("type") == "object" and isinstance(properties, dict):
                 node["additionalProperties"] = False
+                # OpenAI-compatible strict structured outputs require every declared
+                # property to be present. Pydantic already represents semantically optional
+                # values as a union with null; defaulted collections therefore become explicit
+                # empty arrays rather than omitted keys.
+                if properties:
+                    node["required"] = list(properties)
             for value in node.values():
                 normalize(value)
         elif isinstance(node, list):

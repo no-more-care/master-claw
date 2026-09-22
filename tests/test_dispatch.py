@@ -44,8 +44,8 @@ def snapshot(
     [
         (
             snapshot("/game status", command="/game"),
-            RunHandler,
-            HandlerKind.COMMAND,
+            RespondFromState,
+            StateResponseKind.GAME_STATUS,
         ),
         (
             snapshot("0", pending=PendingView("pool_confirmation")),
@@ -135,6 +135,64 @@ def test_new_world_request_cannot_replace_active_review_workspace() -> None:
         "world_workspace_active",
         DecisionSource.WORKSPACE,
         CommandId.CREATE_WORLD,
+    )
+
+
+def test_detailed_new_world_request_cannot_be_misread_as_workspace_revision() -> None:
+    decision = decide(
+        snapshot(
+            "Создай новый мир про пиратов и затонувшие города",
+            mode=OperatingMode.WORLD_MANAGEMENT,
+            workspace_stage="collecting",
+        )
+    )
+    assert decision == Reject(
+        "world_workspace_active",
+        DecisionSource.WORKSPACE,
+        CommandId.CREATE_WORLD,
+    )
+
+
+@pytest.mark.parametrize(
+    "content",
+    [
+        "Не хочу создавать новый мир",
+        "Он сказал: «создай новый мир про пиратов»",
+        "Если этот не подойдёт, создай новый мир",
+    ],
+)
+def test_non_assertive_world_creation_text_does_not_trigger_workspace_guard(content) -> None:
+    assert isinstance(
+        decide(
+            snapshot(
+                content,
+                mode=OperatingMode.WORLD_MANAGEMENT,
+                workspace_stage="collecting",
+            )
+        ),
+        ClassifyWithLlm,
+    )
+
+
+@pytest.mark.parametrize(
+    "content",
+    ["// обсуждаем расписание", "[ooc] вернусь завтра", "[вне игры] пауза на чай"],
+)
+def test_ooc_prefix_bypasses_state_llm(content) -> None:
+    assert decide(snapshot(content)) == Reject("ooc_ignored", DecisionSource.PHRASE)
+
+
+def test_preparation_multi_intent_is_not_silently_collapsed() -> None:
+    decision = decide(
+        snapshot(
+            "Создай мне персонажа-следопыта и начинаем игру",
+            mode=OperatingMode.PREPARATION,
+        )
+    )
+    assert decision == Reject(
+        "preparation_multi_intent",
+        DecisionSource.PHRASE,
+        CommandId.CLARIFY,
     )
 
 

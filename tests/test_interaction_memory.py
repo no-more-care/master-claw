@@ -247,8 +247,8 @@ def test_accepted_player_narration_is_recorded_after_review(tmp_path) -> None:
         scene_id="room",
         proposal=PoolProposal(
             trait_names=("Lore",),
-            aspect_names=("Runes",),
-            difficulty=1,
+            aspect_names=("Runes", "Archives"),
+            difficulty=2,
         ),
         prompt="Confirm.",
         declaration="Open the rune lock.",
@@ -283,6 +283,18 @@ def test_accepted_player_narration_is_recorded_after_review(tmp_path) -> None:
     assert events[0]["payload"]["metadata"] == {
         "roll_id": roll.roll_id,
         "source_event_id": "narration",
+        "fiction_context": {
+            "game_id": "game",
+            "player_id": "alice",
+            "character_id": "hero",
+            "character_revision": 1,
+            "scene_id": "room",
+            "scene_revision": 0,
+            "location_revision": 0,
+            "participants": ["alice"],
+        },
+        "response_mode": "delivery",
+        "original_target_channel_id": "narrative",
     }
 
 

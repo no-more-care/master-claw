@@ -8,6 +8,7 @@ version = "2.0.0.dev0"
 description = "Deterministic Discord game-master orchestration on OpenHands SDK"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+  "httpx>=0.28,<0.29",
   "discord.py>=2.5,<3",
   # OpenHands 1.33 allows newer LiteLLM releases, but 1.92.0 has no usable
   # Windows/Python 3.12 wheel and attempts a Rust source build during install.

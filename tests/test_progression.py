@@ -80,6 +80,114 @@ def test_xp_is_awarded_automatically_at_each_new_full_half_hour(tmp_path) -> Non
     assert character.experience_earned == 1
 
 
+def test_causal_activity_replay_is_exact_and_does_not_double_credit_or_xp(tmp_path) -> None:
+    store, _ = setup_game(tmp_path)
+    store.create_character(
+        CharacterState(
+            "companion",
+            "game",
+            "bob",
+            "Bio",
+            character_sheet(),
+        )
+    )
+    current = datetime(2026, 1, 1, tzinfo=UTC)
+    store.record_activity(game_id="game", occurred_at=current)
+    for _ in range(5):
+        current += timedelta(minutes=5)
+        store.record_activity(game_id="game", occurred_at=current)
+    current += timedelta(minutes=5)
+
+    first = store.record_activity(
+        game_id="game",
+        occurred_at=current,
+        causation_id="activity:event-30-minutes",
+    )
+    activity_after_first = store.activity_state("game")
+    revisions_after_first = {
+        player_id: store.character_for_player(game_id="game", player_id=player_id).revision
+        for player_id in ("alice", "bob")
+    }
+    replayed = store.record_activity(
+        game_id="game",
+        occurred_at=current,
+        causation_id="activity:event-30-minutes",
+    )
+    recorded = store.activity_record_for_causation(
+        causation_id="activity:event-30-minutes",
+        game_id="game",
+        occurred_at=current,
+    )
+
+    assert first == replayed
+    assert first.total_active_seconds == 1800
+    assert first.xp_awarded_each == 1
+    assert recorded == (first, ("companion", "hero"))
+    assert store.activity_state("game") == activity_after_first
+    assert {
+        player_id: store.character_for_player(game_id="game", player_id=player_id).revision
+        for player_id in ("alice", "bob")
+    } == revisions_after_first
+    assert all(revision == 1 for revision in revisions_after_first.values())
+
+
+def test_causal_activity_replay_rejects_game_or_timestamp_mismatch(tmp_path) -> None:
+    store, _ = setup_game(tmp_path)
+    occurred_at = datetime(2026, 1, 1, tzinfo=UTC)
+    store.record_activity(
+        game_id="game",
+        occurred_at=occurred_at,
+        causation_id="activity:identity",
+    )
+    store.create_game(GameState("other-game", "world", GameLifecycle.ACTIVE))
+    original_state = store.activity_state("game")
+    other_state = store.activity_state("other-game")
+
+    with pytest.raises(RuntimeError, match="activity replay identity mismatch"):
+        store.record_activity(
+            game_id="game",
+            occurred_at=occurred_at + timedelta(seconds=1),
+            causation_id="activity:identity",
+        )
+    with pytest.raises(RuntimeError, match="activity replay identity mismatch"):
+        store.record_activity(
+            game_id="other-game",
+            occurred_at=occurred_at,
+            causation_id="activity:identity",
+        )
+
+    assert store.activity_state("game") == original_state
+    assert store.activity_state("other-game") == other_state
+
+
+def test_causal_activity_replay_rejects_malformed_marker_without_mutation(tmp_path) -> None:
+    store, _ = setup_game(tmp_path)
+    occurred_at = datetime(2026, 1, 1, tzinfo=UTC)
+    with store.transaction() as connection:
+        connection.execute(
+            """INSERT INTO domain_events
+               (game_id, event_type, payload_json, causation_id)
+               VALUES (?, 'activity_recorded', ?, ?)""",
+            ("game", "{}", "activity:malformed"),
+        )
+    original_state = store.activity_state("game")
+
+    with pytest.raises(RuntimeError, match="activity replay marker is invalid"):
+        store.record_activity(
+            game_id="game",
+            occurred_at=occurred_at,
+            causation_id="activity:malformed",
+        )
+    with pytest.raises(RuntimeError, match="activity replay marker is invalid"):
+        store.activity_record_for_causation(
+            causation_id="activity:malformed",
+            game_id="game",
+            occurred_at=occurred_at,
+        )
+
+    assert store.activity_state("game") == original_state
+
+
 def test_disabled_progression_tracks_time_but_awards_no_xp(tmp_path) -> None:
     store, service = setup_game(tmp_path, progression_enabled=False)
     current = datetime(2026, 1, 1, tzinfo=UTC)

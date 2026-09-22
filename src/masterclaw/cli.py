@@ -8,11 +8,13 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from masterclaw.adapters.discord_bot import DiscordIngressClient
+from masterclaw.adapters.jev import JevClassifier
 from masterclaw.adapters.openhands import OpenHandsCompletionPort, OpenHandsLLMRegistry
 from masterclaw.app.advancement_coordinator import AdvancementCoordinator
 from masterclaw.app.message_handler import MessageApplication
 from masterclaw.app.orchestrator import ChannelOrchestrator
 from masterclaw.app.worldgen_service import create_world_generation_service
+from masterclaw.classifiers.policy import ClassifierMode
 from masterclaw.config import ModelRole, OutputTransport, Settings
 from masterclaw.context.assembler import ContextAssembler
 from masterclaw.pipelines.action import create_action_pipeline
@@ -51,11 +53,14 @@ HEALTHCHECK_REQUIRED_TABLES = frozenset(
         "scenes",
         "characters",
         "pending_interactions",
+        "decision_checkpoints",
+        "event_operations",
         "domain_events",
         "rolls",
         "outbox_messages",
         "llm_calls",
         "stage_spans",
+        "lexicon_candidates",
     }
 )
 
@@ -112,6 +117,15 @@ def build_parser() -> argparse.ArgumentParser:
     performance.add_argument("--status", choices=("ok", "error"))
     performance.add_argument("--limit", type=int, default=20)
     performance.add_argument("--format", choices=("table", "json", "csv"), default="table")
+    routing_quality = subparsers.add_parser(
+        "routing-quality-report",
+        help="Report lexicon candidates and model routing quality rates",
+    )
+    routing_quality.add_argument("--database", default="data/masterclaw.sqlite3")
+    routing_quality.add_argument("--since-hours", type=int, default=24 * 7)
+    routing_quality.add_argument("--min-count", type=int, default=2)
+    routing_quality.add_argument("--limit", type=int, default=50)
+    routing_quality.add_argument("--format", choices=("table", "json"), default="table")
     return parser
 
 
@@ -182,6 +196,19 @@ def main(argv: list[str] | None = None) -> int:
         )
         print(render_report(report, args.format))
         return 0
+    if args.command == "routing-quality-report":
+        from masterclaw.routing_quality import render_routing_quality_report, routing_quality_report
+
+        store = SQLiteStore(args.database)
+        store.initialize()
+        report = routing_quality_report(
+            store,
+            since_hours=args.since_hours,
+            min_count=args.min_count,
+            limit=args.limit,
+        )
+        print(render_routing_quality_report(report, args.format))
+        return 0
     if args.command == "dead-letter":
         store = SQLiteStore(args.database)
         store.initialize()
@@ -230,7 +257,12 @@ def _serve(settings: Settings) -> int:
             completion(ModelRole.STATE, settings.state_fallback_model),
         )
 
-    state_router = StateDecisionRouter(state_completion())
+    classifier = _state_classifier(settings)
+    state_router = StateDecisionRouter(
+        state_completion(),
+        classifier=classifier,
+        classifier_config=settings.classifier,
+    )
     context = ContextAssembler(
         settings.prompt_path,
         model_ids={role: settings.model_for(role).model for role in ModelRole},
@@ -283,9 +315,25 @@ def _serve(settings: Settings) -> int:
         store=store,
         orchestrator=orchestrator,
         debounce_seconds=settings.discord_debounce_seconds,
+        close_resources=None if classifier is None else classifier.aclose,
     )
     client.run(settings.discord_token.get_secret_value(), log_handler=None)
     return 0
+
+
+def _state_classifier(settings: Settings) -> JevClassifier | None:
+    if settings.classifier.mode is ClassifierMode.OFF:
+        return None
+    return JevClassifier(
+        model=settings.classifier.model,
+        timeout_seconds=settings.classifier.timeout_seconds,
+        max_concurrency=settings.llm_max_concurrency,
+        api_key=(
+            settings.classifier_api_key
+            if settings.classifier_api_key is not None
+            else settings.openrouter_api_key
+        ),
+    )
 
 
 def _service_completion(

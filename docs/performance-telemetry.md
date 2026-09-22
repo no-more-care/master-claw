@@ -37,3 +37,60 @@ analysis.
 
 The report reads SQLite directly and never calls an LLM. Use `--database` to analyze a copied or
 restored database without touching the live daemon.
+
+## Weekly routing-quality review
+
+Run the routing-quality report once a week against the live database, and retain its JSON output
+with the other operational reports:
+
+```bash
+masterclaw routing-quality-report --since-hours 168 --min-count 2
+masterclaw routing-quality-report --since-hours 168 --min-count 2 --format json
+```
+
+The lexicon section groups replay-safe observations by scenario, command and normalized phrase.
+Each Discord event can contribute at most one observation, so an inbox or handler replay does not
+inflate frequency. Candidates are limited to high-confidence read-only `SHOW_*` commands and
+`ANSWER_PENDING`. Promotion remains a manual change: review meaning, locale and cross-scenario
+collisions before adding an exact phrase to a scenario lexicon. The report never edits routing
+rules automatically.
+
+The quality section deliberately keeps three denominators separate:
+
+- schema-repair rate is repair completions divided by bounded pipeline runs for the same typed
+  output contract;
+- invalid-result rate is bounded runs ending in `PipelineValidationError` divided by bounded runs
+  for that contract; it does not claim that every caller caught and rendered the error;
+- model-fallback rate is secondary-model completion attempts divided by primary-model completion
+  attempts for that contract.
+
+These are typed-output-contract aggregates because that is the stable operation identity already
+persisted in performance spans. They must not be added together: a single pipeline run can use both
+a secondary model and schema repair. Compare each rate with its own prior weekly window and
+investigate abrupt increases before changing prompts or model assignments. The command reads
+SQLite only after applying the normal schema migration and does not call a model.
+
+## Semantic classifier shadow observations
+
+When `MASTERCLAW_CLASSIFIER__MODE=shadow`, `classifier.state_dispatch` spans persist a typed
+observation in the existing `stage_spans.attributes_json` column. No schema migration is needed.
+The observation includes requested and resolved model, reported version/provider/request ID,
+taxonomy/request fingerprint, full label probabilities, confidence, the authoritative router's
+command, agreement, latency, and numeric token/cost metadata. Unknown versions remain null.
+Free-form provider metadata and non-allowlisted usage fields are omitted; player messages,
+arguments, history, player IDs and GM context are not included.
+
+The observation's `outcome` is `eligible`, `uncertain`, `blocked`, or `error`; these are evaluation
+signals and never authorize a command. Inspect `error_category` and `error_transient` to distinguish
+configuration/authentication/request/response failures from rate-limit/server/timeout/network
+failures. A handled shadow failure leaves the enclosing span status `ok` because routing succeeds
+using the current router. Cancellation still propagates.
+
+For calibration, query `attributes_json` on spans where `stage = 'classifier.state_dispatch'`.
+The current performance report includes their latency, but its LLM cost summary and the routing
+quality report do not yet aggregate classifier distributions or costs. The durable observations
+are available for that separate reporting work; they are not lost when a model alias changes.
+
+Jev reuses `MASTERCLAW_OPENROUTER_API_KEY`, optionally overridden by
+`MASTERCLAW_CLASSIFIER_API_KEY`. Empty credentials fail during startup when shadow is enabled.
+Its bounded HTTP pool is reused and closed after Discord's in-flight work is cancelled at shutdown.

@@ -21,4 +21,8 @@ class ModeRouter:
             return RouteDecision(OperatingMode.PREPARATION, "game_not_started")
         if channel.lifecycle is GameLifecycle.ACTIVE:
             return RouteDecision(OperatingMode.PLAY, "active_game")
-        return RouteDecision(OperatingMode.PREPARATION, "inactive_game_requires_session_command")
+        if channel.lifecycle is GameLifecycle.PAUSED:
+            return RouteDecision(OperatingMode.PAUSED, "paused_game")
+        if channel.lifecycle is GameLifecycle.FINISHED:
+            return RouteDecision(OperatingMode.FINISHED, "finished_game")
+        return RouteDecision(OperatingMode.PREPARATION, "game_not_started")

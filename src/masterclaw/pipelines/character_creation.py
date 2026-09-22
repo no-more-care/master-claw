@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic_core import PydanticCustomError
 
 from masterclaw.domain.mechanics import FlagType
 from masterclaw.pipelines.base import BoundedJsonPipeline, CompletionPort
@@ -15,10 +16,16 @@ class TraitDraft(BaseModel):
     @model_validator(mode="after")
     def require_one_aspect_per_level(self) -> TraitDraft:
         if len(self.aspects) != self.level:
-            raise ValueError("aspect count must equal trait level")
+            raise PydanticCustomError(
+                "trait_aspect_count_mismatch",
+                "aspect count must equal trait level",
+            )
         normalized_aspects = [item.strip().casefold() for item in self.aspects]
         if len(set(normalized_aspects)) != len(normalized_aspects):
-            raise ValueError("trait aspects must be unique")
+            raise PydanticCustomError(
+                "trait_aspects_not_unique",
+                "trait aspects must be unique",
+            )
         return self
 
 
@@ -68,7 +75,9 @@ def create_character_pipeline(
         static_system=(
             "Create one starting BlackBirdPie character from the player brief and public "
             "world context. Trait levels must total exactly 18; each trait level is 2..6; "
-            "aspect count equals level. Include at least three flags and at least one positive "
+            "aspect count equals level. For example, a level-3 trait has exactly three aspects "
+            "and a level-6 trait has exactly six; never reuse a shorter aspect list for a higher "
+            "level. Include at least three flags and at least one positive "
             "relationship flag, marking every flag with is_positive. Trait names and aspect "
             "names must be unique after trimming and case folding. Do not use or reveal secret "
             "plot information."

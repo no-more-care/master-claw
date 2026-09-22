@@ -10,6 +10,11 @@ class MechanicsError(ValueError):
     pass
 
 
+MIN_DIFFICULTY = 2
+MAX_DIFFICULTY = 7
+MIN_EFFECTIVE_DIFFICULTY = 1
+
+
 class NarratorRights(StrEnum):
     PLAYER_SUCCESS = "player_success"
     GM_SUCCESS = "gm_success"
@@ -155,7 +160,7 @@ class PoolProposal:
     aspect_names: tuple[str, ...] = ()
     flag: str | None = None
     reserve_spent: int = 0
-    difficulty: int = 1
+    difficulty: int = MIN_DIFFICULTY
     bonus_ids: tuple[str, ...] = ()
 
 
@@ -177,8 +182,8 @@ class RollResult:
 
 
 def validate_pool(sheet: CharacterSheet, proposal: PoolProposal) -> ValidatedPool:
-    if proposal.difficulty < 1:
-        raise MechanicsError("difficulty must be positive")
+    if not MIN_DIFFICULTY <= proposal.difficulty <= MAX_DIFFICULTY:
+        raise MechanicsError(f"difficulty must be between {MIN_DIFFICULTY} and {MAX_DIFFICULTY}")
     if not proposal.trait_names:
         raise MechanicsError("at least one trait is required")
     if len(set(proposal.trait_names)) != len(proposal.trait_names):
@@ -233,7 +238,7 @@ def validate_pool(sheet: CharacterSheet, proposal: PoolProposal) -> ValidatedPoo
     )
     return ValidatedPool(
         size=len(components),
-        difficulty=max(1, proposal.difficulty - difficulty_reductions),
+        difficulty=max(MIN_EFFECTIVE_DIFFICULTY, proposal.difficulty - difficulty_reductions),
         reserve_after_spend=sheet.reserve_current - proposal.reserve_spent,
         components=components,
         bonus_ids=proposal.bonus_ids,
@@ -262,7 +267,7 @@ def social_difficulty(relation: SocialRelation, deal: DealPosition = DealPositio
         DealPosition.ADVANTAGEOUS: 1,
         DealPosition.UNFAVOURABLE: -1,
     }[deal]
-    return max(1, base + modifier)
+    return min(MAX_DIFFICULTY, max(MIN_DIFFICULTY, base + modifier))
 
 
 def roll_pool(pool: ValidatedPool, *, die: Callable[[], int] | None = None) -> RollResult:

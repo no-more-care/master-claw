@@ -12,6 +12,7 @@ from pydantic import BaseModel, SecretStr
 from masterclaw.config import ModelConfig, ModelRole, OutputTransport, Settings
 from masterclaw.pipelines.base import (
     CompletionResult,
+    DeterministicProviderError,
     TransientProviderError,
     strict_output_schema,
 )
@@ -19,10 +20,6 @@ from masterclaw.storage.sqlite import SQLiteStore
 from masterclaw.telemetry import current_game_id, current_trace_fields, stage_span
 
 logger = logging.getLogger(__name__)
-
-
-class DeterministicProviderError(RuntimeError):
-    """A provider rejection that requires changing configuration or request content."""
 
 
 class OpenHandsLLMRegistry:
@@ -162,6 +159,14 @@ class OpenHandsCompletionPort:
             }
         else:
             schema = strict_output_schema(output_type)
+            completion_kwargs["response_format"] = {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": tool_name,
+                    "strict": True,
+                    "schema": schema,
+                },
+            }
             messages.append(
                 Message(
                     role="user",
@@ -212,8 +217,40 @@ class OpenHandsCompletionPort:
                             response = await self._invoke_provider(
                                 messages, tools, completion_kwargs
                             )
-                        break
                     except Exception as error:
+                        if (
+                            "response_format" in completion_kwargs
+                            and _is_structured_output_rejection(error)
+                        ):
+                            # Model/provider metadata can advertise structured output while a
+                            # particular route still rejects response_format or this schema.
+                            # Retry once with the already-supplied JSON-schema prompt; this is a
+                            # changed request, not a replay of the deterministic rejection.
+                            completion_kwargs.pop("response_format", None)
+                            logger.warning(
+                                "provider rejected strict response_format for role %s; "
+                                "falling back to prompt JSON",
+                                self._role.value,
+                            )
+                            try:
+                                with stage_span(
+                                    "llm.provider_attempt",
+                                    component="openhands",
+                                    operation=self._role.value,
+                                    attributes={
+                                        "model": self._llm.model,
+                                        "attempt": attempt,
+                                        "is_retry": True,
+                                        "schema_transport_fallback": True,
+                                    },
+                                ):
+                                    response = await self._invoke_provider(
+                                        messages, tools, completion_kwargs
+                                    )
+                            except Exception as fallback_error:
+                                error = fallback_error
+                            else:
+                                break
                         if _is_deterministic_provider_error(error):
                             raise DeterministicProviderError(
                                 "provider rejected the request; retry requires changing it"
@@ -229,6 +266,8 @@ class OpenHandsCompletionPort:
                             self._retry_delays[attempt - 1],
                         )
                         await asyncio.sleep(self._retry_delays[attempt - 1])
+                    else:
+                        break
                 assert response is not None
         except Exception as error:
             self._record(
@@ -377,6 +416,13 @@ def _is_deterministic_provider_error(error: Exception) -> bool:
             LLMMalformedConversationHistoryError,
         ),
     )
+
+
+def _is_structured_output_rejection(error: Exception) -> bool:
+    """Return true when prompt JSON can safely retry without response_format."""
+    from openhands.sdk.llm.exceptions import LLMBadRequestError
+
+    return isinstance(error, LLMBadRequestError)
 
 
 def _terminal_output_tool(tool_name: str, output_type: type[BaseModel]):

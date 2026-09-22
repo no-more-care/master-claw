@@ -89,7 +89,7 @@ The `default_narrative_style` is a hint used at game creation — when starting 
 ### starter_characters.md
 Up to 5 ready-to-play characters. Each must be valid by the character schema (characters/SKILL.md):
 - traits_points_total == 18
-- 3–7 traits, each level 2–6, aspects count == level
+- 3–9 traits, each level 2–6, aspects count == level
 - At least 1 flag with type: relationship (locked: true)
 - reserve_dice.current == 7, experience.earned == 0
 

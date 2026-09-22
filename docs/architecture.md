@@ -110,14 +110,17 @@ record `scenario`, `command`, `source`, gate result, and evidence in telemetry.
 Scenario descriptors also control the state model's projection list and chat-history depth. World
 selection receives the catalogue, play receives the current scene and actor, and pending scenarios
 receive the outstanding interaction. High-confidence model decisions for routine information or
-pending replies emit normalized `lexicon_candidate` telemetry for later exact-lexicon promotion.
+pending replies persist normalized, event-idempotent `lexicon_candidate` observations for the weekly
+`routing-quality-report` and later manual exact-lexicon promotion.
 
 Each typed pipeline manifest declares its invalid-output fallback. Routine schema failures are
 translated into stage-specific clarification instead of escaping to the orchestrator. Context
 assembly degrades bounded history and long projection strings before failing, and oversized player
 messages are rejected before any model call. Claimed inbox messages are persisted one at a time, so
-one handler failure cannot discard successful siblings or fail unrelated messages. Provider retries
-use typed transient failures and 5/30-second backoff; deterministic failures are not retried.
+one handler failure cannot discard successful siblings or fail unrelated messages. Provider adapters
+use bounded 5/30-second retries; if a typed transient failure still escapes, the durable inbox
+requeues the message after 5/30/120/300 seconds while preserving per-channel FIFO. Deterministic
+failures are not retried.
 
 `app.message_handler.MessageApplication` is a thin 145-line lifecycle facade. Pure decision
 execution lives in `app.handlers.dispatching`; world management, preparation, information, play,

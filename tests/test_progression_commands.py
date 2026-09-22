@@ -57,12 +57,13 @@ def send(app, *, event_id, author, content, at):
     )
 
 
-def test_xp_status_reports_automatic_progression_without_llm(tmp_path) -> None:
+def test_read_only_status_does_not_farm_xp_and_reports_character_xp_without_llm(tmp_path) -> None:
     store, app, current = setup_app(tmp_path)
     for index in range(6):
         current += timedelta(minutes=5)
         send(app, event_id=f"play-{index}", author="player", content="/game status", at=current)
     status = send(app, event_id="status", author="player", content="/xp status", at=current)
     assert "Прогрессия: включена" in status
-    assert "начислено полных интервалов: 1" in status
-    assert store.character_for_player(game_id="game", player_id="player").experience_earned == 1
+    assert "начислено полных интервалов: 0" in status
+    assert "XP персонажа: доступно 0, заработано 0, потрачено 0" in status
+    assert store.character_for_player(game_id="game", player_id="player").experience_earned == 0

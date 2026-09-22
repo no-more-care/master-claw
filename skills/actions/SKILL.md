@@ -96,9 +96,11 @@ If auto-success: announce it briefly, describe or hand narrative to player. Skip
 | 4 | Hard — alert enemies, adverse conditions |
 | 5 | Very hard — expert opposition |
 | 6 | Extreme — legendary difficulty |
-| 7+ | Nearly impossible |
+| 7 | Nearly impossible |
 
-Set difficulty based on the FICTION (what the world demands), never based on player resources or requests.
+Base difficulty is bounded to 2–7. A canonical one-use `difficulty_reduction` bonus may reduce an
+already validated base difficulty of 2 to an effective difficulty of 1. Set difficulty based on the
+FICTION (what the world demands), never based on player resources or requests.
 
 Announce difficulty and failure stakes to the player.
 

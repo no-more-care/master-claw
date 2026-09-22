@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 
+from masterclaw.app.decision_checkpoints import run_checkpointed_decision
 from masterclaw.app.i18n import tr
 from masterclaw.app.scenarios import normalize_phrase
 from masterclaw.context.manifests import PipelineName, manifest_for
@@ -16,6 +17,7 @@ from masterclaw.domain.mechanics import (
     validate_character,
 )
 from masterclaw.domain.models import (
+    HandlerResponse,
     IncomingMessage,
 )
 from masterclaw.pipelines.base import PipelineValidationError
@@ -30,6 +32,13 @@ _JOINABLE_LIFECYCLES = {"preparing", "active", "paused"}
 
 
 class PreparationHandlers:
+    def _character_name_taken(self, *, game_id: str, name: str) -> bool:
+        normalized = name.strip().casefold()
+        return any(
+            str(item["name"]).strip().casefold() == normalized
+            for item in self._store.character_roster(game_id)
+        )
+
     def _place_joining_character(self, *, game_id: str, player_id: str) -> bool:
         """Place a character created after game start into the party's scene."""
         roster = self._store.character_roster(game_id)
@@ -57,6 +66,18 @@ class PreparationHandlers:
             return tr(locale, "character_prepare_only")
         existing = self._store.character_for_player(game_id=game_id, player_id=message.author_id)
         if existing is not None:
+            if (
+                game.lifecycle.value != "preparing"
+                and self._store.scene_projection(game_id=game_id, player_id=message.author_id)
+                is None
+                and self._place_joining_character(game_id=game_id, player_id=message.author_id)
+            ):
+                return tr(
+                    locale,
+                    "character_created_joined",
+                    character_id=existing.character_id,
+                    name=existing.sheet.name,
+                )
             return tr(
                 locale,
                 "character_created_and_placed",
@@ -74,9 +95,14 @@ class PreparationHandlers:
             player_id=message.author_id,
         )
         try:
-            draft = await self._character_pipeline.run(
+            draft = await run_checkpointed_decision(
+                store=self._store,
+                event_id=message.event_id,
+                pipeline_key="character_creation",
+                pipeline=self._character_pipeline,
                 task="Create a validated starting character from the player's natural description.",
                 context=assembled,
+                game_id=game_id,
             )
         except PipelineValidationError:
             logger.warning(
@@ -91,6 +117,8 @@ class PreparationHandlers:
             flags=tuple(Flag(item.text, item.type, locked=True) for item in draft.flags),
         )
         validate_character(sheet, STARTING_CHARACTER_RULES)
+        if self._character_name_taken(game_id=game_id, name=sheet.name):
+            return tr(locale, "character_name_taken", name=sheet.name)
         character_id = f"character_{message.event_id}"
         self._store.create_character(
             CharacterState(
@@ -160,12 +188,29 @@ class PreparationHandlers:
         locale = self._locale(game_id)
         existing = self._store.character_for_player(game_id=game_id, player_id=message.author_id)
         if existing is not None:
+            game = self._store.game_state(game_id)
+            if (
+                game is not None
+                and game.lifecycle.value != "preparing"
+                and self._store.scene_projection(game_id=game_id, player_id=message.author_id)
+                is None
+                and self._place_joining_character(game_id=game_id, player_id=message.author_id)
+            ):
+                return tr(
+                    locale,
+                    "character_created_joined",
+                    character_id=existing.character_id,
+                    name=existing.sheet.name,
+                )
             return tr(
                 locale,
                 "character_created_and_placed",
                 character_id=existing.character_id,
                 name=existing.sheet.name,
             )
+        pregen_name = str(pregen["name"])
+        if self._character_name_taken(game_id=game_id, name=pregen_name):
+            return tr(locale, "pregen_already_claimed", name=pregen_name)
         traits = tuple(
             Trait(str(item["name"]), int(item["level"]), tuple(item["aspects"]))
             for item in pregen.get("traits", [])
@@ -174,7 +219,7 @@ class PreparationHandlers:
             Flag(str(item["text"]), FlagType(str(item["type"])), locked=True)
             for item in pregen.get("flags", [])
         )
-        sheet = CharacterSheet(name=str(pregen["name"]), traits=traits, flags=flags)
+        sheet = CharacterSheet(name=pregen_name, traits=traits, flags=flags)
         validate_character(sheet, STARTING_CHARACTER_RULES)
         character_id = f"character_{message.event_id}"
         self._store.create_character(
@@ -205,13 +250,26 @@ class PreparationHandlers:
             name=sheet.name,
         )
 
-    def _handle_natural_game_start(self, *, game_id: str, started_at) -> str:
+    def _handle_natural_game_start(
+        self, *, message: IncomingMessage, game_id: str
+    ) -> str | HandlerResponse:
         locale = self._locale(game_id)
+        operation_event_id = (
+            message.event_id if self._has_durable_inbox_event(message.event_id) else None
+        )
         try:
-            game = self._games.start_game(game_id, started_at=started_at)
+            game = self._games.start_game(
+                game_id,
+                started_at=message.created_at,
+                event_id=operation_event_id,
+                channel_id=message.channel_id,
+            )
         except (ValueError, RuntimeError) as error:
             return tr(locale, "game_start_failed", error=error)
-        return tr(locale, "game_started", game_id=game.game_id)
+        return HandlerResponse(
+            tr(locale, "game_started", game_id=game.game_id),
+            render_live_status=True,
+        )
 
     async def _handle_natural_game_configuration(
         self, *, message: IncomingMessage, game_id: str
@@ -239,8 +297,14 @@ class PreparationHandlers:
             player_id=message.author_id,
         )
         try:
-            request = await self._game_configuration_pipeline.run(
-                task="Extract the requested game setting.", context=assembled
+            request = await run_checkpointed_decision(
+                store=self._store,
+                event_id=message.event_id,
+                pipeline_key="game_configuration",
+                pipeline=self._game_configuration_pipeline,
+                task="Extract the requested game setting.",
+                context=assembled,
+                game_id=game_id,
             )
         except PipelineValidationError:
             logger.warning(
@@ -248,11 +312,17 @@ class PreparationHandlers:
             )
             return tr(locale, manifest.on_invalid.value)
         try:
+            operation_event_id = (
+                message.event_id if self._has_durable_inbox_event(message.event_id) else None
+            )
             if request.kind is GameConfigurationKind.PROGRESSION:
                 if request.enabled is None:
                     raise ValueError("progression setting requires on or off")
                 updated = self._games.configure_progression(
-                    game_id=game_id, enabled=request.enabled
+                    game_id=game_id,
+                    enabled=request.enabled,
+                    event_id=operation_event_id,
+                    channel_id=message.channel_id,
                 )
                 return tr(
                     locale,
@@ -267,6 +337,8 @@ class PreparationHandlers:
                 updated = self._games.configure_narrator_rights(
                     game_id=game_id,
                     level=request.narrator_rights,
+                    event_id=operation_event_id,
+                    channel_id=message.channel_id,
                 )
                 return tr(
                     locale,
@@ -277,10 +349,11 @@ class PreparationHandlers:
                 if request.channel_id is None:
                     raise ValueError("narrative channel id is required")
                 channel_id = parse_discord_channel_id(request.channel_id)
-                self._store.set_narrative_channel(
+                self._games.configure_narrative_channel(
                     game_id=game_id,
-                    channel_id=channel_id,
-                    expected_revision=game.revision,
+                    narrative_channel_id=channel_id,
+                    event_id=operation_event_id,
+                    channel_id=message.channel_id,
                 )
                 return tr(locale, "narrative_channel_changed", channel_id=channel_id)
             if request.kind is GameConfigurationKind.RESERVE_RECOVERY:
@@ -289,6 +362,8 @@ class PreparationHandlers:
                 updated = self._games.configure_reserve_recovery(
                     game_id=game_id,
                     mode=request.reserve_recovery_mode,
+                    event_id=operation_event_id,
+                    channel_id=message.channel_id,
                 )
                 return tr(
                     locale,
@@ -298,7 +373,11 @@ class PreparationHandlers:
             if not request.scene_title:
                 raise ValueError("scene title is required")
             scene_id = f"scene_{message.event_id}"
-            self._store.create_scene(scene_id=scene_id, game_id=game_id, title=request.scene_title)
+            self._store.create_scene_if_absent(
+                scene_id=scene_id,
+                game_id=game_id,
+                title=request.scene_title,
+            )
             return tr(locale, "scene_created", scene_id=scene_id)
         except (ValueError, RuntimeError) as error:
             return tr(locale, "setting_failed", error=error)

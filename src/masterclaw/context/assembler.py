@@ -157,7 +157,17 @@ class ContextAssembler:
         if isinstance(value, str):
             if len(value) <= max_string_chars:
                 return value
-            return value[: max_string_chars - 1].rstrip() + "…"
+            if "Later player revision" not in value:
+                return value[: max_string_chars - 1].rstrip() + "…"
+            omission = "\n… [middle omitted] …\n"
+            if max_string_chars <= len(omission):
+                return value[-max_string_chars:]
+            available = max_string_chars - len(omission)
+            # Canonical briefs use later-wins revisions. Preserve both the original premise and
+            # a larger tail so the newest, highest-priority revision survives budget degradation.
+            head_length = available // 3
+            tail_length = available - head_length
+            return value[:head_length].rstrip() + omission + value[-tail_length:].lstrip()
         if isinstance(value, Mapping):
             return {
                 str(key): cls._truncate_projection(item, max_string_chars=max_string_chars)

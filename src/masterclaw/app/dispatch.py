@@ -4,13 +4,14 @@ from dataclasses import dataclass
 from enum import StrEnum
 
 from masterclaw.app.scenarios import (
-    WORLD_CREATION_PHRASES,
     CommandId,
     ScenarioId,
-    has_slash_root,
+    is_world_creation_request,
     match_explicit,
     normalize_phrase,
+    preparation_has_multiple_intents,
     resolve_scenario,
+    routes_unknown_slash_subcommand_to_usage,
 )
 from masterclaw.domain.models import OperatingMode
 
@@ -20,6 +21,7 @@ class DecisionSource(StrEnum):
     PENDING = "pending"
     WORKSPACE = "workspace"
     PHRASE = "phrase"
+    STRUCTURAL = "structural"
     LLM = "llm"
 
 
@@ -139,6 +141,11 @@ def decision_for_scenario_command(
         CommandId.CREATE_CHARACTER: HandlerKind.CHARACTER_CREATE,
         CommandId.SELECT_CHARACTER: HandlerKind.CHARACTER_SELECT,
         CommandId.START_GAME: HandlerKind.GAME_START,
+        CommandId.PAUSE_GAME: HandlerKind.COMMAND,
+        CommandId.RESUME_GAME: HandlerKind.COMMAND,
+        CommandId.FINISH_GAME: HandlerKind.COMMAND,
+        CommandId.UNBIND_GAME: HandlerKind.COMMAND,
+        CommandId.NEW_SESSION: HandlerKind.COMMAND,
         CommandId.CONFIGURE_GAME: HandlerKind.GAME_CONFIGURE,
         CommandId.DECLARE_ACTION: HandlerKind.ACTION,
         CommandId.PLAYER_NARRATION: HandlerKind.ROLEPLAY,
@@ -165,20 +172,29 @@ def decide(snapshot: DispatchSnapshot) -> Decision:
     )
     if scenario.id is ScenarioId.ROLL_RESUME:
         return decision_for_scenario_command(CommandId.RESUME_ROLL, source=DecisionSource.PENDING)
+    normalized = normalize_phrase(snapshot.content)
+    if (
+        snapshot.content.lstrip().startswith("//")
+        or normalized.startswith("ooc ")
+        or normalized == "ooc"
+        or normalized.startswith("вне игры ")
+        or normalized == "вне игры"
+    ):
+        return Reject("ooc_ignored", DecisionSource.PHRASE)
     if snapshot.command is not None:
         matched_command = match_explicit(scenario, snapshot.content)
         if matched_command is not None:
+            direct = decision_for_scenario_command(matched_command, source=DecisionSource.COMMAND)
+            if isinstance(direct, RespondFromState):
+                return direct
             return RunHandler(HandlerKind.COMMAND, DecisionSource.COMMAND, matched_command)
-        if has_slash_root(scenario, snapshot.command):
+        if routes_unknown_slash_subcommand_to_usage(scenario, snapshot.content):
             return RunHandler(HandlerKind.COMMAND, DecisionSource.COMMAND)
         return Reject(
             f"unavailable_{snapshot.mode.value}",
             DecisionSource.COMMAND,
         )
-    if (
-        snapshot.workspace_stage is not None
-        and normalize_phrase(snapshot.content) in WORLD_CREATION_PHRASES
-    ):
+    if snapshot.workspace_stage is not None and is_world_creation_request(snapshot.content):
         return Reject(
             "world_workspace_active",
             DecisionSource.WORKSPACE,
@@ -187,6 +203,10 @@ def decide(snapshot: DispatchSnapshot) -> Decision:
     explicit = match_explicit(scenario, snapshot.content)
     if explicit is not None:
         return decision_for_scenario_command(explicit, source=DecisionSource.PHRASE)
+    if snapshot.mode is OperatingMode.PREPARATION and preparation_has_multiple_intents(
+        snapshot.content
+    ):
+        return Reject("preparation_multi_intent", DecisionSource.PHRASE, CommandId.CLARIFY)
     if snapshot.pending is not None:
         normalized = snapshot.content.strip().casefold()
         if normalized in {"да", "нет", "yes", "no", "confirm", "cancel", "отмена"} or (

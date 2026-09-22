@@ -10,6 +10,8 @@ from masterclaw.context.manifests import (
     manifest_for,
     state_decision_manifest,
 )
+from masterclaw.domain.characters import CharacterState, PlotItem
+from masterclaw.domain.mechanics import CharacterSheet
 from masterclaw.domain.models import GameLifecycle
 from masterclaw.domain.state import GameState, WorldState
 from masterclaw.storage.sqlite import SQLiteStore
@@ -87,6 +89,9 @@ def test_public_world_slice_contains_canonical_scene_neighborhood_without_secret
         manifest_for(PipelineName.SCENE_QUESTION),
         {
             "session_brief": {"locale": "en"},
+            "actor_character": support._actor_character_projection(
+                game_id="game", player_id="alice"
+            ),
             "current_scene": scene,
             "player_question": "Where can I go?",
         },
@@ -121,7 +126,7 @@ def test_public_world_slice_contains_canonical_scene_neighborhood_without_secret
     assert SECRET not in assembled.dynamic_context
 
 
-def test_gm_owned_context_receives_secret_plot_and_public_world_slice(tmp_path) -> None:
+def test_roleplay_context_receives_public_world_slice_without_secret(tmp_path) -> None:
     store = _store_with_world_context(tmp_path)
     support = _support(store)
     scene = store.scene_projection(game_id="game", player_id="alice")
@@ -130,6 +135,9 @@ def test_gm_owned_context_receives_secret_plot_and_public_world_slice(tmp_path) 
         manifest_for(PipelineName.ROLEPLAY_REPLY),
         {
             "session_brief": {"locale": "en"},
+            "actor_character": support._actor_character_projection(
+                game_id="game", player_id="alice"
+            ),
             "current_scene": scene,
             "player_narration": "I ask why the bell is cracked.",
         },
@@ -137,18 +145,19 @@ def test_gm_owned_context_receives_secret_plot_and_public_world_slice(tmp_path) 
         channel_id="channel",
         player_id="alice",
     )
-    gm_world = _state_payload(assembled, "gm_world_context")
+    public_world = _state_payload(assembled, "public_world_context")
 
-    assert gm_world["premise"] == "A chained city survives above an intelligent storm."
-    assert gm_world["active_threads"] == [
+    assert public_world["premise"] == "A chained city survives above an intelligent storm."
+    assert public_world["active_threads"] == [
         "Find the missing bell keeper.",
         "Learn who altered the bell.",
     ]
-    assert gm_world["active_threats"] == [
+    assert public_world["active_threats"] == [
         "The tower sways in the storm.",
         "The oldest chain is close to breaking.",
     ]
-    assert gm_world["secret_plot"] == SECRET
+    assert "secret_plot" not in public_world
+    assert SECRET not in assembled.dynamic_context
 
 
 def test_player_narration_review_uses_public_context_without_secret(tmp_path) -> None:
@@ -160,6 +169,9 @@ def test_player_narration_review_uses_public_context_without_secret(tmp_path) ->
         manifest_for(PipelineName.PLAYER_NARRATION_REVIEW),
         {
             "session_brief": {"locale": "en"},
+            "actor_character": support._actor_character_projection(
+                game_id="game", player_id="alice"
+            ),
             "current_scene": scene,
             "roll_result": {
                 "hits": 2,
@@ -176,6 +188,25 @@ def test_player_narration_review_uses_public_context_without_secret(tmp_path) ->
     assert "public_world_context" in assembled.dynamic_context
     assert "gm_world_context" not in assembled.dynamic_context
     assert SECRET not in assembled.dynamic_context
+
+
+def test_actor_projection_keeps_canonical_plot_item_descriptions(tmp_path) -> None:
+    store = _store_with_world_context(tmp_path)
+    store.create_character(
+        CharacterState(
+            "hero",
+            "game",
+            "alice",
+            "Bio",
+            CharacterSheet("Hero", (), ()),
+            plot_items=(PlotItem("Brass key", "Opens the archive lift"),),
+        )
+    )
+
+    actor = _support(store)._actor_character_projection(game_id="game", player_id="alice")
+
+    assert actor is not None
+    assert actor["plot_items"] == [{"name": "Brass key", "description": "Opens the archive lift"}]
 
 
 def test_secret_plot_is_absent_from_state_router_and_public_status(tmp_path) -> None:
@@ -218,15 +249,20 @@ def test_secret_plot_is_absent_from_state_router_and_public_status(tmp_path) -> 
     assert SECRET not in panel
 
 
-def test_only_gm_owned_gameplay_manifests_request_secret_world_context() -> None:
-    gm_owned = {
+def test_only_canonical_state_planning_requests_secret_world_context() -> None:
+    assert "gm_world_context" in manifest_for(PipelineName.CONSEQUENCE_PLANNING).state_projections
+
+    player_facing = {
         PipelineName.ACTION_INTERPRETATION,
-        PipelineName.CONSEQUENCE_PLANNING,
         PipelineName.OUTCOME_NARRATION,
         PipelineName.ROLEPLAY_REPLY,
+        PipelineName.SCENE_QUESTION,
+        PipelineName.PLAYER_NARRATION_REVIEW,
     }
-    for pipeline in gm_owned:
-        assert "gm_world_context" in manifest_for(pipeline).state_projections
+    for pipeline in player_facing:
+        projections = manifest_for(pipeline).state_projections
+        assert "public_world_context" in projections
+        assert "gm_world_context" not in projections
 
     assert "public_world_context" in manifest_for(PipelineName.SCENE_QUESTION).state_projections
     assert (

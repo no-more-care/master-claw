@@ -2,18 +2,52 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Mapping
+from contextvars import ContextVar, Token
 
+from masterclaw.app.i18n import locale_for_text
 from masterclaw.app.scenarios import Scenario
 from masterclaw.context.assembler import AssembledContext, ContextHistory
 from masterclaw.context.manifests import ContextManifest
+from masterclaw.domain.models import ChannelState, IncomingMessage
+from masterclaw.domain.text_safety import hidden_secret_plot, secret_fact_catalog
 from masterclaw.telemetry import (
     stage_span,
 )
 
 logger = logging.getLogger(__name__)
+_MESSAGE_LOCALE: ContextVar[str] = ContextVar("masterclaw_message_locale", default="ru")
 
 
 class HandlerSupport:
+    def _has_durable_inbox_event(self, event_id: str) -> bool:
+        """Keep direct unit/service calls compatible while production uses event UoWs."""
+
+        try:
+            self._store.inbox_provider_attempts(event_id)
+        except ValueError as error:
+            if str(error) == "inbox event not found":
+                return False
+            raise
+        return True
+
+    def _channel_for_message(self, message: IncomingMessage) -> ChannelState:
+        """Recover the immutable ingress route for nested deterministic dispatches."""
+        if message.has_routing_snapshot:
+            return ChannelState(
+                channel_id=message.channel_id,
+                game_id=message.routing_game_id,
+                lifecycle=message.routing_lifecycle,
+            )
+        return self._store.channel_state(message.channel_id)
+
+    @staticmethod
+    def _bind_message_locale(content: str) -> Token[str]:
+        return _MESSAGE_LOCALE.set(locale_for_text(content))
+
+    @staticmethod
+    def _reset_message_locale(token: Token[str]) -> None:
+        _MESSAGE_LOCALE.reset(token)
+
     @staticmethod
     def _projection_items(value: object, *, limit: int = 12) -> list[object]:
         if value is None:
@@ -120,7 +154,16 @@ class HandlerSupport:
             "active_threats": active_threats,
         }
         if include_secret:
-            projection["secret_plot"] = content.get("secret_plot")
+            raw_secret = content.get("secret_plot")
+            hidden_secret = hidden_secret_plot(
+                raw_secret if isinstance(raw_secret, str) else None,
+                self._store.revealed_secret_ids(game_id),
+            )
+            projection["secret_plot"] = hidden_secret
+            projection["secret_catalog"] = [
+                {"secret_id": fact.secret_id, "text": fact.text}
+                for fact in secret_fact_catalog(hidden_secret)
+            ]
         return projection
 
     def _scene_with_participant_characters(
@@ -147,6 +190,42 @@ class HandlerSupport:
             if (player_id := str(participant)) in names_by_player
         ]
         return enriched
+
+    def _actor_character_projection(
+        self, *, game_id: str, player_id: str
+    ) -> dict[str, object] | None:
+        character = self._store.character_for_player(game_id=game_id, player_id=player_id)
+        if character is None:
+            return None
+        return {
+            "player_id": player_id,
+            "character_id": character.character_id,
+            "revision": character.revision,
+            "name": character.sheet.name,
+            "traits": [
+                {
+                    "name": trait.name,
+                    "level": trait.level,
+                    "aspects": list(trait.aspects),
+                }
+                for trait in character.sheet.traits
+            ],
+            "flags": [flag.text for flag in character.sheet.flags],
+            "reserve": character.sheet.reserve_current,
+            "conditions": [item.text for item in character.conditions],
+            "plot_items": [
+                {"name": item.name, "description": item.description}
+                for item in character.plot_items
+            ],
+            "temporary_bonuses": [
+                {
+                    "bonus_id": bonus.bonus_id,
+                    "type": bonus.type.value,
+                    "trigger": bonus.trigger,
+                }
+                for bonus in character.sheet.temporary_bonuses
+            ],
+        }
 
     def _scenario_context_projections(
         self,
@@ -211,38 +290,10 @@ class HandlerSupport:
                 else self._scene_with_participant_characters(game_id=game_id, scene=scene)
             )
         if "actor_character" in requested:
-            character = (
-                None
-                if game_id is None
-                else self._store.character_for_player(game_id=game_id, player_id=player_id)
-            )
             projections["actor_character"] = (
                 None
-                if character is None
-                else {
-                    "character_id": character.character_id,
-                    "name": character.sheet.name,
-                    "traits": [
-                        {
-                            "name": trait.name,
-                            "level": trait.level,
-                            "aspects": list(trait.aspects),
-                        }
-                        for trait in character.sheet.traits
-                    ],
-                    "flags": [flag.text for flag in character.sheet.flags],
-                    "reserve": character.sheet.reserve_current,
-                    "conditions": [item.text for item in character.conditions],
-                    "plot_items": [item.name for item in character.plot_items],
-                    "temporary_bonuses": [
-                        {
-                            "bonus_id": bonus.bonus_id,
-                            "type": bonus.type.value,
-                            "trigger": bonus.trigger,
-                        }
-                        for bonus in character.sheet.temporary_bonuses
-                    ],
-                }
+                if game_id is None
+                else self._actor_character_projection(game_id=game_id, player_id=player_id)
             )
         return projections
 
@@ -255,6 +306,29 @@ class HandlerSupport:
         channel_id: str | None = None,
         player_id: str | None = None,
     ) -> AssembledContext:
+        if (
+            game_id is not None
+            and "session_brief" in manifest.state_projections
+            and "session_brief" not in projections
+        ):
+            game = self._store.game_state(game_id)
+            if game is not None:
+                projections = {
+                    **projections,
+                    "session_brief": self._narrative_session_brief(game),
+                }
+        if (
+            game_id is not None
+            and player_id is not None
+            and "actor_character" in manifest.state_projections
+            and "actor_character" not in projections
+        ):
+            projections = {
+                **projections,
+                "actor_character": self._actor_character_projection(
+                    game_id=game_id, player_id=player_id
+                ),
+            }
         if game_id is not None and "current_scene" in projections:
             projections = {
                 **projections,
@@ -321,7 +395,7 @@ class HandlerSupport:
 
     def _locale(self, game_id: str | None) -> str:
         if game_id is None:
-            return "ru"
+            return _MESSAGE_LOCALE.get()
         game = self._store.game_state(game_id)
         return game.locale if game is not None else "ru"
 
@@ -331,7 +405,8 @@ class HandlerSupport:
             return None
         content = self._store.world_content(game.world_id) or {}
         secret_plot = content.get("secret_plot")
-        return secret_plot if isinstance(secret_plot, str) and secret_plot.strip() else None
+        raw_secret = secret_plot if isinstance(secret_plot, str) and secret_plot.strip() else None
+        return hidden_secret_plot(raw_secret, self._store.revealed_secret_ids(game_id))
 
     def _narrative_session_brief(self, game) -> dict[str, object]:
         content = self._store.world_content(game.world_id) or {}
