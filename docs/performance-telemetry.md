@@ -147,7 +147,8 @@ those filters are `filtered_out`; unparseable rows cannot be assigned a scope an
 malformed within the requested time window. Thus scanned = filtered-out + valid + legacy +
 malformed + unknown-version + skipped. Group question statistics are never mixed across taxonomy
 scales. Explicit current-v1 `SkippedClassifierObservation` spans have `outcome=skipped` and a typed
-reason (`projection_truncated` or `no_candidates`), not empty answer distributions. They are counted
+reason (`projection_truncated`, `projection_unavailable` or `no_candidates`), not empty answer
+distributions. They are counted
 separately by use case/scope/taxonomy/requested model/reason and excluded from **all** calibrated
 outcome, agreement, latency, token and cost denominators. Unknown reasons or extra unsafe fields are
 malformed. `--limit` also bounds skipped groups by descending count then lexical dimensions;

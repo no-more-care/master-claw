@@ -62,6 +62,7 @@ ReferenceValue = Identifier | StrictBool | FiniteFloat
 class ClassifierSkipReason(StrEnum):
     PROJECTION_TRUNCATED = "projection_truncated"
     NO_CANDIDATES = "no_candidates"
+    PROJECTION_UNAVAILABLE = "projection_unavailable"
 
 
 class SkippedClassifierObservation(Contract):

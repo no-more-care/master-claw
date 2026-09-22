@@ -20,6 +20,7 @@ class ClassifierUseCase(StrEnum):
     ACTION_CAPABILITY = "action_capability"
     PLAYER_NARRATION_RIGHTS = "player_narration_rights"
     RESERVE_RECOVERY = "reserve_recovery"
+    OUTCOME_NARRATIVE_REVIEW = "outcome_narrative_review"
 
 
 class ClassifierUseCaseConfig(Contract):
@@ -67,6 +68,17 @@ class ReserveRecoveryClassifierConfig(ClassifierUseCaseConfig):
         return self
 
 
+class OutcomeNarrativeClassifierConfig(ClassifierUseCaseConfig):
+    allow_threshold: float = Field(default=0.95, ge=0, le=1, allow_inf_nan=False)
+    deny_threshold: float = Field(default=0.05, ge=0, le=1, allow_inf_nan=False)
+
+    @model_validator(mode="after")
+    def ordered_thresholds(self) -> OutcomeNarrativeClassifierConfig:
+        if self.deny_threshold >= self.allow_threshold:
+            raise ValueError("outcome narrative deny_threshold must be below allow_threshold")
+        return self
+
+
 class ClassifierConfig(ClassifierUseCaseConfig):
     provider: Literal["jev"] = "jev"
     model: str = Field(default="~typesafe/jev-latest", min_length=1, max_length=200)
@@ -77,6 +89,7 @@ class ClassifierConfig(ClassifierUseCaseConfig):
     action_capability: ActionCapabilityClassifierConfig = ActionCapabilityClassifierConfig()
     player_narration_rights: NarrationRightsClassifierConfig = NarrationRightsClassifierConfig()
     reserve_recovery: ReserveRecoveryClassifierConfig = ReserveRecoveryClassifierConfig()
+    outcome_narrative_review: OutcomeNarrativeClassifierConfig = OutcomeNarrativeClassifierConfig()
 
     def for_use_case(self, use_case: ClassifierUseCase) -> ClassifierUseCaseConfig:
         if use_case is ClassifierUseCase.STATE_DISPATCH:
@@ -95,6 +108,7 @@ class ClassifierConfig(ClassifierUseCaseConfig):
             ClassifierUseCase.ACTION_CAPABILITY: self.action_capability,
             ClassifierUseCase.PLAYER_NARRATION_RIGHTS: self.player_narration_rights,
             ClassifierUseCase.RESERVE_RECOVERY: self.reserve_recovery,
+            ClassifierUseCase.OUTCOME_NARRATIVE_REVIEW: self.outcome_narrative_review,
         }[use_case]
 
     def enabled_use_cases(self) -> tuple[ClassifierUseCaseConfig, ...]:

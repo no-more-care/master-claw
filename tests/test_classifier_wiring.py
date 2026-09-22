@@ -216,8 +216,9 @@ def test_advancement_thresholds_are_independent_nested_settings(monkeypatch):
 @pytest.mark.parametrize("action_mode", ["off", "shadow"])
 @pytest.mark.parametrize("narration_mode", ["off", "shadow"])
 @pytest.mark.parametrize("reserve_mode", ["off", "shadow"])
+@pytest.mark.parametrize("outcome_mode", ["off", "shadow"])
 def test_cli_state_and_advancement_share_executor_and_close_one_backend(
-    tmp_path, monkeypatch, state_mode, action_mode, narration_mode, reserve_mode
+    tmp_path, monkeypatch, state_mode, action_mode, narration_mode, reserve_mode, outcome_mode
 ):
     import masterclaw.cli as cli
 
@@ -260,16 +261,26 @@ def test_cli_state_and_advancement_share_executor_and_close_one_backend(
             "action_capability": {"mode": action_mode},
             "player_narration_rights": {"mode": narration_mode},
             "reserve_recovery": {"mode": reserve_mode},
+            "outcome_narrative_review": {"mode": outcome_mode},
         },
     )
     assert cli._serve(configured) == 0
     from masterclaw.app.legacy_compound_planning import LegacyCompoundPlanDecider
+    from masterclaw.app.legacy_outcome_narrative_review import LegacyAlwaysReviewDecider
+    from masterclaw.app.outcome_narrative_review import OutcomeNarrativePipeline
 
     assert isinstance(captured["compound_plan_decider"], LegacyCompoundPlanDecider)
     assert "compound_play_pipeline" not in captured
+    assert isinstance(captured["narrative_pipeline"], OutcomeNarrativePipeline)
+    assert isinstance(captured["narrative_pipeline"]._decider, LegacyAlwaysReviewDecider)
     state_executor = captured["state_decisions"]._classifier._executor
     advancement_executor = captured["advancement"]._decider._classifier._executor
     assert state_executor is advancement_executor
+    outcome_observer = captured["narrative_pipeline"]._observer
+    if outcome_mode == "shadow":
+        assert outcome_observer._executor is state_executor
+    else:
+        assert outcome_observer is None
     observer = captured["action_capability_observer"]
     if action_mode == "shadow":
         assert observer._executor is state_executor
@@ -317,6 +328,24 @@ def test_reserve_recovery_nested_config_alone_enables_shared_runtime(monkeypatch
 def test_reserve_classifier_config_rejects_unbounded_or_authoritative_modes(values):
     with pytest.raises(ValidationError):
         settings(classifier={"reserve_recovery": values})
+
+
+def test_outcome_review_config_alone_enables_runtime_and_has_independent_thresholds(monkeypatch):
+    assert settings().classifier.outcome_narrative_review.mode is ClassifierMode.OFF
+    monkeypatch.setenv("MASTERCLAW_CLASSIFIER__OUTCOME_NARRATIVE_REVIEW__MODE", "shadow")
+    monkeypatch.setenv("MASTERCLAW_CLASSIFIER__OUTCOME_NARRATIVE_REVIEW__ALLOW_THRESHOLD", "0.9")
+    monkeypatch.setenv("MASTERCLAW_CLASSIFIER__OUTCOME_NARRATIVE_REVIEW__DENY_THRESHOLD", "0.2")
+    configured = settings()
+    policy = configured.classifier.for_use_case(ClassifierUseCase.OUTCOME_NARRATIVE_REVIEW)
+    assert policy.allow_threshold == 0.9 and policy.deny_threshold == 0.2
+    assert configured.classifier.mode is ClassifierMode.OFF
+    assert configured.classifier.player_narration_rights.mode is ClassifierMode.OFF
+    runtime = create_semantic_classifier(configured)
+    assert runtime is not None
+    asyncio.run(runtime.aclose())
+    for values in ({"mode": "active"}, {"allow_threshold": 0.1, "deny_threshold": 0.2}):
+        with pytest.raises(ValidationError):
+            settings(classifier={"outcome_narrative_review": values})
 
 
 def test_narration_rights_config_is_independent_and_alone_enables_runtime(monkeypatch):

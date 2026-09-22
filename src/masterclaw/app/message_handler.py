@@ -7,6 +7,7 @@ from masterclaw.app.action_preparation import ActionCapabilityObserver, ActionPr
 from masterclaw.app.action_service import ActionService
 from masterclaw.app.advancement_coordinator import AdvancementCoordinator
 from masterclaw.app.compound_planning import CompoundPlanDecider, CompoundPlanningCoordinator
+from masterclaw.app.decision_checkpoints import DecisionPipeline
 from masterclaw.app.game_service import GameService
 from masterclaw.app.handlers.commands import CommandHandlers
 from masterclaw.app.handlers.compound import CompoundPlayHandlers
@@ -47,7 +48,7 @@ from masterclaw.pipelines.conversation_actions import (
     GameConfigurationRequest,
     RollConfirmationRequest,
 )
-from masterclaw.pipelines.narrative import NarrativeResult, ReviewedNarrativePipeline
+from masterclaw.pipelines.narrative import NarrativeResult
 from masterclaw.pipelines.player_narration import PlayerNarrationReview
 from masterclaw.pipelines.reserve_recovery import ReserveRecoveryDecision
 from masterclaw.pipelines.state_decision import StateDecisionRouter
@@ -88,9 +89,7 @@ class MessageApplication(
         action_pipeline: BoundedJsonPipeline[ActionInterpretation] | None = None,
         action_preparation: ActionPreparationService | None = None,
         action_capability_observer: ActionCapabilityObserver | None = None,
-        narrative_pipeline: (
-            BoundedJsonPipeline[NarrativeResult] | ReviewedNarrativePipeline | None
-        ) = None,
+        narrative_pipeline: DecisionPipeline[NarrativeResult] | None = None,
         advancement: AdvancementCoordinator | None = None,
         player_narration_pipeline: BoundedJsonPipeline[PlayerNarrationReview] | None = None,
         narration_rights_decider: NarrationRightsDecider | None = None,

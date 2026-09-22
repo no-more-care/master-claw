@@ -18,10 +18,17 @@ from masterclaw.app.advancement_safety_classifier import (
 )
 from masterclaw.app.legacy_advancement_safety import LegacyAdvancementSafetyDecider
 from masterclaw.app.legacy_compound_planning import LegacyCompoundPlanDecider
+from masterclaw.app.legacy_outcome_narrative_review import (
+    LegacyAlwaysReviewDecider,
+    LegacyNarrativeDraftGenerator,
+    LegacyNarrativeTextEditor,
+)
 from masterclaw.app.legacy_player_narration_review import LegacyPlayerNarrationReview
 from masterclaw.app.legacy_reserve_recovery import LegacyReserveRecoveryDecider
 from masterclaw.app.message_handler import MessageApplication
 from masterclaw.app.orchestrator import ChannelOrchestrator
+from masterclaw.app.outcome_narrative_classifier import OutcomeNarrativeClassifier
+from masterclaw.app.outcome_narrative_review import OutcomeNarrativePipeline
 from masterclaw.app.player_narration_review import NarrationRightsDecider
 from masterclaw.app.player_narration_rights_classifier import (
     PlayerNarrationRightsClassifier,
@@ -50,7 +57,10 @@ from masterclaw.pipelines.conversation_actions import (
     create_game_configuration_pipeline,
     create_roll_confirmation_pipeline,
 )
-from masterclaw.pipelines.narrative import create_reviewed_narrative_pipeline
+from masterclaw.pipelines.narrative import (
+    create_narrative_editor_pipeline,
+    create_narrative_pipeline,
+)
 from masterclaw.pipelines.player_narration import create_player_narration_pipeline
 from masterclaw.pipelines.reserve_recovery import create_reserve_recovery_pipeline
 from masterclaw.pipelines.state_decision import StateDecisionRouter
@@ -367,12 +377,25 @@ def _serve(settings: Settings) -> int:
             and settings.classifier.action_capability.mode is ClassifierMode.SHADOW
             else None
         ),
-        narrative_pipeline=create_reviewed_narrative_pipeline(
-            context=context,
-            narrator_completion=completion(ModelRole.NARRATIVE),
-            reviewer_completion=completion(ModelRole.REASONING, settings.narrative_review_model),
-            reviewer_fallback_completion=completion(
-                ModelRole.REASONING, settings.narrative_review_fallback_model
+        narrative_pipeline=OutcomeNarrativePipeline(
+            draft=LegacyNarrativeDraftGenerator(
+                create_narrative_pipeline(completion(ModelRole.NARRATIVE))
+            ),
+            decider=LegacyAlwaysReviewDecider(),
+            observer=OutcomeNarrativeClassifier(
+                classifier.executor, settings.classifier.outcome_narrative_review
+            )
+            if classifier is not None
+            and settings.classifier.outcome_narrative_review.mode is ClassifierMode.SHADOW
+            else None,
+            editor=LegacyNarrativeTextEditor(
+                context=context,
+                reviewer=create_narrative_editor_pipeline(
+                    completion(ModelRole.REASONING, settings.narrative_review_model)
+                ),
+                reviewer_fallback=create_narrative_editor_pipeline(
+                    completion(ModelRole.REASONING, settings.narrative_review_fallback_model)
+                ),
             ),
         ),
         advancement=advancement,
