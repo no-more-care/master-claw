@@ -1,5 +1,6 @@
 import asyncio
 import json
+from dataclasses import FrozenInstanceError
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -9,7 +10,9 @@ from pydantic import ValidationError
 from masterclaw.app.game_service import GameService
 from masterclaw.app.handlers.world_management import WorldManagementHandlers
 from masterclaw.app.i18n import tr
+from masterclaw.app.legacy_world_semantic_guard import LegacyWorldSemanticGuard
 from masterclaw.app.message_handler import MessageApplication
+from masterclaw.app.world_semantic_guard import WorldSemanticGuardError, WorldSemanticSnapshot
 from masterclaw.app.world_settings import WORLD_SETTING_DEFAULTS
 from masterclaw.app.worldgen_service import (
     WorldGenerationError,
@@ -18,17 +21,159 @@ from masterclaw.app.worldgen_service import (
     validate_confirmed_world_settings,
 )
 from masterclaw.context.assembler import AssembledContext, ContextAssembler
+from masterclaw.context.manifests import PipelineName, manifest_for
 from masterclaw.domain.models import HandlerResponse, IncomingMessage
 from masterclaw.domain.state import GameLifecycle, GameState, WorldState
 from masterclaw.pipelines.base import CompletionResult, PipelineValidationError
 from masterclaw.pipelines.state_decision import StateDecisionRouter
 from masterclaw.pipelines.world_intake import WorldCreationBrief, create_world_intake_pipeline
 from masterclaw.pipelines.worldgen import (
+    CreativeWorldDraft,
     WorldDraft,
     WorldLocation,
     create_world_structuring_pipeline,
 )
 from masterclaw.storage.sqlite import SQLiteStore
+
+
+def test_world_semantic_snapshot_is_frozen_detached_and_retains_adherence() -> None:
+    draft = WorldDraft.model_validate(adherent_english_world_payload())
+    settings = {"locale": "en", "content_constraints": ["no torture"]}
+    snapshot = WorldSemanticSnapshot.capture(
+        settings=settings,
+        draft=draft.model_dump(mode="json"),
+        adherence=draft.setting_adherence.model_dump(mode="json"),
+    )
+    settings["content_constraints"].append("no memory")
+    snapshot.draft["themes"].append("detached")
+    assert snapshot.settings["content_constraints"] == ["no torture"]
+    assert snapshot.draft["themes"] == ["memory"]
+    assert "setting_adherence" not in snapshot.draft
+    assert snapshot.adherence["locale"]["confirmed_value"] == "en"
+    # Private draft data remains local: legacy content boundaries also inspect it.
+    assert snapshot.draft["secret_plot"] == draft.secret_plot
+    with pytest.raises(FrozenInstanceError):
+        snapshot.draft_json = "{}"
+    LegacyWorldSemanticGuard().validate(snapshot)
+
+
+def test_world_semantic_error_translation_keeps_public_identity() -> None:
+    draft = WorldDraft.model_validate(valid_world_payload())
+    settings = {"content_constraints": ["no storm"]}
+    snapshot = WorldSemanticSnapshot.capture(
+        settings=settings,
+        draft=draft.model_dump(mode="json"),
+        adherence=draft.setting_adherence.model_dump(mode="json"),
+    )
+    with pytest.raises(WorldSemanticGuardError) as guard_error:
+        LegacyWorldSemanticGuard().validate(snapshot)
+    with pytest.raises(WorldGenerationError) as service_error:
+        WorldGenerationService._validate_draft(draft, settings=settings)
+    assert str(service_error.value) == str(guard_error.value)
+    assert str(service_error.value) == "structured world violates a content boundary"
+    assert WorldGenerationError.__module__ == "masterclaw.app.worldgen_service"
+    assert service_error.value.__cause__ is None
+    assert service_error.value.__suppress_context__
+
+
+@pytest.mark.parametrize(
+    ("settings", "secret_leak", "expected", "guard_calls"),
+    [
+        ({"themes": ["missing"]}, False, "missing a requested theme", 0),
+        ({"pregenerated_character_count": 4}, False, "requested pregen count", 0),
+        ({"locale": "ru"}, False, "prose does not match confirmed locale", 1),
+        ({}, True, "public world material overlaps the secret plot", 1),
+    ],
+)
+def test_injected_world_guard_cannot_bypass_remaining_service_checks(
+    settings, secret_leak, expected, guard_calls
+) -> None:
+    calls = []
+
+    class Guard:
+        def validate(self, snapshot):
+            calls.append(snapshot)
+
+    payload = valid_world_payload()
+    if secret_leak:
+        payload["premise"] += " " + payload["secret_plot"]
+    with pytest.raises(WorldGenerationError, match=expected):
+        WorldGenerationService._validate_draft(
+            WorldDraft.model_validate(payload), settings=settings, semantic_guard=Guard()
+        )
+    assert len(calls) == guard_calls
+
+
+@pytest.mark.parametrize("failure", [None, WorldSemanticGuardError, asyncio.CancelledError])
+def test_world_guard_preserves_structuring_fallback_order_and_context(failure) -> None:
+    calls = []
+    captured = []
+    draft = WorldDraft.model_validate(valid_world_payload())
+    creative = CreativeWorldDraft(module_plot="A city hangs above the storm. " * 10)
+
+    class Pipeline:
+        def __init__(self, name, result):
+            self.name, self.result = name, result
+
+        async def run(self, **kwargs):
+            calls.append(self.name)
+            captured.append((self.name, kwargs))
+            return self.result
+
+    class Guard:
+        def validate(self, snapshot):
+            calls.append("guard")
+            assert snapshot.draft == draft.model_dump(mode="json")
+            if calls.count("guard") == 1 or failure is not None:
+                raise (failure or WorldSemanticGuardError)("semantic rejection")
+
+    context = ContextAssembler(Path(__file__).parents[1] / "prompts")
+    service = WorldGenerationService(
+        context=context,
+        creative_pipeline=Pipeline("creative", creative),
+        creative_fallback_pipeline=Pipeline("creative_fallback", creative),
+        structuring_pipeline=Pipeline("structuring", draft),
+        structuring_fallback_pipeline=Pipeline("fallback", draft),
+        semantic_guard=Guard(),
+    )
+    invocation = service.generate(
+        world=WorldState("storm", "Storm World"), brief="A storm city", settings={}
+    )
+    if failure is asyncio.CancelledError:
+        with pytest.raises(asyncio.CancelledError, match="semantic rejection"):
+            asyncio.run(invocation)
+        assert calls == ["creative", "structuring", "guard"]
+    else:
+        if failure is not None:
+            with pytest.raises(WorldGenerationError, match="^semantic rejection$"):
+                asyncio.run(invocation)
+        else:
+            assert asyncio.run(invocation) is draft
+        assert calls == ["creative", "structuring", "guard", "fallback", "guard"]
+        assert captured[1][1] == captured[2][1]
+
+    constraints = {
+        "brief": "A storm city",
+        "world_id": "storm",
+        "title": "Storm World",
+        "confirmed_settings": {},
+    }
+    assert captured[0][1] == {
+        "task": "Write the raw creative plot for this module.",
+        "context": context.assemble(
+            manifest_for(PipelineName.WORLD_CREATIVE), {"world_constraints": constraints}
+        ),
+    }
+    assert captured[1][1] == {
+        "task": (
+            "Check the raw plot for consistency and convert it into the complete world "
+            "JSON contract."
+        ),
+        "context": context.assemble(
+            manifest_for(PipelineName.WORLD_STRUCTURING),
+            {"world_constraints": constraints, "creative_draft": creative.module_plot},
+        ),
+    }
 
 
 def pregen(name: str, target: str, *, faction: str | None = "Chain Keepers") -> dict:

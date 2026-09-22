@@ -7,6 +7,7 @@ from masterclaw.app.decision_checkpoints import run_checkpointed_decision
 from masterclaw.app.handlers.types import WorldWorkspaceStage
 from masterclaw.app.i18n import tr
 from masterclaw.app.scenarios import normalize_phrase
+from masterclaw.app.world_semantic_observer import capture_public_world_semantics
 from masterclaw.app.world_settings import (
     WORLD_SETTING_DEFAULTS,
     complete_world_settings,
@@ -326,7 +327,7 @@ class WorldManagementHandlers:
             return tr(locale, "world_workspace_clarification")
         world_content = draft.model_dump(mode="json")
         world_content["game_defaults"] = game_defaults(settings)
-        self._store.commit_world_generation(
+        committed = self._store.commit_world_generation(
             event_id=message.event_id,
             channel_id=message.channel_id,
             world_id=world.world_id,
@@ -337,6 +338,16 @@ class WorldManagementHandlers:
             settings=settings,
             sources=sources,
         )
+        observer = self._world_semantic_observer
+        if committed and observer is not None:
+            try:
+                await observer.observe(
+                    capture_public_world_semantics(settings=settings, content=world_content)
+                )
+            except Exception:
+                # Durable gameplay succeeded. Do not expose provider/state/error details.
+                # CancelledError still propagates; committed replay never repeats observation.
+                logger.warning("world_semantic_observation_failed")
         return tr(locale, "world_draft_generated")
 
     def _handle_world_confirmation(

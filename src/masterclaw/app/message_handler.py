@@ -33,6 +33,7 @@ from masterclaw.app.reserve_recovery import ReserveRecoveryDecider, ReserveRecov
 from masterclaw.app.reserve_recovery_coordinator import ReserveRecoveryCoordinator
 from masterclaw.app.state_dispatch_service import StateDispatchDecisionService
 from masterclaw.app.status_panels import render_status_panel
+from masterclaw.app.world_semantic_observer import WorldSemanticObserver
 from masterclaw.app.worldgen_service import WorldGenerationService
 from masterclaw.context.assembler import ContextAssembler
 from masterclaw.domain.models import HandlerResponse, IncomingMessage
@@ -96,6 +97,7 @@ class MessageApplication(
         narration_text_port: NarrationTextPort | None = None,
         die: Callable[[], int] | None = None,
         worldgen: WorldGenerationService | None = None,
+        world_semantic_observer: WorldSemanticObserver | None = None,
         character_pipeline: BoundedJsonPipeline[CharacterDraft] | None = None,
         consequence_pipeline: BoundedJsonPipeline[SceneConsequencePlan] | None = None,
         reserve_recovery_pipeline: BoundedJsonPipeline[ReserveRecoveryDecision] | None = None,
@@ -154,6 +156,7 @@ class MessageApplication(
         self._narration_text_port = narration_text_port
         self._die = die
         self._worldgen = worldgen
+        self._world_semantic_observer = world_semantic_observer
         self._character_pipeline = character_pipeline
         self._consequence_pipeline = consequence_pipeline
         if (

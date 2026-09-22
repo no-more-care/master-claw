@@ -199,3 +199,20 @@ coverage first, compare model-alias resolution and error/latency/cost changes, t
 per-taxonomy distributions and explicit-reference disagreement cases. Use independently reviewed
 examples before changing thresholds. This report is calibration evidence, **not automatic
 threshold promotion**, a safety proof, an authority mode or permission to publish classifier prose.
+
+### World-generation public semantics
+
+`classifier.worldgen_semantics` / `worldgen_semantics.v1` samples only successfully
+committed legacy-accepted drafts. This is a positive-branch sample, not semantic gold:
+there are no comparable references or agreement denominators. Inspect pass/review/uncertain
+signals and probability distributions as calibration evidence; independently label samples
+before drawing accuracy conclusions. Dynamic questions cover supplied public settings and,
+when requested, distinct pregen concepts. There is no remote content-boundary question and
+no private boundary text or secret ground truth is sent. Boundary validation remains the
+local deterministic guard, including in any future extension unless separately authorized.
+
+Oversized/unsafe public projections are typed skipped rows, excluded from calibrated and
+agreement rates. Observation runs only for the durable commit owner. Replay and race losers
+do not observe; a crash/cancellation after commit can lose one sample without affecting the
+committed draft. Thus counts describe observed fresh commits, not every generated candidate
+or a guaranteed complete census. This sidecar neither changes acceptance nor writes prose.

@@ -262,6 +262,7 @@ def test_cli_state_and_advancement_share_executor_and_close_one_backend(
             "player_narration_rights": {"mode": narration_mode},
             "reserve_recovery": {"mode": reserve_mode},
             "outcome_narrative_review": {"mode": outcome_mode},
+            "worldgen_semantics": {"mode": state_mode},
         },
     )
     assert cli._serve(configured) == 0
@@ -276,6 +277,11 @@ def test_cli_state_and_advancement_share_executor_and_close_one_backend(
     state_executor = captured["state_decisions"]._classifier._executor
     advancement_executor = captured["advancement"]._decider._classifier._executor
     assert state_executor is advancement_executor
+    world_observer = captured["world_semantic_observer"]
+    if state_mode == "shadow":
+        assert world_observer._executor is state_executor
+    else:
+        assert world_observer is None
     outcome_observer = captured["narrative_pipeline"]._observer
     if outcome_mode == "shadow":
         assert outcome_observer._executor is state_executor
@@ -328,6 +334,26 @@ def test_reserve_recovery_nested_config_alone_enables_shared_runtime(monkeypatch
 def test_reserve_classifier_config_rejects_unbounded_or_authoritative_modes(values):
     with pytest.raises(ValidationError):
         settings(classifier={"reserve_recovery": values})
+
+
+def test_world_semantics_config_alone_enables_shared_runtime(monkeypatch):
+    assert settings().classifier.worldgen_semantics.mode is ClassifierMode.OFF
+    monkeypatch.setenv("MASTERCLAW_CLASSIFIER__WORLDGEN_SEMANTICS__MODE", "shadow")
+    monkeypatch.setenv("MASTERCLAW_CLASSIFIER__WORLDGEN_SEMANTICS__ALLOW_THRESHOLD", "0.9")
+    monkeypatch.setenv("MASTERCLAW_CLASSIFIER__WORLDGEN_SEMANTICS__DENY_THRESHOLD", "0.2")
+    monkeypatch.setenv("MASTERCLAW_CLASSIFIER__WORLDGEN_SEMANTICS__TIMEOUT_SECONDS", "3")
+    configured = settings()
+    policy = configured.classifier.for_use_case(ClassifierUseCase.WORLDGEN_SEMANTICS)
+    assert policy.allow_threshold == 0.9 and policy.deny_threshold == 0.2
+    assert policy.timeout_seconds == 3
+    assert configured.classifier.mode is ClassifierMode.OFF
+    assert configured.classifier.advancement.mode is ClassifierMode.OFF
+    runtime = create_semantic_classifier(configured)
+    assert runtime is not None
+    asyncio.run(runtime.aclose())
+    for values in ({"mode": "active"}, {"allow_threshold": 0.1, "deny_threshold": 0.2}):
+        with pytest.raises(ValidationError):
+            settings(classifier={"worldgen_semantics": values})
 
 
 def test_outcome_review_config_alone_enables_runtime_and_has_independent_thresholds(monkeypatch):

@@ -37,6 +37,7 @@ from masterclaw.app.player_narration_rights_classifier import (
 from masterclaw.app.reserve_recovery_classifier import ReserveRecoveryClassifier
 from masterclaw.app.state_dispatch_classifier import StateDispatchClassifier
 from masterclaw.app.state_dispatch_service import StateDispatchDecisionService
+from masterclaw.app.world_semantic_classifier import WorldSemanticClassifier
 from masterclaw.app.worldgen_service import create_world_generation_service
 from masterclaw.classifiers.policy import ClassifierMode, ClassifierUseCase
 from masterclaw.config import ModelRole, OutputTransport, Settings
@@ -413,6 +414,12 @@ def _serve(settings: Settings) -> int:
             ),
         ),
         character_pipeline=create_character_pipeline(reasoning_completion()),
+        world_semantic_observer=WorldSemanticClassifier(
+            classifier.executor, settings.classifier.worldgen_semantics
+        )
+        if classifier is not None
+        and settings.classifier.worldgen_semantics.mode is ClassifierMode.SHADOW
+        else None,
         consequence_pipeline=create_consequence_pipeline(reasoning_completion()),
         reserve_recovery_decider=LegacyReserveRecoveryDecider(
             context=context,
