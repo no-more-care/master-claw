@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field, SecretStr, model_validator
 
 from masterclaw.classifiers.base import ChoiceAnswer, Contract, Identifier, Probability
 
@@ -91,10 +91,22 @@ class WorldSemanticClassifierConfig(ClassifierUseCaseConfig):
         return self
 
 
+class SystemOneHttpConfig(Contract):
+    endpoint: str = "http://127.0.0.1:8081/v1/systemone"
+    model: str = Field(default="local/system-one", pattern=r"^[A-Za-z0-9][A-Za-z0-9._/-]{0,127}$")
+    # A direct Kev run may be a private path; never expose it through config repr/logging.
+    expected_revision: SecretStr | None = Field(default=None, min_length=1, max_length=512)
+    allow_non_loopback: bool = False
+    max_concurrency: int = Field(default=1, ge=1, le=64)
+    token: SecretStr | None = None
+    auth_header: Literal["Authorization", "X-API-Key"] = "Authorization"
+
+
 class ClassifierConfig(ClassifierUseCaseConfig):
-    provider: Literal["jev"] = "jev"
+    provider: Literal["jev", "system_one_http"] = "jev"
     model: str = Field(default="~typesafe/jev-latest", min_length=1, max_length=200)
     max_concurrency: int = Field(default=4, ge=1, le=64)
+    system_one_http: SystemOneHttpConfig = SystemOneHttpConfig()
     state_dispatch: ClassifierUseCaseConfig | None = None
     advancement: AdvancementClassifierConfig = AdvancementClassifierConfig()
     action: ClassifierUseCaseConfig = ClassifierUseCaseConfig()

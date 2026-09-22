@@ -42,7 +42,27 @@ def _jev_runtime(settings: Settings) -> ClassifierRuntime:
 
 
 BackendFactory = Callable[[Settings], ClassifierRuntime]
-_BACKEND_FACTORIES: Mapping[str, BackendFactory] = {"jev": _jev_runtime}
+
+
+def _system_one_http_runtime(settings: Settings) -> ClassifierRuntime:
+    from masterclaw.adapters.system_one_http import SystemOneHttpClassifier
+
+    config = settings.classifier
+    adapter = SystemOneHttpClassifier(
+        config=config.system_one_http,
+        timeout_seconds=max(policy.timeout_seconds for policy in config.enabled_use_cases()),
+    )
+    return ClassifierRuntime(
+        port=adapter,
+        executor=SemanticClassifierExecutor(adapter, requested_model=config.system_one_http.model),
+        resources=RuntimeResources(adapter),
+    )
+
+
+_BACKEND_FACTORIES: Mapping[str, BackendFactory] = {
+    "jev": _jev_runtime,
+    "system_one_http": _system_one_http_runtime,
+}
 
 
 def create_semantic_classifier(settings: Settings) -> ClassifierRuntime | None:

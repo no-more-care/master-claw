@@ -102,6 +102,12 @@ def build_parser() -> argparse.ArgumentParser:
     init_db.add_argument("--database", default="data/masterclaw.sqlite3")
     subparsers.add_parser("serve", help="Run the Discord daemon")
     subparsers.add_parser("doctor", help="Validate configuration and local resources")
+    classifier_doctor = subparsers.add_parser(
+        "classifier-doctor", help="Check the configured local System One sidecar without inference"
+    )
+    classifier_doctor.add_argument(
+        "--smoke", action="store_true", help="Also send one synthetic choice/noul/score request"
+    )
     healthcheck = subparsers.add_parser(
         "healthcheck", help="Check that the live SQLite database is readable without modifying it"
     )
@@ -170,6 +176,10 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.command == "classifier-doctor":
+        from masterclaw.classifier_doctor import run_classifier_doctor
+
+        return run_classifier_doctor(smoke=args.smoke)
     if args.command == "init-db":
         SQLiteStore(args.database).initialize()
         return 0

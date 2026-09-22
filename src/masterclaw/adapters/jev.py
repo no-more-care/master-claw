@@ -3,105 +3,29 @@ from __future__ import annotations
 import asyncio
 import json
 import os
-from typing import Annotated, Literal
 
 import httpx
-from pydantic import BaseModel, ConfigDict, Field, JsonValue, SecretStr, ValidationError
+from pydantic import SecretStr, ValidationError
 
+from masterclaw.adapters.classifier_http import _BorrowedTransport, _http_error
+from masterclaw.adapters.system_one_wire import parse_system_one_response
 from masterclaw.classifiers.base import (
     MAX_REQUEST_BYTES,
     MAX_RESPONSE_BYTES,
-    ChoiceAnswer,
     ClassificationRequest,
     ClassificationResponse,
-    ClassifierAuthenticationError,
     ClassifierConfigurationError,
     ClassifierNetworkError,
-    ClassifierRateLimitError,
     ClassifierRequestError,
     ClassifierResponseError,
-    ClassifierServerError,
     ClassifierTimeoutError,
-    NoulAnswer,
-    Probability,
-    ScoreAnswer,
-    Text,
 )
 
 DECISIONS_URL = "https://openrouter.ai/api/alpha/decisions"
 
 
-class _WireNoul(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    type: Literal["noul"]
-    noul: Probability
-
-
-class _WireResponse(BaseModel):
-    # Provider metadata can grow independently of the typed answer contract.
-    model_config = ConfigDict(extra="ignore")
-    model: Text
-    answers: dict[
-        str, Annotated[ChoiceAnswer | ScoreAnswer | _WireNoul, Field(discriminator="type")]
-    ] = Field(min_length=1, max_length=32)
-    provider: Text | None = None
-    version: Text | None = None
-    id: Text | None = None
-    usage: dict[str, JsonValue] = Field(default_factory=dict)
-
-
 def parse_response(payload: object, request: ClassificationRequest) -> ClassificationResponse:
-    """Translate the provider wire format, then validate it against the exact request."""
-    try:
-        wire = _WireResponse.model_validate(payload)
-        answers: dict[str, ChoiceAnswer | ScoreAnswer | NoulAnswer] = {}
-        for key, answer in wire.answers.items():
-            if isinstance(answer, _WireNoul):
-                answers[key] = NoulAnswer(
-                    noul=answer.noul,
-                    probabilities={"true": answer.noul, "false": 1 - answer.noul},
-                )
-            else:
-                # The response contract's discriminated union validates choice/score and
-                # rejects unknown types. Noul confidence is absent on the wire, not invented.
-                answers[key] = answer
-        return ClassificationResponse(
-            request_key=request.request_key,
-            taxonomy_version=request.taxonomy_version,
-            provider="openrouter",
-            upstream_provider=wire.provider,
-            model=wire.model,
-            version=wire.version,
-            request_id=wire.id,
-            answers=answers,
-            usage=wire.usage,
-            cost=wire.usage.get("cost"),
-        ).validate_for(request)
-    except (ValidationError, ValueError, TypeError):
-        raise ClassifierResponseError("invalid classifier response") from None
-
-
-class _BorrowedTransport(httpx.AsyncBaseTransport):
-    """Let an owned client borrow a caller-owned transport without closing it."""
-
-    def __init__(self, transport: httpx.AsyncBaseTransport) -> None:
-        self._transport = transport
-
-    async def handle_async_request(self, request: httpx.Request) -> httpx.Response:
-        return await self._transport.handle_async_request(request)
-
-
-def _http_error(status: int):
-    message = f"classifier HTTP status {status}"
-    if status in {401, 403}:
-        return ClassifierAuthenticationError(message)
-    if status == 408:
-        return ClassifierTimeoutError(message)
-    if status == 429:
-        return ClassifierRateLimitError(message)
-    if status >= 500:
-        return ClassifierServerError(message)
-    return ClassifierRequestError(message)
+    return parse_system_one_response(payload, request, provider="openrouter")
 
 
 class JevClassifier:

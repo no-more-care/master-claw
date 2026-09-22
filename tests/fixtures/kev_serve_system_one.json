@@ -1,0 +1,27 @@
+{
+  "source": "https://github.com/jaredpalmer/kev/blob/main/kev/serve.py",
+  "note": "Envelope fields from models() and Server.answer(); values synthetic, not checkpoint data.",
+  "catalog": {
+    "models": [{
+      "id": "kev-latest",
+      "aliases": ["jev-latest"],
+      "run": "runs/synthetic-kev",
+      "base": "synthetic/base",
+      "lora": true,
+      "device": "cpu",
+      "dtype": "float32",
+      "temperature": 1.0,
+      "prefix_cache": {"size": 4, "min_state_tokens": 384, "hits": 0, "misses": 0, "cached_states": 0}
+    }]
+  },
+  "response": {
+    "model": "jev-latest",
+    "answers": {
+      "route": {"type": "choice", "choice": "a", "confidence": 0.98, "probabilities": {"a": 0.98, "b": 0.02}},
+      "valid": {"type": "noul", "noul": 0.5},
+      "risk": {"type": "score", "score": 0.75, "confidence": 0.8, "legend": {"0": "low", "1": "high"}, "probabilities": {"0": 0.25, "1": 0.75}}
+    },
+    "usage": {"input_tokens": 100, "output_tokens": 35},
+    "latency_ms": 12.0
+  }
+}
