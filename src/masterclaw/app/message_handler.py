@@ -17,8 +17,14 @@ from masterclaw.app.handlers.support import HandlerSupport
 from masterclaw.app.handlers.world_management import WorldManagementHandlers
 from masterclaw.app.i18n import tr
 from masterclaw.app.legacy_player_narration_review import LegacyPlayerNarrationReview
+from masterclaw.app.legacy_reserve_recovery import (
+    LegacyReserveRecoveryDecider,
+    LegacyReserveRecoverySnapshotCapture,
+)
 from masterclaw.app.player_narration_review import NarrationRightsDecider, NarrationTextPort
 from masterclaw.app.progression_service import ProgressionService
+from masterclaw.app.reserve_recovery import ReserveRecoveryDecider, ReserveRecoveryObserver
+from masterclaw.app.reserve_recovery_coordinator import ReserveRecoveryCoordinator
 from masterclaw.app.state_dispatch_service import StateDispatchDecisionService
 from masterclaw.app.status_panels import render_status_panel
 from masterclaw.app.worldgen_service import WorldGenerationService
@@ -89,6 +95,9 @@ class MessageApplication(
         character_pipeline: BoundedJsonPipeline[CharacterDraft] | None = None,
         consequence_pipeline: BoundedJsonPipeline[SceneConsequencePlan] | None = None,
         reserve_recovery_pipeline: BoundedJsonPipeline[ReserveRecoveryDecision] | None = None,
+        reserve_recovery_decider: ReserveRecoveryDecider | None = None,
+        reserve_recovery: ReserveRecoveryCoordinator | None = None,
+        reserve_recovery_observer: ReserveRecoveryObserver | None = None,
         world_intake_pipeline: BoundedJsonPipeline[WorldCreationBrief] | None = None,
         scene_question_pipeline: BoundedJsonPipeline[ConversationReply] | None = None,
         rules_question_pipeline: BoundedJsonPipeline[ConversationReply] | None = None,
@@ -141,7 +150,32 @@ class MessageApplication(
         self._worldgen = worldgen
         self._character_pipeline = character_pipeline
         self._consequence_pipeline = consequence_pipeline
-        self._reserve_recovery_pipeline = reserve_recovery_pipeline
+        if (
+            sum(
+                value is not None
+                for value in (reserve_recovery_pipeline, reserve_recovery_decider, reserve_recovery)
+            )
+            > 1
+        ):
+            raise ValueError(
+                "provide reserve recovery coordinator, decider or legacy pipeline, not multiple"
+            )
+        if reserve_recovery is not None and reserve_recovery_observer is not None:
+            raise ValueError("provide observer on the supplied reserve recovery coordinator")
+        if reserve_recovery_pipeline is not None:
+            reserve_recovery_decider = LegacyReserveRecoveryDecider(
+                context=context,
+                pipeline=reserve_recovery_pipeline,
+            )
+        self._reserve_recovery = reserve_recovery or ReserveRecoveryCoordinator(
+            store=store,
+            games=self._games,
+            decider=reserve_recovery_decider,
+            observer=reserve_recovery_observer,
+            capture_snapshot=LegacyReserveRecoverySnapshotCapture(
+                store, self._capture_context_inputs
+            ),
+        )
         self._world_intake_pipeline = world_intake_pipeline
         self._scene_question_pipeline = scene_question_pipeline
         self._rules_question_pipeline = rules_question_pipeline

@@ -5,7 +5,7 @@ from typing import Literal
 
 from pydantic import Field, model_validator
 
-from masterclaw.classifiers.base import ChoiceAnswer, Contract, Identifier
+from masterclaw.classifiers.base import ChoiceAnswer, Contract, Identifier, Probability
 
 
 class ClassifierMode(StrEnum):
@@ -19,6 +19,7 @@ class ClassifierUseCase(StrEnum):
     ACTION = "action"
     ACTION_CAPABILITY = "action_capability"
     PLAYER_NARRATION_RIGHTS = "player_narration_rights"
+    RESERVE_RECOVERY = "reserve_recovery"
 
 
 class ClassifierUseCaseConfig(Contract):
@@ -54,6 +55,18 @@ class NarrationRightsClassifierConfig(ClassifierUseCaseConfig):
         return self
 
 
+class ReserveRecoveryClassifierConfig(ClassifierUseCaseConfig):
+    allow_threshold: float = Field(default=0.95, ge=0, le=1, allow_inf_nan=False)
+    deny_threshold: float = Field(default=0.05, ge=0, le=1, allow_inf_nan=False)
+    max_candidates: int = Field(default=8, ge=1, le=31)
+
+    @model_validator(mode="after")
+    def ordered_thresholds(self) -> ReserveRecoveryClassifierConfig:
+        if self.deny_threshold >= self.allow_threshold:
+            raise ValueError("reserve recovery deny_threshold must be below allow_threshold")
+        return self
+
+
 class ClassifierConfig(ClassifierUseCaseConfig):
     provider: Literal["jev"] = "jev"
     model: str = Field(default="~typesafe/jev-latest", min_length=1, max_length=200)
@@ -63,6 +76,7 @@ class ClassifierConfig(ClassifierUseCaseConfig):
     action: ClassifierUseCaseConfig = ClassifierUseCaseConfig()
     action_capability: ActionCapabilityClassifierConfig = ActionCapabilityClassifierConfig()
     player_narration_rights: NarrationRightsClassifierConfig = NarrationRightsClassifierConfig()
+    reserve_recovery: ReserveRecoveryClassifierConfig = ReserveRecoveryClassifierConfig()
 
     def for_use_case(self, use_case: ClassifierUseCase) -> ClassifierUseCaseConfig:
         if use_case is ClassifierUseCase.STATE_DISPATCH:
@@ -80,6 +94,7 @@ class ClassifierConfig(ClassifierUseCaseConfig):
             ClassifierUseCase.ACTION: self.action,
             ClassifierUseCase.ACTION_CAPABILITY: self.action_capability,
             ClassifierUseCase.PLAYER_NARRATION_RIGHTS: self.player_narration_rights,
+            ClassifierUseCase.RESERVE_RECOVERY: self.reserve_recovery,
         }[use_case]
 
     def enabled_use_cases(self) -> tuple[ClassifierUseCaseConfig, ...]:
@@ -92,6 +107,8 @@ class ClassifierConfig(ClassifierUseCaseConfig):
 
 class SemanticEvaluationPolicy(ClassifierUseCaseConfig):
     blocked_choices: dict[Identifier, frozenset[Identifier]] = Field(default_factory=dict)
+    noul_allow_threshold: Probability | None = None
+    noul_deny_threshold: Probability | None = None
 
 
 class ShadowDisposition(StrEnum):

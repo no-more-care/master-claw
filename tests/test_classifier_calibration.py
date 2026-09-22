@@ -11,7 +11,7 @@ from masterclaw.classifier_calibration import (
     classifier_calibration_report,
     render_classifier_calibration_report,
 )
-from masterclaw.classifiers.observations import ClassifierObservation
+from masterclaw.classifiers.observations import ClassifierObservation, SkippedClassifierObservation
 from masterclaw.cli import main
 from masterclaw.storage.sqlite import SQLiteStore
 
@@ -73,6 +73,45 @@ def span(attributes, stage=None):
 
 def report(*records, **filters):
     return classifier_calibration_report(Source([span(row) for row in records]), **filters)
+
+
+def test_typed_skips_are_separate_from_evaluation_rates_and_fail_closed_on_extra_data():
+    skipped = SkippedClassifierObservation(
+        use_case="reserve_recovery",
+        mode="shadow",
+        scope="both",
+        taxonomy_version="reserve_recovery.v1",
+        requested_model="alias-latest",
+        reason="projection_truncated",
+    ).model_dump(mode="json")
+    result = report(
+        skipped,
+        skipped,
+        {**skipped, "reason": "unknown_reason"},
+        {**skipped, "request_id": "private-request"},
+        {**skipped, "requested_model": "sk-secret"},
+        attrs(answers={}),  # Still malformed; no normal-contract invariant is weakened.
+    )
+    assert result["rows"]["skipped"] == 2
+    assert result["rows"]["malformed"] == 4
+    assert result["summary"]["total"] == result["summary"]["comparable_rows"] == 0
+    assert result["skipped"] == [
+        {
+            "use_case": "reserve_recovery",
+            "scope": "both",
+            "taxonomy_version": "reserve_recovery.v1",
+            "requested_model": "alias-latest",
+            "reason": "projection_truncated",
+            "count": 2,
+        }
+    ]
+    assert "private-request" not in render_classifier_calibration_report(result, "json")
+    assert "sk-secret" not in render_classifier_calibration_report(result, "table")
+    assert report(skipped, scope="safe_rest")["rows"]["skipped"] == 0
+    limited = report(skipped, skipped, {**skipped, "scope": "safe_rest"}, limit=1)
+    assert limited["rows"]["skipped"] == 3
+    assert len(limited["skipped"]) == limited["omitted_skipped_groups"] == 1
+    assert limited["skipped"][0]["count"] == 2
 
 
 def mixed():
@@ -172,6 +211,7 @@ def test_mixed_primitives_explicit_reference_denominators_cost_and_tokens_once()
     summary = result["summary"]
     assert result["rows"] == {
         "scanned": 10,
+        "skipped": 0,
         "valid": 10,
         "legacy": 0,
         "malformed": 0,
@@ -258,6 +298,7 @@ def test_legacy_unknown_and_malformed_are_excluded_even_if_shape_looks_current()
     result = classifier_calibration_report(Source(rows))
     assert result["rows"] == {
         "scanned": 9,
+        "skipped": 0,
         "valid": 1,
         "legacy": 2,
         "unknown_version": 1,

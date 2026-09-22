@@ -18,6 +18,7 @@ from masterclaw.classifiers.base import ChoiceAnswer, NoulAnswer
 from masterclaw.classifiers.observations import (
     AnswerObservation,
     ClassifierObservation,
+    SkippedClassifierObservation,
     metadata_identifier,
 )
 
@@ -390,6 +391,7 @@ def classifier_calibration_report(
     counts = Counter()
     observations = []
     groups = defaultdict(list)
+    skipped = Counter()
     for span in source.classifier_spans(since_hours=since_hours):
         counts["scanned"] += 1
         try:
@@ -414,6 +416,29 @@ def classifier_calibration_report(
             counts["unknown_version"] += 1
             continue
         try:
+            if attributes.get("outcome") == "skipped":
+                observation = SkippedClassifierObservation.model_validate(attributes)
+                # Reuse the exact aggregate privacy checks without treating the skip as an
+                # evaluation. The temporary off shape is never counted or serialized.
+                _validate(
+                    ClassifierObservation(
+                        **observation.model_dump(exclude={"outcome", "reason"}),
+                        outcome="off",
+                        latency_ms=0,
+                    ),
+                    span.stage,
+                )
+                counts["skipped"] += 1
+                skipped[
+                    (
+                        observation.use_case,
+                        observation.scope,
+                        observation.taxonomy_version,
+                        observation.requested_model,
+                        observation.reason.value,
+                    )
+                ] += 1
+                continue
             observation = ClassifierObservation.model_validate(attributes)
             _validate(observation, span.stage)
         except (ValueError, TypeError, KeyError, OverflowError):
@@ -446,9 +471,25 @@ def classifier_calibration_report(
                 "legacy",
                 "malformed",
                 "unknown_version",
+                "skipped",
             )
         },
         "summary": summary,
+        "skipped_group_count": len(skipped),
+        "omitted_skipped_groups": max(0, len(skipped) - limit),
+        "skipped": [
+            dict(
+                zip(
+                    ("use_case", "scope", "taxonomy_version", "requested_model", "reason"),
+                    key,
+                    strict=True,
+                ),
+                count=count,
+            )
+            for key, count in sorted(
+                skipped.items(), key=lambda item: (-item[1], tuple(v or "" for v in item[0]))
+            )[:limit]
+        ],
         "group_count": len(groups),
         "omitted_groups": max(0, len(groups) - limit),
         "groups": [
@@ -467,6 +508,7 @@ def render_classifier_calibration_report(report: dict[str, object], format_name:
         "Classifier calibration (shadow evidence, not authority)",
         "Rows: " + " ".join(f"{key}={value}" for key, value in report["rows"].items()),
         "Summary: " + json.dumps(report["summary"], sort_keys=True),
+        "Skipped: " + json.dumps(report["skipped"], sort_keys=True),
         " | ".join(_DIMENSIONS),
     ]
     for group in report["groups"]:

@@ -49,6 +49,6 @@ class ContextInputCapture(Protocol):
         projections: dict[str, object],
         *,
         game_id: str,
-        channel_id: str,
-        player_id: str,
+        channel_id: str | None = None,
+        player_id: str | None = None,
     ) -> ContextInputSnapshot: ...

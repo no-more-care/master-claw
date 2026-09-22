@@ -18,6 +18,7 @@ from masterclaw.app.advancement_safety_classifier import (
 )
 from masterclaw.app.legacy_advancement_safety import LegacyAdvancementSafetyDecider
 from masterclaw.app.legacy_player_narration_review import LegacyPlayerNarrationReview
+from masterclaw.app.legacy_reserve_recovery import LegacyReserveRecoveryDecider
 from masterclaw.app.message_handler import MessageApplication
 from masterclaw.app.orchestrator import ChannelOrchestrator
 from masterclaw.app.player_narration_review import NarrationRightsDecider
@@ -25,6 +26,7 @@ from masterclaw.app.player_narration_rights_classifier import (
     PlayerNarrationRightsClassifier,
     ShadowNarrationRightsDecider,
 )
+from masterclaw.app.reserve_recovery_classifier import ReserveRecoveryClassifier
 from masterclaw.app.state_dispatch_classifier import StateDispatchClassifier
 from masterclaw.app.state_dispatch_service import StateDispatchDecisionService
 from masterclaw.app.worldgen_service import create_world_generation_service
@@ -388,7 +390,16 @@ def _serve(settings: Settings) -> int:
         ),
         character_pipeline=create_character_pipeline(reasoning_completion()),
         consequence_pipeline=create_consequence_pipeline(reasoning_completion()),
-        reserve_recovery_pipeline=create_reserve_recovery_pipeline(reasoning_completion()),
+        reserve_recovery_decider=LegacyReserveRecoveryDecider(
+            context=context,
+            pipeline=create_reserve_recovery_pipeline(reasoning_completion()),
+        ),
+        reserve_recovery_observer=ReserveRecoveryClassifier(
+            classifier.executor, settings.classifier.reserve_recovery
+        )
+        if classifier is not None
+        and settings.classifier.reserve_recovery.mode is ClassifierMode.SHADOW
+        else None,
         world_intake_pipeline=create_world_intake_pipeline(reasoning_completion()),
         scene_question_pipeline=create_scene_question_pipeline(reasoning_completion()),
         rules_question_pipeline=create_rules_question_pipeline(reasoning_completion()),

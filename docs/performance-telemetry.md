@@ -145,7 +145,15 @@ lexically; all-window summary totals are computed **before** group limiting. Omi
 is explicit. `--use-case`/`--scope` are exact matches against raw metadata. Parseable rows outside
 those filters are `filtered_out`; unparseable rows cannot be assigned a scope and are counted as
 malformed within the requested time window. Thus scanned = filtered-out + valid + legacy +
-malformed + unknown-version. Group question statistics are never mixed across taxonomy scales.
+malformed + unknown-version + skipped. Group question statistics are never mixed across taxonomy
+scales. Explicit current-v1 `SkippedClassifierObservation` spans have `outcome=skipped` and a typed
+reason (`projection_truncated` or `no_candidates`), not empty answer distributions. They are counted
+separately by use case/scope/taxonomy/requested model/reason and excluded from **all** calibrated
+outcome, agreement, latency, token and cost denominators. Unknown reasons or extra unsafe fields are
+malformed. `--limit` also bounds skipped groups by descending count then lexical dimensions;
+`omitted_skipped_groups` reports omissions, while `rows.skipped` includes every matching skip.
+Inspect these skips in the weekly workflow before interpreting recovery coverage; a projection
+bound is missing evidence, not a negative classification.
 
 Metric denominators:
 

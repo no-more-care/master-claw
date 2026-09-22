@@ -4700,6 +4700,26 @@ class SQLiteStore:
     ) -> dict[str, object]:
         """Persist first-writer-wins recovery targets before applying idempotent awards."""
 
+        payload, _ = self.checkpoint_reserve_recovery_decision_with_status(
+            game_id=game_id,
+            causation_id=causation_id,
+            safe_rest_completed=safe_rest_completed,
+            safe_rest_reason=safe_rest_reason,
+            awards=awards,
+        )
+        return payload
+
+    def checkpoint_reserve_recovery_decision_with_status(
+        self,
+        *,
+        game_id: str,
+        causation_id: str,
+        safe_rest_completed: bool,
+        safe_rest_reason: str | None,
+        awards: tuple[tuple[str, str], ...],
+    ) -> tuple[dict[str, object], bool]:
+        """Return atomic insert ownership; the legacy persisted payload remains unchanged."""
+
         if not causation_id:
             raise ValueError("reserve recovery causation id cannot be empty")
         normalized_rest_reason = (
@@ -4724,7 +4744,7 @@ class SQLiteStore:
             if prior is not None:
                 if prior.get("game_id") != game_id:
                     raise RuntimeError("reserve recovery decision belongs to another game")
-                return prior
+                return prior, False
             game = connection.execute(
                 "SELECT 1 FROM games WHERE game_id = ?",
                 (game_id,),
@@ -4764,7 +4784,7 @@ class SQLiteStore:
                     event_causation_id,
                 ),
             )
-            return payload
+            return payload, True
 
     def restore_reserve_for_safe_rest(self, *, game_id: str, reason: str, causation_id: str) -> int:
         """Restore every character to their maximum reserve in one audited transaction."""

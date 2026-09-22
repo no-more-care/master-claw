@@ -2307,69 +2307,10 @@ class PlayHandlers:
         outcome_source: dict[str, object],
         player_id: str | None,
     ) -> None:
-        game = self._store.game_state(game_id)
-        if game is None:
-            return
-        try:
-            canonical = self._store.reserve_recovery_decision(causation_id)
-            if canonical is None:
-                if self._reserve_recovery_pipeline is None:
-                    return
-                current_scene = (
-                    self._store.scene_projection(game_id=game_id, player_id=player_id)
-                    if player_id is not None
-                    else None
-                ) or scene
-                assembled = self._assemble_context(
-                    manifest_for(PipelineName.RESERVE_RECOVERY),
-                    {
-                        "current_scene": current_scene,
-                        "outcome_source": outcome_source,
-                        "reserve_policy": game.reserve_recovery_mode.value,
-                        "actor_character": (
-                            None
-                            if player_id is None
-                            else self._actor_character_projection(
-                                game_id=game_id,
-                                player_id=player_id,
-                            )
-                        ),
-                        "characters": self._store.reserve_projection(game_id),
-                    },
-                    game_id=game_id,
-                    player_id=player_id,
-                )
-                decision = await self._reserve_recovery_pipeline.run(
-                    task="Decide whether this resolved outcome earns reserve recovery.",
-                    context=assembled,
-                )
-                canonical = self._store.checkpoint_reserve_recovery_decision(
-                    game_id=game_id,
-                    causation_id=causation_id,
-                    safe_rest_completed=(
-                        decision.safe_rest_completed and game.reserve_recovery_mode.allows_safe_rest
-                    ),
-                    safe_rest_reason=decision.safe_rest_reason,
-                    awards=(
-                        tuple((award.player_id, award.reason) for award in decision.awards)
-                        if game.reserve_recovery_mode.allows_roleplay_award
-                        else ()
-                    ),
-                )
-            if bool(canonical["safe_rest_completed"]):
-                self._games.restore_reserve_for_safe_rest(
-                    game_id=game_id,
-                    reason=str(canonical["safe_rest_reason"] or "completed safe rest"),
-                    causation_id=f"reserve-rest:{causation_id}",
-                )
-            for award in canonical["awards"]:
-                award_payload = dict(award)
-                award_player_id = str(award_payload["player_id"])
-                self._games.award_reserve_die(
-                    game_id=game_id,
-                    player_id=award_player_id,
-                    reason=str(award_payload["reason"]),
-                    causation_id=f"reserve-award:{causation_id}:{award_player_id}",
-                )
-        except Exception:
-            logger.exception("Reserve-recovery adjudication failed for %s", causation_id)
+        await self._reserve_recovery.consider(
+            game_id=game_id,
+            scene=scene,
+            causation_id=causation_id,
+            outcome_source=outcome_source,
+            player_id=player_id,
+        )

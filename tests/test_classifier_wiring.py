@@ -215,8 +215,9 @@ def test_advancement_thresholds_are_independent_nested_settings(monkeypatch):
 @pytest.mark.parametrize("state_mode", ["off", "shadow"])
 @pytest.mark.parametrize("action_mode", ["off", "shadow"])
 @pytest.mark.parametrize("narration_mode", ["off", "shadow"])
+@pytest.mark.parametrize("reserve_mode", ["off", "shadow"])
 def test_cli_state_and_advancement_share_executor_and_close_one_backend(
-    tmp_path, monkeypatch, state_mode, action_mode, narration_mode
+    tmp_path, monkeypatch, state_mode, action_mode, narration_mode, reserve_mode
 ):
     import masterclaw.cli as cli
 
@@ -258,6 +259,7 @@ def test_cli_state_and_advancement_share_executor_and_close_one_backend(
             "advancement": {"mode": "shadow"},
             "action_capability": {"mode": action_mode},
             "player_narration_rights": {"mode": narration_mode},
+            "reserve_recovery": {"mode": reserve_mode},
         },
     )
     assert cli._serve(configured) == 0
@@ -275,7 +277,42 @@ def test_cli_state_and_advancement_share_executor_and_close_one_backend(
         assert narration_decider._baseline is captured["narration_text_port"]
     else:
         assert narration_decider is captured["narration_text_port"]
+    reserve_observer = captured["reserve_recovery_observer"]
+    if reserve_mode == "shadow":
+        assert reserve_observer._executor is state_executor
+    else:
+        assert reserve_observer is None
     assert closes == ["backend"]
+
+
+def test_reserve_recovery_nested_config_alone_enables_shared_runtime(monkeypatch):
+    assert settings().classifier.reserve_recovery.mode is ClassifierMode.OFF
+    monkeypatch.setenv("MASTERCLAW_CLASSIFIER__RESERVE_RECOVERY__MODE", "shadow")
+    monkeypatch.setenv("MASTERCLAW_CLASSIFIER__RESERVE_RECOVERY__ALLOW_THRESHOLD", "0.9")
+    monkeypatch.setenv("MASTERCLAW_CLASSIFIER__RESERVE_RECOVERY__DENY_THRESHOLD", "0.2")
+    monkeypatch.setenv("MASTERCLAW_CLASSIFIER__RESERVE_RECOVERY__MAX_CANDIDATES", "12")
+    configured = settings()
+    policy = configured.classifier.for_use_case(ClassifierUseCase.RESERVE_RECOVERY)
+    assert policy.allow_threshold == 0.9 and policy.deny_threshold == 0.2
+    assert policy.max_candidates == 12
+    assert configured.classifier.mode is ClassifierMode.OFF
+    runtime = create_semantic_classifier(configured)
+    assert runtime is not None
+    asyncio.run(runtime.aclose())
+
+
+@pytest.mark.parametrize(
+    "values",
+    [
+        {"max_candidates": 32},
+        {"max_candidates": 0},
+        {"allow_threshold": 0.1, "deny_threshold": 0.2},
+        {"mode": "active"},
+    ],
+)
+def test_reserve_classifier_config_rejects_unbounded_or_authoritative_modes(values):
+    with pytest.raises(ValidationError):
+        settings(classifier={"reserve_recovery": values})
 
 
 def test_narration_rights_config_is_independent_and_alone_enables_runtime(monkeypatch):

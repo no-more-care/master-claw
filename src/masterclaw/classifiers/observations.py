@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import math
 import re
+from enum import StrEnum
 from typing import Literal
 
 from pydantic import Field, FiniteFloat, JsonValue, StrictBool
@@ -56,6 +57,24 @@ def numeric_usage(usage: dict[str, JsonValue]) -> dict[str, JsonValue]:
 
 
 ReferenceValue = Identifier | StrictBool | FiniteFloat
+
+
+class ClassifierSkipReason(StrEnum):
+    PROJECTION_TRUNCATED = "projection_truncated"
+    NO_CANDIDATES = "no_candidates"
+
+
+class SkippedClassifierObservation(Contract):
+    """An explicit non-evaluation: no answers, references, usage or calibration denominator."""
+
+    observation_schema_version: Literal["v1"] = "v1"
+    outcome: Literal["skipped"] = "skipped"
+    reason: ClassifierSkipReason
+    use_case: Identifier
+    mode: ClassifierMode
+    scope: Identifier | None = None
+    taxonomy_version: Identifier
+    requested_model: str | None
 
 
 class AnswerObservation(Contract):

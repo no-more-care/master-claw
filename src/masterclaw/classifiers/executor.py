@@ -29,7 +29,9 @@ from masterclaw.classifiers.base import (
 from masterclaw.classifiers.observations import (
     AnswerObservation,
     ClassifierObservation,
+    ClassifierSkipReason,
     ReferenceValue,
+    SkippedClassifierObservation,
     metadata_identifier,
     numeric_usage,
 )
@@ -74,6 +76,31 @@ class SemanticClassifierExecutor:
     def __init__(self, port: ClassifierPort, *, requested_model: str) -> None:
         self._port = port
         self._requested_model = requested_model
+
+    def record_skipped(
+        self,
+        *,
+        taxonomy_version: str,
+        policy: SemanticEvaluationPolicy,
+        context: SemanticEvaluationContext,
+        reason: ClassifierSkipReason,
+    ) -> SkippedClassifierObservation:
+        observation = SkippedClassifierObservation(
+            use_case=context.use_case,
+            scope=context.scope,
+            mode=policy.mode,
+            taxonomy_version=taxonomy_version,
+            requested_model=metadata_identifier(self._requested_model),
+            reason=reason,
+        )
+        if policy.mode is not ClassifierMode.OFF:
+            with stage_span(
+                f"classifier.{context.use_case}",
+                component="classifier",
+                attributes=observation.model_dump(mode="json"),
+            ):
+                pass
+        return observation
 
     async def evaluate(
         self,
@@ -159,7 +186,7 @@ class SemanticClassifierExecutor:
                             (summary.decision_comparison or summary.decision)
                             == context.decision_reference
                             if context.decision_reference is not None
-                            else None
+                            else agreement
                         ),
                     )
             except Exception as error:
@@ -226,10 +253,17 @@ class SemanticClassifierExecutor:
                 values["choice"] = answer.choice
             elif isinstance(answer, NoulAnswer):
                 # Noul is a yes-probability, not confidence. Either decisive polarity is useful.
+                decisive = max(answer.noul, 1 - answer.noul) >= policy.threshold
+                if (
+                    policy.noul_allow_threshold is not None
+                    and policy.noul_deny_threshold is not None
+                ):
+                    decisive = (
+                        answer.noul >= policy.noul_allow_threshold
+                        or answer.noul <= policy.noul_deny_threshold
+                    )
                 disposition = (
-                    ShadowDisposition.ELIGIBLE
-                    if max(answer.noul, 1 - answer.noul) >= policy.threshold
-                    else ShadowDisposition.UNCERTAIN
+                    ShadowDisposition.ELIGIBLE if decisive else ShadowDisposition.UNCERTAIN
                 )
                 values["noul"] = answer.noul
             else:
