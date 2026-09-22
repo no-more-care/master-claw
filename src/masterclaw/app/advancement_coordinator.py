@@ -1,28 +1,15 @@
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict
-
-from masterclaw.app.decision_checkpoints import (
-    decision_input_fingerprint,
-    decision_output_type_name,
+from masterclaw.app.advancement_safety import (
+    AdvancementSafetyDecider,
+    SafetyVerdict,
+    capture_advancement_safety_snapshot,
 )
 from masterclaw.app.progression_service import ProgressionService
-from masterclaw.context.assembler import ContextAssembler, ContextHistory
-from masterclaw.context.manifests import PipelineName, manifest_for
 from masterclaw.domain.characters import CharacterState
 from masterclaw.domain.progression import AdvancementPermit
-from masterclaw.pipelines.advancement import AdvancementSafetyDecision
-from masterclaw.pipelines.base import BoundedJsonPipeline
 from masterclaw.storage.sqlite import SQLiteStore
 from masterclaw.telemetry import traced_stage
-
-
-class AdvancementAuthorizationCheckpoint(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    decision: AdvancementSafetyDecision
-    scene_id: str
-    scene_revision: int
 
 
 class AdvancementCoordinator:
@@ -30,12 +17,10 @@ class AdvancementCoordinator:
         self,
         *,
         store: SQLiteStore,
-        context: ContextAssembler,
-        safety_pipeline: BoundedJsonPipeline[AdvancementSafetyDecision],
+        decider: AdvancementSafetyDecider,
     ) -> None:
         self._store = store
-        self._context = context
-        self._pipeline = safety_pipeline
+        self._decider = decider
         self._progression = ProgressionService(store)
 
     async def raise_trait(
@@ -148,92 +133,21 @@ class AdvancementCoordinator:
         scene = self._store.scene_projection(game_id=game_id, player_id=player_id)
         if character is None or scene is None:
             raise ValueError("character or current scene is missing")
-        manifest = manifest_for(PipelineName.ADVANCEMENT_SAFETY)
-        assembled = self._context.assemble(
-            manifest,
-            {
-                "session_brief": {"game_id": game_id, "locale": game.locale},
-                "current_scene": scene,
-                "actor_character": {
-                    "player_id": player_id,
-                    "name": character.sheet.name,
-                    "available_xp": character.experience_available,
-                    "traits": [
-                        {"name": trait.name, "level": trait.level}
-                        for trait in character.sheet.traits
-                    ],
-                },
-                "advancement_request": request,
-            },
-            history=ContextHistory(
-                self._store.recent_domain_events(
-                    game_id=game_id,
-                    limit=manifest.recent_domain_events,
-                ),
-                self._store.recent_chat_messages(
-                    game_id=game_id,
-                    player_id=player_id,
-                    limit=manifest.recent_chat_messages,
-                ),
-            ),
+        snapshot = capture_advancement_safety_snapshot(
+            store=self._store,
+            game=game,
+            player_id=player_id,
+            character=character,
+            scene=scene,
+            request=request,
         )
-        checkpoint: AdvancementAuthorizationCheckpoint | None = None
-        input_fingerprint = decision_input_fingerprint(
-            {
-                "game_id": game_id,
-                "player_id": player_id,
-                "scene_id": str(scene["scene_id"]),
-                "scene_revision": int(scene["scene_revision"]),
-                "character_id": character.character_id,
-                "traits": [
-                    {
-                        "name": trait.name,
-                        "level": trait.level,
-                        "aspects": list(trait.aspects),
-                    }
-                    for trait in character.sheet.traits
-                ],
-                "request": request,
-            }
-        )
-        if checkpoint_event_id is not None:
-            output_type = decision_output_type_name(AdvancementAuthorizationCheckpoint)
-            payload = self._store.decision_checkpoint(
-                event_id=checkpoint_event_id,
-                pipeline_key="advancement_safety",
-                output_type=output_type,
-                game_id=game_id,
-                input_fingerprint=input_fingerprint,
-            )
-            if payload is not None:
-                checkpoint = AdvancementAuthorizationCheckpoint.model_validate(payload)
-        if checkpoint is None:
-            decision = await self._pipeline.run(
-                task="Decide whether advancement is currently fictionally allowed.",
-                context=assembled,
-            )
-            checkpoint = AdvancementAuthorizationCheckpoint(
-                decision=decision,
-                scene_id=str(scene["scene_id"]),
-                scene_revision=int(scene["scene_revision"]),
-            )
-            if checkpoint_event_id is not None:
-                canonical = self._store.checkpoint_decision(
-                    event_id=checkpoint_event_id,
-                    pipeline_key="advancement_safety",
-                    output_type=decision_output_type_name(AdvancementAuthorizationCheckpoint),
-                    payload=checkpoint.model_dump(mode="json"),
-                    game_id=game_id,
-                    input_fingerprint=input_fingerprint,
-                )
-                checkpoint = AdvancementAuthorizationCheckpoint.model_validate(canonical)
-        decision = checkpoint.decision
-        if not decision.allowed:
-            raise ValueError(f"advancement is not allowed now: {decision.reason}")
+        assessment = await self._decider.assess(snapshot, checkpoint_event_id=checkpoint_event_id)
+        if assessment.verdict is not SafetyVerdict.ALLOW:
+            raise ValueError(f"advancement is not allowed now: {assessment.display_detail}")
         return AdvancementPermit(
             game_id=game_id,
             player_id=player_id,
-            scene_id=checkpoint.scene_id,
-            scene_revision=checkpoint.scene_revision,
-            reason=decision.reason,
+            scene_id=snapshot.scene_id,
+            scene_revision=snapshot.scene_revision,
+            reason=assessment.display_detail,
         )

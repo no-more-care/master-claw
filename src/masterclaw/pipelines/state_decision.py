@@ -3,12 +3,9 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Literal, cast
 
-from pydantic import BaseModel, ConfigDict, Field, JsonValue, create_model, field_validator
+from pydantic import BaseModel, ConfigDict, Field, create_model, field_validator
 
-from masterclaw.app.decision_checkpoints import DecisionPipeline
 from masterclaw.app.scenarios import CommandId, Scenario, ScenarioId
-from masterclaw.classifiers.base import ClassifierPort
-from masterclaw.classifiers.policy import ClassifierConfig, ClassifierMode
 from masterclaw.pipelines.base import BoundedJsonPipeline, CompletionPort
 
 
@@ -120,35 +117,11 @@ def create_state_decision_pipeline(
 
 
 class StateDecisionRouter:
-    def __init__(
-        self,
-        completion: CompletionPort,
-        *,
-        classifier: ClassifierPort | None = None,
-        classifier_config: ClassifierConfig | None = None,
-    ) -> None:
+    def __init__(self, completion: CompletionPort) -> None:
         self._completion = completion
-        self._classifier = classifier
-        self._classifier_config = classifier_config or ClassifierConfig()
 
-    def pipeline_for(
-        self,
-        scenario: Scenario,
-        *,
-        classifier_state: dict[str, JsonValue] | None = None,
-    ) -> DecisionPipeline[StateDecisionBase]:
-        pipeline = create_state_decision_pipeline(self._completion, scenario)
-        if self._classifier is not None and self._classifier_config.mode is ClassifierMode.SHADOW:
-            from masterclaw.classifiers.state_dispatch import ShadowStatePipeline
-
-            return ShadowStatePipeline(
-                pipeline,
-                scenario,
-                self._classifier,
-                self._classifier_config,
-                classifier_state,
-            )
-        return pipeline
+    def pipeline_for(self, scenario: Scenario) -> BoundedJsonPipeline[StateDecisionBase]:
+        return create_state_decision_pipeline(self._completion, scenario)
 
 
 def command_of(decision: StateDecisionBase) -> CommandId:

@@ -4,6 +4,7 @@ import logging
 from collections.abc import Mapping
 from contextvars import ContextVar, Token
 
+from masterclaw.app.fiction_context import actor_character_projection
 from masterclaw.app.i18n import locale_for_text
 from masterclaw.app.scenarios import Scenario
 from masterclaw.context.assembler import AssembledContext, ContextHistory
@@ -197,35 +198,7 @@ class HandlerSupport:
         character = self._store.character_for_player(game_id=game_id, player_id=player_id)
         if character is None:
             return None
-        return {
-            "player_id": player_id,
-            "character_id": character.character_id,
-            "revision": character.revision,
-            "name": character.sheet.name,
-            "traits": [
-                {
-                    "name": trait.name,
-                    "level": trait.level,
-                    "aspects": list(trait.aspects),
-                }
-                for trait in character.sheet.traits
-            ],
-            "flags": [flag.text for flag in character.sheet.flags],
-            "reserve": character.sheet.reserve_current,
-            "conditions": [item.text for item in character.conditions],
-            "plot_items": [
-                {"name": item.name, "description": item.description}
-                for item in character.plot_items
-            ],
-            "temporary_bonuses": [
-                {
-                    "bonus_id": bonus.bonus_id,
-                    "type": bonus.type.value,
-                    "trigger": bonus.trigger,
-                }
-                for bonus in character.sheet.temporary_bonuses
-            ],
-        }
+        return actor_character_projection(character, player_id=player_id)
 
     def _scenario_context_projections(
         self,

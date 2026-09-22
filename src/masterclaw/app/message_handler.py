@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable
 
+from masterclaw.app.action_preparation import ActionCapabilityObserver, ActionPreparationService
 from masterclaw.app.action_service import ActionService
 from masterclaw.app.advancement_coordinator import AdvancementCoordinator
 from masterclaw.app.game_service import GameService
@@ -16,6 +17,7 @@ from masterclaw.app.handlers.support import HandlerSupport
 from masterclaw.app.handlers.world_management import WorldManagementHandlers
 from masterclaw.app.i18n import tr
 from masterclaw.app.progression_service import ProgressionService
+from masterclaw.app.state_dispatch_service import StateDispatchDecisionService
 from masterclaw.app.status_panels import render_status_panel
 from masterclaw.app.worldgen_service import WorldGenerationService
 from masterclaw.context.assembler import ContextAssembler
@@ -68,8 +70,11 @@ class MessageApplication(
         *,
         store: SQLiteStore,
         context: ContextAssembler,
-        state_router: StateDecisionRouter,
+        state_router: StateDecisionRouter | None = None,
+        state_decisions: StateDispatchDecisionService | None = None,
         action_pipeline: BoundedJsonPipeline[ActionInterpretation] | None = None,
+        action_preparation: ActionPreparationService | None = None,
+        action_capability_observer: ActionCapabilityObserver | None = None,
         narrative_pipeline: (
             BoundedJsonPipeline[NarrativeResult] | ReviewedNarrativePipeline | None
         ) = None,
@@ -91,11 +96,26 @@ class MessageApplication(
     ) -> None:
         self._store = store
         self._context = context
-        self._state_router = state_router
+        if state_decisions is not None and state_router is not None:
+            raise ValueError("provide state decisions or a legacy state router, not both")
+        if state_decisions is None:
+            if state_router is None:
+                raise ValueError("state decision service or router is required")
+            state_decisions = StateDispatchDecisionService(store=store, baseline=state_router)
+        self._state_decisions = state_decisions
         self._router = ModeRouter()
         self._progression = ProgressionService(store)
         self._actions = ActionService(store)
-        self._action_pipeline = action_pipeline
+        if action_preparation is not None and action_pipeline is not None:
+            raise ValueError("provide action preparation or a legacy action pipeline, not both")
+        if action_preparation is not None and action_capability_observer is not None:
+            raise ValueError("inject the observer into the supplied action preparation service")
+        self._action_preparation = action_preparation or ActionPreparationService(
+            store=store,
+            assemble_context=self._assemble_context,
+            pipeline=action_pipeline,
+            observer=action_capability_observer,
+        )
         self._narrative_pipeline = narrative_pipeline
         self._advancement = advancement
         self._games = GameService(store)

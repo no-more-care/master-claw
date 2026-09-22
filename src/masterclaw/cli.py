@@ -8,13 +8,21 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from masterclaw.adapters.discord_bot import DiscordIngressClient
-from masterclaw.adapters.jev import JevClassifier
 from masterclaw.adapters.openhands import OpenHandsCompletionPort, OpenHandsLLMRegistry
+from masterclaw.app.action_capability_classifier import ActionCapabilityClassifier
 from masterclaw.app.advancement_coordinator import AdvancementCoordinator
+from masterclaw.app.advancement_safety import AdvancementSafetyDecider
+from masterclaw.app.advancement_safety_classifier import (
+    AdvancementSafetyClassifier,
+    ShadowAdvancementSafetyDecider,
+)
+from masterclaw.app.legacy_advancement_safety import LegacyAdvancementSafetyDecider
 from masterclaw.app.message_handler import MessageApplication
 from masterclaw.app.orchestrator import ChannelOrchestrator
+from masterclaw.app.state_dispatch_classifier import StateDispatchClassifier
+from masterclaw.app.state_dispatch_service import StateDispatchDecisionService
 from masterclaw.app.worldgen_service import create_world_generation_service
-from masterclaw.classifiers.policy import ClassifierMode
+from masterclaw.classifiers.policy import ClassifierMode, ClassifierUseCase
 from masterclaw.config import ModelRole, OutputTransport, Settings
 from masterclaw.context.assembler import ContextAssembler
 from masterclaw.pipelines.action import create_action_pipeline
@@ -38,6 +46,8 @@ from masterclaw.pipelines.player_narration import create_player_narration_pipeli
 from masterclaw.pipelines.reserve_recovery import create_reserve_recovery_pipeline
 from masterclaw.pipelines.state_decision import StateDecisionRouter
 from masterclaw.pipelines.world_intake import create_world_intake_pipeline
+from masterclaw.runtime.composition import create_semantic_classifier
+from masterclaw.runtime.resources import RuntimeResources
 from masterclaw.runtime_lock import InstanceAlreadyRunning, single_instance
 from masterclaw.storage.sqlite import SCHEMA_VERSION, SQLiteStore
 
@@ -257,26 +267,51 @@ def _serve(settings: Settings) -> int:
             completion(ModelRole.STATE, settings.state_fallback_model),
         )
 
-    classifier = _state_classifier(settings)
-    state_router = StateDecisionRouter(
-        state_completion(),
-        classifier=classifier,
-        classifier_config=settings.classifier,
+    classifier = create_semantic_classifier(settings)
+    resources = RuntimeResources()
+    if classifier is not None:
+        resources.add(classifier)
+    state_decisions = StateDispatchDecisionService(
+        store=store,
+        baseline=StateDecisionRouter(state_completion()),
+        classifier=(
+            None
+            if classifier is None
+            else StateDispatchClassifier(
+                classifier.executor,
+                settings.classifier.for_use_case(ClassifierUseCase.STATE_DISPATCH),
+            )
+        ),
     )
     context = ContextAssembler(
         settings.prompt_path,
         model_ids={role: settings.model_for(role).model for role in ModelRole},
     )
-    advancement = AdvancementCoordinator(
+    advancement_decider: AdvancementSafetyDecider = LegacyAdvancementSafetyDecider(
         store=store,
         context=context,
         safety_pipeline=create_advancement_safety_pipeline(state_completion()),
     )
+    if classifier is not None:
+        advancement_decider = ShadowAdvancementSafetyDecider(
+            advancement_decider,
+            AdvancementSafetyClassifier(classifier.executor, settings.classifier.advancement),
+        )
+    advancement = AdvancementCoordinator(
+        store=store,
+        decider=advancement_decider,
+    )
     application = MessageApplication(
         store=store,
         context=context,
-        state_router=state_router,
+        state_decisions=state_decisions,
         action_pipeline=create_action_pipeline(reasoning_completion()),
+        action_capability_observer=(
+            ActionCapabilityClassifier(classifier.executor, settings.classifier.action_capability)
+            if classifier is not None
+            and settings.classifier.action_capability.mode is ClassifierMode.SHADOW
+            else None
+        ),
         narrative_pipeline=create_reviewed_narrative_pipeline(
             context=context,
             narrator_completion=completion(ModelRole.NARRATIVE),
@@ -315,25 +350,10 @@ def _serve(settings: Settings) -> int:
         store=store,
         orchestrator=orchestrator,
         debounce_seconds=settings.discord_debounce_seconds,
-        close_resources=None if classifier is None else classifier.aclose,
+        resources=resources,
     )
     client.run(settings.discord_token.get_secret_value(), log_handler=None)
     return 0
-
-
-def _state_classifier(settings: Settings) -> JevClassifier | None:
-    if settings.classifier.mode is ClassifierMode.OFF:
-        return None
-    return JevClassifier(
-        model=settings.classifier.model,
-        timeout_seconds=settings.classifier.timeout_seconds,
-        max_concurrency=settings.llm_max_concurrency,
-        api_key=(
-            settings.classifier_api_key
-            if settings.classifier_api_key is not None
-            else settings.openrouter_api_key
-        ),
-    )
 
 
 def _service_completion(

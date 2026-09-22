@@ -13,6 +13,7 @@ import discord
 from masterclaw.app.i18n import locale_for_text, tr
 from masterclaw.app.orchestrator import ChannelOrchestrator
 from masterclaw.domain.models import IncomingAttachment, IncomingMessage
+from masterclaw.runtime.resources import AsyncCloseable
 from masterclaw.storage.sqlite import SQLiteStore
 from masterclaw.telemetry import bind_trace, reset_trace, sanitized_error_summary, stage_span
 
@@ -30,6 +31,7 @@ class DiscordIngressClient(discord.Client):
         debounce_seconds: float = 1.5,
         outbox_poll_seconds: float = 1.0,
         close_resources: Callable[[], Awaitable[None]] | None = None,
+        resources: AsyncCloseable | None = None,
     ) -> None:
         intents = discord.Intents.default()
         intents.message_content = True
@@ -43,7 +45,9 @@ class DiscordIngressClient(discord.Client):
         self._outbox_publish_lock = asyncio.Lock()
         self._outbox_wakeup = asyncio.Event()
         self._outbox_task: asyncio.Task[None] | None = None
-        self._close_resources = close_resources
+        if resources is not None and close_resources is not None:
+            raise ValueError("provide a resource bundle or legacy close callback, not both")
+        self._close_resources = resources.aclose if resources is not None else close_resources
 
     async def on_ready(self) -> None:
         recovered = 0

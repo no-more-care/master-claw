@@ -5,10 +5,10 @@ import uuid
 from collections.abc import Mapping
 from dataclasses import replace
 
+from masterclaw.app.action_preparation import PreparedAction
 from masterclaw.app.decision_checkpoints import run_checkpointed_decision
 from masterclaw.app.handlers.information import PreparedRoleplay
 from masterclaw.app.handlers.play import (
-    PreparedAction,
     PreparedAdvancement,
     PreparedSceneConsequence,
 )

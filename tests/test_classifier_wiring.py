@@ -6,9 +6,10 @@ from pydantic import ValidationError
 from masterclaw.adapters.discord_bot import DiscordIngressClient
 from masterclaw.adapters.jev import JevClassifier
 from masterclaw.classifiers.base import ClassifierConfigurationError
-from masterclaw.classifiers.policy import ClassifierMode
-from masterclaw.cli import _state_classifier
+from masterclaw.classifiers.policy import ClassifierMode, ClassifierUseCase
 from masterclaw.config import Settings
+from masterclaw.runtime.composition import create_semantic_classifier
+from masterclaw.runtime.resources import RuntimeResources
 
 
 def settings(**kwargs):
@@ -32,7 +33,7 @@ def test_classifier_off_needs_no_additional_credentials(monkeypatch):
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
     configured = settings()
     assert configured.classifier.mode is ClassifierMode.OFF
-    assert _state_classifier(configured) is None
+    assert create_semantic_classifier(configured) is None
 
 
 def test_nested_classifier_environment_config_and_wiring(monkeypatch):
@@ -46,7 +47,8 @@ def test_nested_classifier_environment_config_and_wiring(monkeypatch):
     assert configured.classifier.model == "typesafe/jev-1.13"
     assert configured.classifier.threshold == 0.98
     assert configured.classifier.timeout_seconds == 2.5
-    assert isinstance(_state_classifier(configured), JevClassifier)
+    runtime = create_semantic_classifier(configured)
+    assert isinstance(runtime.port, JevClassifier)
 
 
 def test_classifier_key_alias_supports_dotenv_without_changing_default_mode(tmp_path, monkeypatch):
@@ -64,7 +66,7 @@ def test_classifier_key_alias_supports_dotenv_without_changing_default_mode(tmp_
     )
     assert configured.classifier_api_key.get_secret_value() == "dotenv-test-key"
     assert "dotenv-test-key" not in repr(configured)
-    assert _state_classifier(configured) is None
+    assert create_semantic_classifier(configured) is None
 
 
 def test_wiring_uses_existing_key_with_explicit_prefixed_override(monkeypatch):
@@ -74,18 +76,18 @@ def test_wiring_uses_existing_key_with_explicit_prefixed_override(monkeypatch):
         captured.update(kwargs)
         return object()
 
-    monkeypatch.setattr("masterclaw.cli.JevClassifier", factory)
-    _state_classifier(settings(classifier={"mode": "shadow"}))
+    monkeypatch.setattr("masterclaw.adapters.jev.JevClassifier", factory)
+    create_semantic_classifier(settings(classifier={"mode": "shadow"}))
     assert captured["api_key"].get_secret_value() == "test"
     monkeypatch.setenv("MASTERCLAW_CLASSIFIER_API_KEY", "dedicated")
-    _state_classifier(settings(classifier={"mode": "shadow"}))
+    create_semantic_classifier(settings(classifier={"mode": "shadow"}))
     assert captured["api_key"].get_secret_value() == "dedicated"
 
 
 @pytest.mark.parametrize("override", [None, ""])
 def test_shadow_credentials_fail_at_wiring(override):
     with pytest.raises(ClassifierConfigurationError, match="credentials unavailable"):
-        _state_classifier(
+        create_semantic_classifier(
             settings(
                 openrouter_api_key="   ",
                 classifier_api_key=override,
@@ -135,3 +137,146 @@ def test_ingress_shutdown_cancels_work_then_closes_classifier_resources_once():
 
     asyncio.run(run())
     assert order == ["work_cancelled", "resources_closed"]
+
+
+def test_nested_use_case_overrides_and_independent_concurrency(monkeypatch):
+    monkeypatch.setenv("MASTERCLAW_CLASSIFIER__MODE", "shadow")
+    monkeypatch.setenv("MASTERCLAW_CLASSIFIER__THRESHOLD", "0.98")
+    monkeypatch.setenv("MASTERCLAW_CLASSIFIER__STATE_DISPATCH__TIMEOUT_SECONDS", "7")
+    monkeypatch.setenv("MASTERCLAW_CLASSIFIER__MAX_CONCURRENCY", "2")
+    configured = settings(llm_max_concurrency=17)
+    state = configured.classifier.for_use_case(ClassifierUseCase.STATE_DISPATCH)
+    assert state.mode is ClassifierMode.SHADOW
+    assert state.threshold == 0.98
+    assert state.timeout_seconds == 7
+    assert configured.classifier.for_use_case(ClassifierUseCase.ACTION).mode is ClassifierMode.OFF
+    assert (
+        configured.classifier.for_use_case(ClassifierUseCase.ADVANCEMENT).mode is ClassifierMode.OFF
+    )
+    captured = {}
+
+    def factory(**kwargs):
+        captured.update(kwargs)
+        return object()
+
+    monkeypatch.setattr("masterclaw.adapters.jev.JevClassifier", factory)
+    create_semantic_classifier(configured)
+    assert captured["max_concurrency"] == 2
+    assert captured["timeout_seconds"] == 7
+
+
+def test_explicit_state_off_overrides_flat_shadow_without_creating_backend(monkeypatch):
+    def forbidden_factory(**kwargs):
+        raise AssertionError("off must not construct a backend")
+
+    monkeypatch.setattr("masterclaw.adapters.jev.JevClassifier", forbidden_factory)
+    configured = settings(
+        openrouter_api_key="",
+        classifier={
+            "mode": "shadow",
+            "state_dispatch": {"mode": "off"},
+        },
+    )
+    assert create_semantic_classifier(configured) is None
+
+
+def test_ingress_closes_resource_bundle_once():
+    closed = []
+
+    class Resource:
+        async def aclose(self):
+            closed.append("closed")
+
+    async def run():
+        client = DiscordIngressClient(
+            store=object(),
+            orchestrator=object(),
+            resources=RuntimeResources(Resource()),
+        )
+        await client.close()
+        await client.close()
+
+    asyncio.run(run())
+    assert closed == ["closed"]
+
+
+def test_advancement_thresholds_are_independent_nested_settings(monkeypatch):
+    monkeypatch.setenv("MASTERCLAW_CLASSIFIER__THRESHOLD", "0.99")
+    monkeypatch.setenv("MASTERCLAW_CLASSIFIER__ADVANCEMENT__MODE", "shadow")
+    monkeypatch.setenv("MASTERCLAW_CLASSIFIER__ADVANCEMENT__ALLOW_THRESHOLD", "0.85")
+    monkeypatch.setenv("MASTERCLAW_CLASSIFIER__ADVANCEMENT__DENY_THRESHOLD", "0.15")
+    configured = settings()
+    assert configured.classifier.advancement.mode is ClassifierMode.SHADOW
+    assert configured.classifier.advancement.allow_threshold == 0.85
+    assert configured.classifier.advancement.deny_threshold == 0.15
+    assert configured.classifier.for_use_case(ClassifierUseCase.STATE_DISPATCH).threshold == 0.99
+
+
+@pytest.mark.parametrize("state_mode", ["off", "shadow"])
+@pytest.mark.parametrize("action_mode", ["off", "shadow"])
+def test_cli_state_and_advancement_share_executor_and_close_one_backend(
+    tmp_path, monkeypatch, state_mode, action_mode
+):
+    import masterclaw.cli as cli
+
+    captured = {}
+    closes = []
+
+    class Backend:
+        async def classify(self, request):
+            raise AssertionError("composition must not invoke a classifier")
+
+        async def aclose(self):
+            closes.append("backend")
+
+    monkeypatch.setattr("masterclaw.adapters.jev.JevClassifier", lambda **kwargs: Backend())
+    monkeypatch.setattr(cli, "OpenHandsLLMRegistry", lambda settings: object())
+    monkeypatch.setattr(cli, "_service_completion", lambda *args, **kwargs: object())
+
+    def application(**kwargs):
+        captured.update(kwargs)
+        return object()
+
+    class Client:
+        def __init__(self, **kwargs):
+            self.resources = kwargs["resources"]
+
+        def run(self, *args, **kwargs):
+            async def close():
+                await self.resources.aclose()
+                await self.resources.aclose()
+
+            asyncio.run(close())
+
+    monkeypatch.setattr(cli, "MessageApplication", application)
+    monkeypatch.setattr(cli, "DiscordIngressClient", Client)
+    configured = settings(
+        database_path=str(tmp_path / "db.sqlite3"),
+        classifier={
+            "mode": state_mode,
+            "advancement": {"mode": "shadow"},
+            "action_capability": {"mode": action_mode},
+        },
+    )
+    assert cli._serve(configured) == 0
+    state_executor = captured["state_decisions"]._classifier._executor
+    advancement_executor = captured["advancement"]._decider._classifier._executor
+    assert state_executor is advancement_executor
+    observer = captured["action_capability_observer"]
+    if action_mode == "shadow":
+        assert observer._executor is state_executor
+    else:
+        assert observer is None
+    assert closes == ["backend"]
+
+
+def test_action_capability_has_independent_config_and_can_enable_runtime_alone(monkeypatch):
+    monkeypatch.setenv("MASTERCLAW_CLASSIFIER__ACTION_CAPABILITY__MODE", "shadow")
+    monkeypatch.setenv("MASTERCLAW_CLASSIFIER__ACTION_CAPABILITY__CAPABLE_THRESHOLD", "0.88")
+    monkeypatch.setenv("MASTERCLAW_CLASSIFIER__ACTION_CAPABILITY__BLOCKED_THRESHOLD", "0.97")
+    configured = settings()
+    assert configured.classifier.mode is ClassifierMode.OFF
+    assert configured.classifier.action.mode is ClassifierMode.OFF
+    policy = configured.classifier.for_use_case(ClassifierUseCase.ACTION_CAPABILITY)
+    assert policy.capable_threshold == 0.88 and policy.blocked_threshold == 0.97
+    assert create_semantic_classifier(configured) is not None

@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-import json
 import logging
 import re
 import uuid
 from collections.abc import Mapping
 from dataclasses import dataclass, replace
 
+from masterclaw.app.action_preparation import MissingActionContext, PreparedAction
 from masterclaw.app.decision_checkpoints import (
     DecisionContextChangedError,
     decision_input_fingerprint,
@@ -50,7 +50,7 @@ from masterclaw.domain.text_safety import (
     redact_secret_leak,
     secret_fact_catalog,
 )
-from masterclaw.pipelines.action import ActionInterpretation, ActionResolution
+from masterclaw.pipelines.action import ActionResolution
 from masterclaw.pipelines.base import PipelineValidationError, TransientProviderError
 from masterclaw.pipelines.conversation_actions import (
     AdvancementKind,
@@ -88,14 +88,6 @@ class PreparedSceneConsequence:
     scene: dict[str, object]
     outcome_source: dict[str, object]
     player_id: str
-
-
-@dataclass(frozen=True, slots=True)
-class PreparedAction:
-    """An interpreted action bound to the exact actor/scene snapshot it was based on."""
-
-    interpretation: ActionInterpretation
-    context: FictionContextSnapshot
 
 
 class PlayHandlers:
@@ -1263,129 +1255,42 @@ class PlayHandlers:
                 replacing_pending=replacing_pending,
                 continuation_context=continuation_context,
             )
-        if self._action_pipeline is None and prepared_result is None:
+        if not self._action_preparation.available and prepared_result is None:
             if raise_on_invalid:
                 raise PipelineValidationError("action interpretation pipeline is unavailable")
             return tr(locale, "action_pipeline_unavailable")
-        character = self._store.character_for_player(game_id=game_id, player_id=message.author_id)
-        scene = self._store.scene_projection(game_id=game_id, player_id=message.author_id)
-        if character is None:
-            return tr(locale, "character_game_required")
-        if scene is None:
-            return tr(locale, "character_scene_required")
+        try:
+            preparation = await self._action_preparation.prepare(
+                message=message,
+                game_id=game_id,
+                locale=locale,
+                replacing_pending=replacing_pending,
+                continuation_context=continuation_context,
+                prepared_result=prepared_result,
+            )
+        except DecisionContextChangedError as error:
+            logger.warning("action_interpretation_context_changed event_id=%s", message.event_id)
+            if raise_on_invalid:
+                raise FictionContextChangedError(str(error)) from error
+            return tr(locale, "fiction_context_changed_retry")
+        except PipelineValidationError:
+            logger.warning(
+                "action_interpretation_invalid event_id=%s", message.event_id, exc_info=True
+            )
+            if raise_on_invalid:
+                raise
+            return tr(locale, manifest_for(PipelineName.ACTION_INTERPRETATION).on_invalid.value)
+        except FictionContextChangedError:
+            if raise_on_invalid:
+                raise
+            return tr(locale, "fiction_context_changed_retry")
+        if isinstance(preparation, MissingActionContext):
+            return tr(locale, preparation.value)
+        prepared_action = preparation
+        result = preparation.interpretation
+        character = preparation.snapshot.character
+        scene = preparation.snapshot.scene
         sheet = character.sheet
-        manifest = manifest_for(PipelineName.ACTION_INTERPRETATION)
-        if prepared_result is None:
-            context_snapshot = FictionContextSnapshot.capture(
-                game_id=game_id,
-                player_id=message.author_id,
-                character=character,
-                scene=scene,
-            )
-            actor_projection = self._actor_character_projection(
-                game_id=game_id,
-                player_id=message.author_id,
-            )
-            assert actor_projection is not None
-            assembled = self._assemble_context(
-                manifest,
-                {
-                    "session_brief": {
-                        "game_id": game_id,
-                        "locale": locale,
-                        "participants_here": scene["participants"],
-                    },
-                    "actor_character": actor_projection,
-                    "current_scene": scene,
-                },
-                game_id=game_id,
-                channel_id=message.channel_id,
-                player_id=message.author_id,
-            )
-            task = f"Interpret the declaration:\n{message.content}"
-            if continuation_context:
-                task += (
-                    "\nThe declaration continues a typed pending interaction. Use the following "
-                    "question/answer context as data, preserve the original intent, and do not "
-                    "reinterpret it as a separate action:\n"
-                    + json.dumps(continuation_context, ensure_ascii=False, sort_keys=True)
-                )
-            assert self._action_pipeline is not None
-            try:
-                result = await run_checkpointed_decision(
-                    store=self._store,
-                    event_id=message.event_id,
-                    pipeline_key="action_interpretation",
-                    pipeline=self._action_pipeline,
-                    task=task,
-                    context=assembled,
-                    game_id=game_id,
-                    input_fingerprint=decision_input_fingerprint(
-                        {
-                            "stage": "action_interpretation",
-                            "message": message.content,
-                            "continuation_context": continuation_context or {},
-                            "replacing_pending_id": (
-                                None
-                                if replacing_pending is None
-                                else replacing_pending.interaction_id
-                            ),
-                            "replacing_pending_revision": (
-                                None if replacing_pending is None else replacing_pending.revision
-                            ),
-                            **context_snapshot.as_mapping(),
-                        }
-                    ),
-                )
-            except DecisionContextChangedError as error:
-                logger.warning(
-                    "action_interpretation_context_changed event_id=%s",
-                    message.event_id,
-                )
-                if raise_on_invalid:
-                    raise FictionContextChangedError(str(error)) from error
-                return tr(locale, "fiction_context_changed_retry")
-            except PipelineValidationError:
-                logger.warning(
-                    "action_interpretation_invalid event_id=%s", message.event_id, exc_info=True
-                )
-                if raise_on_invalid:
-                    raise
-                return tr(locale, manifest.on_invalid.value)
-            current_character = self._store.character_for_player(
-                game_id=game_id,
-                player_id=message.author_id,
-            )
-            current_scene = self._store.scene_projection(
-                game_id=game_id,
-                player_id=message.author_id,
-            )
-            if not context_snapshot.matches(
-                character=current_character,
-                scene=current_scene,
-            ):
-                if raise_on_invalid:
-                    raise FictionContextChangedError(
-                        "action interpretation context changed before commit"
-                    )
-                return tr(locale, "fiction_context_changed_retry")
-            assert current_character is not None and current_scene is not None
-            character = current_character
-            scene = current_scene
-            sheet = character.sheet
-            prepared_action = PreparedAction(
-                interpretation=result,
-                context=context_snapshot,
-            )
-        else:
-            prepared_action = prepared_result
-            result = prepared_action.interpretation
-            if not prepared_action.context.matches(character=character, scene=scene):
-                if raise_on_invalid:
-                    raise FictionContextChangedError(
-                        "prepared action context changed before commit"
-                    )
-                return tr(locale, "fiction_context_changed_retry")
         if preflight_only:
             if result.resolution is ActionResolution.AUTOMATIC:
                 if self._consequence_pipeline is None:

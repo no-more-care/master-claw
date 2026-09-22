@@ -72,11 +72,21 @@ SQLite only after applying the normal schema migration and does not call a model
 
 ## Semantic classifier shadow observations
 
-When `MASTERCLAW_CLASSIFIER__MODE=shadow`, `classifier.state_dispatch` spans persist a typed
-observation in the existing `stage_spans.attributes_json` column. No schema migration is needed.
+When state dispatch shadow mode is enabled, `classifier.state_dispatch` spans persist a typed
+observation in the existing `stage_spans.attributes_json` column. The generic semantic executor
+uses `classifier.<use_case>` for other callers. No schema migration is needed.
 The observation includes requested and resolved model, reported version/provider/request ID,
-taxonomy/request fingerprint, full label probabilities, confidence, the authoritative router's
-command, agreement, latency, and numeric token/cost metadata. Unknown versions remain null.
+taxonomy/request fingerprint, full per-question probabilities and confidence, optional reference
+answers/agreement, latency, and numeric token/cost metadata. Unknown versions remain null.
+Generic observations identify `use_case` and optional `scope`; question results are under
+`answers.<question_id>`. For state dispatch, the router's command is `reference.command` and the
+scenario is `scope`. Previously stored flat observations are retained unchanged.
+`StateDispatchDecisionService` owns the baseline/shadow sequence inside the original
+`state_dispatch` checkpoint. Its normalized result keeps the baseline command, argument,
+confidence and evidence, with replay/observation metadata outside the checkpoint payload.
+Existing checkpoint output identities and the null input fingerprint remain unchanged;
+replay executes neither model. The baseline LLM pipeline and generic classifier package no
+longer import or wrap one another.
 Free-form provider metadata and non-allowlisted usage fields are omitted; player messages,
 arguments, history, player IDs and GM context are not included.
 
@@ -94,3 +104,12 @@ are available for that separate reporting work; they are not lost when a model a
 Jev reuses `MASTERCLAW_OPENROUTER_API_KEY`, optionally overridden by
 `MASTERCLAW_CLASSIFIER_API_KEY`. Empty credentials fail during startup when shadow is enabled.
 Its bounded HTTP pool is reused and closed after Discord's in-flight work is cancelled at shutdown.
+Composition owns a provider-neutral resource bundle, and classifier concurrency is independently
+configured by `MASTERCLAW_CLASSIFIER__MAX_CONCURRENCY`.
+
+`MASTERCLAW_CLASSIFIER__STATE_DISPATCH__MODE`, `__THRESHOLD`, and `__TIMEOUT_SECONDS` select the
+state-dispatch policy. The original flat `MASTERCLAW_CLASSIFIER__MODE`, `__THRESHOLD`, and
+`__TIMEOUT_SECONDS` remain fallbacks for unspecified state-dispatch fields. `ADVANCEMENT` and
+`ACTION` have separate policy structures defaulting to off; this change adds no application calls
+for those use cases and no authority modes. The executor evaluates choice confidence plus the
+selected probability, noul distance from uncertainty via its stronger polarity, and score confidence.

@@ -5,7 +5,6 @@ from collections.abc import Mapping
 from dataclasses import replace
 from datetime import timedelta
 
-from masterclaw.app.decision_checkpoints import run_checkpointed_decision
 from masterclaw.app.dispatch import (
     ClassifyWithLlm,
     DecisionSource,
@@ -38,7 +37,6 @@ from masterclaw.domain.models import (
 )
 from masterclaw.domain.state import PendingKind
 from masterclaw.pipelines.base import PipelineValidationError
-from masterclaw.pipelines.state_decision import command_of
 
 logger = logging.getLogger(__name__)
 
@@ -379,23 +377,15 @@ class DispatchExecution:
                 player_id=message.author_id,
             )
             try:
-                result = await run_checkpointed_decision(
-                    store=self._store,
-                    event_id=message.event_id,
-                    pipeline_key="state_dispatch",
-                    pipeline=self._state_router.pipeline_for(
-                        scenario,
-                        classifier_state={
-                            "message": message.content,
-                            "pending_kind": None if pending is None else pending.kind.value,
-                            "workspace_stage": snapshot.workspace_stage,
-                        },
-                    ),
-                    task=f"Choose exactly one scenario command for:\n{message.content}",
+                result = await self._state_decisions.decide(
+                    message=message,
+                    scenario=scenario,
                     context=assembled,
                     game_id=channel.game_id,
+                    pending_kind=None if pending is None else pending.kind.value,
+                    workspace_stage=snapshot.workspace_stage,
                 )
-                decision_command = command_of(result)
+                decision_command = result.command
                 argument = result.argument
                 decision_evidence = result.evidence
                 if result.confidence >= 0.9 and decision_command in {

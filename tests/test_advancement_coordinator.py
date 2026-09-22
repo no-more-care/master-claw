@@ -6,6 +6,7 @@ import pytest
 
 from masterclaw.app.advancement_coordinator import AdvancementCoordinator
 from masterclaw.app.i18n import tr
+from masterclaw.app.legacy_advancement_safety import LegacyAdvancementSafetyDecider
 from masterclaw.app.message_handler import MessageApplication
 from masterclaw.context.assembler import ContextAssembler
 from masterclaw.context.manifests import FallbackAction, PipelineName, manifest_for
@@ -69,8 +70,11 @@ def setup(tmp_path, *, enabled=True):
 def coordinator(store, allowed):
     return AdvancementCoordinator(
         store=store,
-        context=ContextAssembler(Path(__file__).parents[1] / "prompts"),
-        safety_pipeline=create_advancement_safety_pipeline(FakeCompletion(allowed)),
+        decider=LegacyAdvancementSafetyDecider(
+            store=store,
+            context=ContextAssembler(Path(__file__).parents[1] / "prompts"),
+            safety_pipeline=create_advancement_safety_pipeline(FakeCompletion(allowed)),
+        ),
     )
 
 
@@ -112,8 +116,11 @@ def test_advancement_replay_uses_source_event_id_without_spending_or_authorizing
     completion = FakeCompletion(True)
     advancement = AdvancementCoordinator(
         store=store,
-        context=ContextAssembler(Path(__file__).parents[1] / "prompts"),
-        safety_pipeline=create_advancement_safety_pipeline(completion),
+        decider=LegacyAdvancementSafetyDecider(
+            store=store,
+            context=ContextAssembler(Path(__file__).parents[1] / "prompts"),
+            safety_pipeline=create_advancement_safety_pipeline(completion),
+        ),
     )
 
     first = asyncio.run(
@@ -148,8 +155,11 @@ def test_checkpointed_advancement_authorization_rejects_changed_scene_revision(
     completion = FakeCompletion(True)
     advancement = AdvancementCoordinator(
         store=store,
-        context=ContextAssembler(Path(__file__).parents[1] / "prompts"),
-        safety_pipeline=create_advancement_safety_pipeline(completion),
+        decider=LegacyAdvancementSafetyDecider(
+            store=store,
+            context=ContextAssembler(Path(__file__).parents[1] / "prompts"),
+            safety_pipeline=create_advancement_safety_pipeline(completion),
+        ),
     )
     request = {"kind": "raise", "trait": "T0", "new_aspect": "New"}
 
@@ -207,8 +217,11 @@ def test_invalid_advancement_safety_uses_actionable_fallback_without_mutation(
         ),
         advancement=AdvancementCoordinator(
             store=store,
-            context=ContextAssembler(Path(__file__).parents[1] / "prompts"),
-            safety_pipeline=create_advancement_safety_pipeline(safety),
+            decider=LegacyAdvancementSafetyDecider(
+                store=store,
+                context=ContextAssembler(Path(__file__).parents[1] / "prompts"),
+                safety_pipeline=create_advancement_safety_pipeline(safety),
+            ),
         ),
         advancement_intake_pipeline=create_advancement_intake_pipeline(
             StaticCompletion(

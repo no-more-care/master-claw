@@ -4,7 +4,7 @@ import math
 import re
 from typing import Literal
 
-from pydantic import Field, JsonValue
+from pydantic import Field, FiniteFloat, JsonValue, StrictBool
 
 from masterclaw.classifiers.base import (
     ClassifierErrorCategory,
@@ -12,6 +12,7 @@ from masterclaw.classifiers.base import (
     Identifier,
     Probability,
 )
+from masterclaw.classifiers.policy import ClassifierMode
 
 _METADATA = re.compile(r"^[A-Za-z0-9~][A-Za-z0-9._:/@+\-]{0,199}$")
 _USAGE_FIELDS = frozenset(
@@ -54,11 +55,25 @@ def numeric_usage(usage: dict[str, JsonValue]) -> dict[str, JsonValue]:
     return result
 
 
+ReferenceValue = Identifier | StrictBool | FiniteFloat
+
+
+class AnswerObservation(Contract):
+    type: Literal["choice", "score", "noul"]
+    outcome: Literal["eligible", "uncertain", "blocked"]
+    choice: Identifier | None = None
+    score: FiniteFloat | None = None
+    noul: Probability | None = None
+    confidence: Probability | None = None
+    probabilities: dict[str, Probability]
+
+
 class ClassifierObservation(Contract):
     """Persisted as existing stage-span attributes; contains no state, arguments or player IDs."""
 
-    mode: Literal["shadow"] = "shadow"
-    scenario: Identifier
+    use_case: Identifier
+    mode: ClassifierMode
+    scope: Identifier | None = None
     taxonomy_version: Identifier
     requested_model: str | None
     resolved_model: str | None = None
@@ -69,13 +84,15 @@ class ClassifierObservation(Contract):
     request_key: str | None = None
     usage: dict[str, JsonValue] = Field(default_factory=dict)
     cost: float | None = None
-    outcome: Literal["eligible", "uncertain", "blocked", "error"]
-    command: Identifier | None = None
-    baseline_command: Identifier
-    confidence: Probability | None = None
-    probability: Probability | None = None
-    probabilities: dict[Identifier, Probability] = Field(default_factory=dict)
+    outcome: Literal["off", "eligible", "uncertain", "blocked", "error"]
+    answers: dict[Identifier, AnswerObservation] = Field(default_factory=dict)
+    reference: dict[Identifier, ReferenceValue] = Field(default_factory=dict)
     agreement: bool | None = None
+    decision: Identifier | None = None
+    decision_reason: Identifier | None = None
+    decision_reference: Identifier | None = None
+    decision_comparison: Identifier | None = None
+    decision_thresholds: dict[Identifier, Probability] = Field(default_factory=dict)
     error_category: ClassifierErrorCategory | None = None
     error_transient: bool | None = None
     latency_ms: float = Field(ge=0)

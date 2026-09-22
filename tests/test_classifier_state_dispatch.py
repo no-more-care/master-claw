@@ -1,11 +1,14 @@
 import asyncio
 import json
+import uuid
 from pathlib import Path
 
 import pytest
 
 from masterclaw.app.message_handler import MessageApplication
 from masterclaw.app.scenarios import SCENARIOS, CommandId, ScenarioId
+from masterclaw.app.state_dispatch_classifier import StateDispatchClassifier
+from masterclaw.app.state_dispatch_service import StateDispatchDecisionService
 from masterclaw.classifiers.base import (
     ClassificationResponse,
     ClassifierAuthenticationError,
@@ -18,11 +21,12 @@ from masterclaw.classifiers.base import (
     ClassifierServerError,
     ClassifierTimeoutError,
 )
-from masterclaw.classifiers.policy import ClassifierConfig
+from masterclaw.classifiers.executor import SemanticClassifierExecutor
+from masterclaw.classifiers.policy import ClassifierConfig, ClassifierUseCase
 from masterclaw.context.assembler import AssembledContext, ContextAssembler
 from masterclaw.domain.models import IncomingMessage
 from masterclaw.pipelines.base import CompletionResult
-from masterclaw.pipelines.state_decision import StateDecisionRouter, command_of
+from masterclaw.pipelines.state_decision import StateDecisionRouter
 from masterclaw.storage.sqlite import SQLiteStore
 from masterclaw.telemetry import bind_trace, reset_trace
 
@@ -81,6 +85,39 @@ class Classifier:
         )
 
 
+def make_service(tmp_path, *, completion=None, classifier=None, config=None, store=None):
+    store = store or SQLiteStore(tmp_path / "decisions.sqlite3")
+    store.initialize()
+    config = config or ClassifierConfig(mode="shadow")
+    adapter = (
+        None
+        if classifier is None
+        else StateDispatchClassifier(
+            SemanticClassifierExecutor(classifier, requested_model=config.model),
+            config.for_use_case(ClassifierUseCase.STATE_DISPATCH),
+        )
+    )
+    return StateDispatchDecisionService(
+        store=store,
+        baseline=StateDecisionRouter(completion or Completion()),
+        classifier=adapter,
+    )
+
+
+async def decide(service, *, scenario=ScenarioId.WORLD_SELECTION, content="message", context=None):
+    return await service.decide(
+        message=IncomingMessage.now(
+            event_id=uuid.uuid4().hex,
+            channel_id="channel",
+            author_id="player",
+            content=content,
+        ),
+        scenario=SCENARIOS[scenario],
+        context=context or AssembledContext("", "", (), 0),
+        game_id=None,
+    )
+
+
 @pytest.mark.parametrize(
     ("choice", "confidence", "error", "outcome"),
     [
@@ -92,7 +129,7 @@ class Classifier:
     ],
 )
 def test_shadow_preserves_router_and_sanitizes_telemetry(
-    choice, confidence, error, outcome, caplog
+    choice, confidence, error, outcome, caplog, tmp_path
 ):
     class Sink:
         records = []
@@ -103,21 +140,21 @@ def test_shadow_preserves_router_and_sanitizes_telemetry(
     sink = Sink()
     binding = bind_trace(sink, trace_id="test")
     classifier = Classifier(choice, confidence, error)
-    router = StateDecisionRouter(
-        Completion(),
+    service = make_service(
+        tmp_path,
         classifier=classifier,
-        classifier_config=ClassifierConfig(mode="shadow"),
     )
     try:
         result = asyncio.run(
-            router.pipeline_for(SCENARIOS[ScenarioId.WORLD_SELECTION]).run(
-                task="raw player secret",
+            decide(
+                service,
+                content="raw player secret",
                 context=AssembledContext("", "hidden secret", (), 0),
             )
         )
     finally:
         reset_trace(binding)
-    assert command_of(result) is CommandId.CLARIFY
+    assert result.command is CommandId.CLARIFY
     assert result.argument is None
     request = classifier.requests[0]
     assert request.state["message"] == "raw player secret"
@@ -133,7 +170,7 @@ def test_shadow_preserves_router_and_sanitizes_telemetry(
         assert secret not in caplog.text
 
 
-def test_explicit_only_is_blocked_even_in_shadow_metrics():
+def test_explicit_only_is_blocked_even_in_shadow_metrics(tmp_path):
     class Sink:
         records = []
 
@@ -142,42 +179,44 @@ def test_explicit_only_is_blocked_even_in_shadow_metrics():
 
     sink = Sink()
     binding = bind_trace(sink, trace_id="test")
-    router = StateDecisionRouter(
-        Completion(),
+    service = make_service(
+        tmp_path,
         classifier=Classifier("confirm_world"),
-        classifier_config=ClassifierConfig(mode="shadow"),
     )
     try:
         result = asyncio.run(
-            router.pipeline_for(SCENARIOS[ScenarioId.WORLD_EDITING_REVIEW]).run(
-                task="looks fine",
+            decide(
+                service,
+                scenario=ScenarioId.WORLD_EDITING_REVIEW,
+                content="looks fine",
                 context=AssembledContext("", "", (), 0),
             )
         )
     finally:
         reset_trace(binding)
-    assert command_of(result) is CommandId.CLARIFY
+    assert result.command is CommandId.CLARIFY
     records = [record for record in sink.records if record["stage"] == "classifier.state_dispatch"]
     assert records[-1]["attributes"]["outcome"] == "blocked"
 
 
-def test_shadow_does_not_replace_free_form_argument():
-    router = StateDecisionRouter(
-        Completion("select_world", "The original world"),
+def test_shadow_does_not_replace_free_form_argument(tmp_path):
+    service = make_service(
+        tmp_path,
+        completion=Completion("select_world", "The original world"),
         classifier=Classifier(),
-        classifier_config=ClassifierConfig(mode="shadow"),
     )
     result = asyncio.run(
-        router.pipeline_for(SCENARIOS[ScenarioId.WORLD_SELECTION]).run(
-            task="choose world",
+        decide(
+            service,
+            content="choose world",
             context=AssembledContext("", "", (), 0),
         )
     )
-    assert command_of(result) is CommandId.SELECT_WORLD
+    assert result.command is CommandId.SELECT_WORLD
     assert result.argument == "The original world"
 
 
-def test_timeout_falls_back_but_external_cancellation_propagates():
+def test_timeout_falls_back_but_external_cancellation_propagates(tmp_path):
     class SlowClassifier:
         async def classify(self, request):
             await asyncio.sleep(60)
@@ -187,17 +226,14 @@ def test_timeout_falls_back_but_external_cancellation_propagates():
             raise asyncio.CancelledError
 
     async def run(classifier):
-        router = StateDecisionRouter(
-            Completion(),
+        service = make_service(
+            tmp_path,
             classifier=classifier,
-            classifier_config=ClassifierConfig(mode="shadow", timeout_seconds=0.001),
+            config=ClassifierConfig(mode="shadow", timeout_seconds=0.001),
         )
-        return await router.pipeline_for(SCENARIOS[ScenarioId.WORLD_SELECTION]).run(
-            task="message",
-            context=AssembledContext("", "", (), 0),
-        )
+        return await decide(service)
 
-    assert command_of(asyncio.run(run(SlowClassifier()))) is CommandId.CLARIFY
+    assert asyncio.run(run(SlowClassifier())).command is CommandId.CLARIFY
     with pytest.raises(asyncio.CancelledError):
         asyncio.run(run(CancelledClassifier()))
 
@@ -210,10 +246,8 @@ def test_dispatch_replay_skips_both_models_and_structural_commands_bypass_shadow
     app = MessageApplication(
         store=store,
         context=ContextAssembler(Path(__file__).parents[1] / "prompts"),
-        state_router=StateDecisionRouter(
-            completion,
-            classifier=classifier,
-            classifier_config=ClassifierConfig(mode="shadow"),
+        state_decisions=make_service(
+            tmp_path, completion=completion, classifier=classifier, store=store
         ),
     )
     message = IncomingMessage.now(
@@ -238,15 +272,10 @@ def test_dispatch_replay_skips_both_models_and_structural_commands_bypass_shadow
     assert completion.calls == len(classifier.requests) == 1
 
 
-def test_off_mode_does_not_call_classifier():
+def test_off_mode_does_not_call_classifier(tmp_path):
     classifier = Classifier()
-    router = StateDecisionRouter(Completion(), classifier=classifier)
-    asyncio.run(
-        router.pipeline_for(SCENARIOS[ScenarioId.WORLD_SELECTION]).run(
-            task="message",
-            context=AssembledContext("", "", (), 0),
-        )
-    )
+    service = make_service(tmp_path, classifier=classifier, config=ClassifierConfig())
+    asyncio.run(decide(service))
     assert classifier.requests == []
 
 
@@ -275,14 +304,11 @@ def test_calibration_metadata_and_distributions_are_durable_without_private_stat
     binding = bind_trace(store, trace_id="classifier-test")
     classifier = MetadataClassifier()
     try:
-        router = StateDecisionRouter(
-            Completion(),
-            classifier=classifier,
-            classifier_config=ClassifierConfig(mode="shadow"),
-        )
+        service = make_service(tmp_path, classifier=classifier, store=store)
         asyncio.run(
-            router.pipeline_for(SCENARIOS[ScenarioId.WORLD_SELECTION]).run(
-                task="secret fresh message",
+            decide(
+                service,
+                content="secret fresh message",
                 context=AssembledContext("", "secret context", (), 0),
             )
         )
@@ -305,12 +331,14 @@ def test_calibration_metadata_and_distributions_are_durable_without_private_stat
         "input_tokens_details": {"cached_tokens": 10},
     }
     assert observation["cost"] == 0.001
-    assert set(observation["probabilities"]) == set(
+    assert set(observation["answers"]["command"]["probabilities"]) == set(
         classifier.requests[0].questions["command"].criteria
     )
-    assert observation["confidence"] == 0.99
+    assert observation["answers"]["command"]["confidence"] == 0.99
     assert observation["latency_ms"] >= 0
-    assert observation["baseline_command"] == "clarify"
+    assert observation["reference"] == {"command": "clarify"}
+    assert observation["use_case"] == "state_dispatch"
+    assert observation["scope"] == "world_selection"
     assert observation["error_category"] is None
     assert "secret" not in row["attributes_json"]
     assert "user_id" not in row["attributes_json"]
@@ -329,7 +357,7 @@ def test_calibration_metadata_and_distributions_are_durable_without_private_stat
         ClassifierNetworkError,
     ],
 )
-def test_shadow_observations_preserve_error_category(kind):
+def test_shadow_observations_preserve_error_category(kind, tmp_path):
     class Sink:
         records = []
 
@@ -339,20 +367,14 @@ def test_shadow_observations_preserve_error_category(kind):
     sink = Sink()
     binding = bind_trace(sink, trace_id="errors")
     try:
-        router = StateDecisionRouter(
-            Completion(),
+        service = make_service(
+            tmp_path,
             classifier=Classifier(error=kind("secret exception body")),
-            classifier_config=ClassifierConfig(mode="shadow"),
         )
-        result = asyncio.run(
-            router.pipeline_for(SCENARIOS[ScenarioId.WORLD_SELECTION]).run(
-                task="message",
-                context=AssembledContext("", "", (), 0),
-            )
-        )
+        result = asyncio.run(decide(service))
     finally:
         reset_trace(binding)
-    assert command_of(result) is CommandId.CLARIFY
+    assert result.command is CommandId.CLARIFY
     record = next(row for row in sink.records if row["stage"] == "classifier.state_dispatch")
     assert record["attributes"]["error_category"] == kind.category.value
     assert record["attributes"]["error_transient"] is kind.transient
