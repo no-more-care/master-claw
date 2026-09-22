@@ -18,6 +18,10 @@ from masterclaw.app.handlers.types import (
     FictionContextSnapshot,
 )
 from masterclaw.app.i18n import tr
+from masterclaw.app.player_narration_review import (
+    NarrationVerdict,
+    capture_narration_review_snapshot,
+)
 from masterclaw.app.response_format import format_pool_confirmation, format_roll_result
 from masterclaw.context.manifests import PipelineName, manifest_for
 from masterclaw.domain.mechanics import (
@@ -985,7 +989,7 @@ class PlayHandlers:
                 pending=pending,
                 event=committed,
             )
-        if self._player_narration_pipeline is None:
+        if self._narration_rights_decider is None:
             return tr(locale, "rights_review_unavailable")
         game = self._store.game_state(pending.game_id)
         scene = self._store.scene_projection(game_id=pending.game_id, player_id=message.author_id)
@@ -1009,57 +1013,29 @@ class PlayHandlers:
                 message.event_id,
             )
             return tr(locale, "fiction_context_changed_retry")
-        original_declaration = str(source_pending.payload.get("declaration", ""))
         manifest = manifest_for(PipelineName.PLAYER_NARRATION_REVIEW)
-        assembled = self._assemble_context(
-            manifest,
-            {
-                "session_brief": self._narrative_session_brief(game),
-                "current_scene": scene,
-                "actor_character": self._actor_character_projection(
-                    game_id=pending.game_id,
-                    player_id=message.author_id,
-                ),
-                "roll_result": {
-                    "hits": roll.hits,
-                    "difficulty": roll.difficulty,
-                    "narrator_rights": roll.narrator_rights.value,
-                    "narrator_rights_level": game.narrator_rights_level.value,
-                    "original_declaration": original_declaration,
-                    "pending_prompt": pending.prompt,
-                },
-                "submitted_narration": message.content,
-            },
-            game_id=pending.game_id,
-            channel_id=message.channel_id,
-            player_id=message.author_id,
+        snapshot = capture_narration_review_snapshot(
+            capture_context=self._capture_context_inputs,
+            message=message,
+            pending=pending,
+            source_pending=source_pending,
+            fiction=source_context,
+            roll=roll,
+            rights_level=game.narrator_rights_level.value,
+            locale=locale,
+            session_brief=self._narrative_session_brief(game),
+            scene=scene,
+            actor_projection=self._actor_character_projection(
+                game_id=pending.game_id,
+                player_id=message.author_id,
+            ),
         )
         try:
-            review = await run_checkpointed_decision(
-                store=self._store,
-                event_id=message.event_id,
-                pipeline_key="player_narration_review",
-                pipeline=self._player_narration_pipeline,
-                task="Review the submitted player narration.",
-                context=assembled,
-                game_id=pending.game_id,
-                input_fingerprint=decision_input_fingerprint(
-                    {
-                        "stage": "player_narration_review",
-                        "submitted_narration": message.content,
-                        "pending_interaction_id": pending.interaction_id,
-                        "pending_revision": pending.revision,
-                        "source_interaction_id": source_pending.interaction_id,
-                        "source_interaction_revision": source_pending.revision,
-                        "source_scene_revision": int(source_pending.payload["scene_revision"]),
-                        "source_location_revision": int(
-                            source_pending.payload["location_revision"]
-                        ),
-                        "source_actor_revision": int(source_pending.payload["character_revision"]),
-                        "roll_id": roll.roll_id,
-                        **source_context.as_mapping(),
-                    }
-                ),
+            assessment = await self._narration_rights_decider.assess(snapshot, message.event_id)
+            text = await self._narration_text_port.materialize(
+                snapshot,
+                assessment,
+                message.event_id,
             )
         except DecisionContextChangedError:
             logger.warning(
@@ -1089,13 +1065,13 @@ class PlayHandlers:
             return tr(locale, "fiction_context_changed_retry")
         assert current_scene is not None
         scene = current_scene
-        if not review.accepted:
+        if assessment.verdict is not NarrationVerdict.ALLOW:
             return redact_secret_leak(
-                review.scale_back_request or tr(locale, "narration_rejected", error=review.reason),
+                text.feedback_text or tr(locale, manifest.on_invalid.value),
                 self._secret_plot_for_game(pending.game_id),
                 replacement=tr(locale, manifest.on_invalid.value),
             )
-        approved_narration = review.approved_narration
+        approved_narration = text.publication_text
         if approved_narration is None:
             return tr(locale, manifest.on_invalid.value)
         try:

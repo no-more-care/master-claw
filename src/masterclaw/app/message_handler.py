@@ -16,6 +16,8 @@ from masterclaw.app.handlers.preparation import PreparationHandlers
 from masterclaw.app.handlers.support import HandlerSupport
 from masterclaw.app.handlers.world_management import WorldManagementHandlers
 from masterclaw.app.i18n import tr
+from masterclaw.app.legacy_player_narration_review import LegacyPlayerNarrationReview
+from masterclaw.app.player_narration_review import NarrationRightsDecider, NarrationTextPort
 from masterclaw.app.progression_service import ProgressionService
 from masterclaw.app.state_dispatch_service import StateDispatchDecisionService
 from masterclaw.app.status_panels import render_status_panel
@@ -80,6 +82,8 @@ class MessageApplication(
         ) = None,
         advancement: AdvancementCoordinator | None = None,
         player_narration_pipeline: BoundedJsonPipeline[PlayerNarrationReview] | None = None,
+        narration_rights_decider: NarrationRightsDecider | None = None,
+        narration_text_port: NarrationTextPort | None = None,
         die: Callable[[], int] | None = None,
         worldgen: WorldGenerationService | None = None,
         character_pipeline: BoundedJsonPipeline[CharacterDraft] | None = None,
@@ -119,7 +123,20 @@ class MessageApplication(
         self._narrative_pipeline = narrative_pipeline
         self._advancement = advancement
         self._games = GameService(store)
-        self._player_narration_pipeline = player_narration_pipeline
+        if player_narration_pipeline is not None:
+            if narration_rights_decider is not None or narration_text_port is not None:
+                raise ValueError("provide narration ports or a legacy narration pipeline, not both")
+            legacy_review = LegacyPlayerNarrationReview(
+                store=store,
+                context=context,
+                pipeline=player_narration_pipeline,
+            )
+            narration_rights_decider = legacy_review
+            narration_text_port = legacy_review
+        if (narration_rights_decider is None) != (narration_text_port is None):
+            raise ValueError("narration rights and text ports must be provided together")
+        self._narration_rights_decider = narration_rights_decider
+        self._narration_text_port = narration_text_port
         self._die = die
         self._worldgen = worldgen
         self._character_pipeline = character_pipeline

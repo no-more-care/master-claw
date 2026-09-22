@@ -17,8 +17,14 @@ from masterclaw.app.advancement_safety_classifier import (
     ShadowAdvancementSafetyDecider,
 )
 from masterclaw.app.legacy_advancement_safety import LegacyAdvancementSafetyDecider
+from masterclaw.app.legacy_player_narration_review import LegacyPlayerNarrationReview
 from masterclaw.app.message_handler import MessageApplication
 from masterclaw.app.orchestrator import ChannelOrchestrator
+from masterclaw.app.player_narration_review import NarrationRightsDecider
+from masterclaw.app.player_narration_rights_classifier import (
+    PlayerNarrationRightsClassifier,
+    ShadowNarrationRightsDecider,
+)
 from masterclaw.app.state_dispatch_classifier import StateDispatchClassifier
 from masterclaw.app.state_dispatch_service import StateDispatchDecisionService
 from masterclaw.app.worldgen_service import create_world_generation_service
@@ -301,6 +307,22 @@ def _serve(settings: Settings) -> int:
         store=store,
         decider=advancement_decider,
     )
+    narration_review = LegacyPlayerNarrationReview(
+        store=store,
+        context=context,
+        pipeline=create_player_narration_pipeline(state_completion()),
+    )
+    narration_decider: NarrationRightsDecider = narration_review
+    if (
+        classifier is not None
+        and settings.classifier.player_narration_rights.mode is ClassifierMode.SHADOW
+    ):
+        narration_decider = ShadowNarrationRightsDecider(
+            narration_review,
+            PlayerNarrationRightsClassifier(
+                classifier.executor, settings.classifier.player_narration_rights
+            ),
+        )
     application = MessageApplication(
         store=store,
         context=context,
@@ -321,7 +343,8 @@ def _serve(settings: Settings) -> int:
             ),
         ),
         advancement=advancement,
-        player_narration_pipeline=create_player_narration_pipeline(state_completion()),
+        narration_rights_decider=narration_decider,
+        narration_text_port=narration_review,
         worldgen=create_world_generation_service(
             context=context,
             creative_completion=completion(ModelRole.WORLDGEN, settings.worldgen_creative_model),

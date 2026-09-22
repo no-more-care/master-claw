@@ -4,10 +4,11 @@ import logging
 from collections.abc import Mapping
 from contextvars import ContextVar, Token
 
+from masterclaw.app.context_inputs import ContextInputSnapshot
 from masterclaw.app.fiction_context import actor_character_projection
 from masterclaw.app.i18n import locale_for_text
 from masterclaw.app.scenarios import Scenario
-from masterclaw.context.assembler import AssembledContext, ContextHistory
+from masterclaw.context.assembler import AssembledContext
 from masterclaw.context.manifests import ContextManifest
 from masterclaw.domain.models import ChannelState, IncomingMessage
 from masterclaw.domain.text_safety import hidden_secret_plot, secret_fact_catalog
@@ -270,7 +271,7 @@ class HandlerSupport:
             )
         return projections
 
-    def _assemble_context(
+    def _capture_context_inputs(
         self,
         manifest: ContextManifest,
         projections: dict[str, object],
@@ -278,7 +279,7 @@ class HandlerSupport:
         game_id: str | None = None,
         channel_id: str | None = None,
         player_id: str | None = None,
-    ) -> AssembledContext:
+    ) -> ContextInputSnapshot:
         if (
             game_id is not None
             and "session_brief" in manifest.state_projections
@@ -354,6 +355,24 @@ class HandlerSupport:
                 player_id=player_id,
                 limit=manifest.recent_chat_messages,
             )
+        return ContextInputSnapshot.capture(projections, domain_events, chat_messages)
+
+    def _assemble_context(
+        self,
+        manifest: ContextManifest,
+        projections: dict[str, object],
+        *,
+        game_id: str | None = None,
+        channel_id: str | None = None,
+        player_id: str | None = None,
+    ) -> AssembledContext:
+        inputs = self._capture_context_inputs(
+            manifest,
+            projections,
+            game_id=game_id,
+            channel_id=channel_id,
+            player_id=player_id,
+        )
         with stage_span(
             "context.assembly",
             component="context_assembler",
@@ -362,8 +381,8 @@ class HandlerSupport:
         ):
             return self._context.assemble(
                 manifest,
-                projections,
-                history=ContextHistory(domain_events, chat_messages),
+                inputs.projections,
+                history=inputs.history,
             )
 
     def _locale(self, game_id: str | None) -> str:

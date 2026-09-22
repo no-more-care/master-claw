@@ -18,6 +18,7 @@ class ClassifierUseCase(StrEnum):
     ADVANCEMENT = "advancement"
     ACTION = "action"
     ACTION_CAPABILITY = "action_capability"
+    PLAYER_NARRATION_RIGHTS = "player_narration_rights"
 
 
 class ClassifierUseCaseConfig(Contract):
@@ -42,6 +43,17 @@ class ActionCapabilityClassifierConfig(ClassifierUseCaseConfig):
     blocked_threshold: float = Field(default=0.98, ge=0.5, le=1, allow_inf_nan=False)
 
 
+class NarrationRightsClassifierConfig(ClassifierUseCaseConfig):
+    allow_threshold: float = Field(default=0.95, ge=0, le=1, allow_inf_nan=False)
+    deny_threshold: float = Field(default=0.05, ge=0, le=1, allow_inf_nan=False)
+
+    @model_validator(mode="after")
+    def ordered_thresholds(self) -> NarrationRightsClassifierConfig:
+        if self.deny_threshold >= self.allow_threshold:
+            raise ValueError("narration deny_threshold must be below allow_threshold")
+        return self
+
+
 class ClassifierConfig(ClassifierUseCaseConfig):
     provider: Literal["jev"] = "jev"
     model: str = Field(default="~typesafe/jev-latest", min_length=1, max_length=200)
@@ -50,6 +62,7 @@ class ClassifierConfig(ClassifierUseCaseConfig):
     advancement: AdvancementClassifierConfig = AdvancementClassifierConfig()
     action: ClassifierUseCaseConfig = ClassifierUseCaseConfig()
     action_capability: ActionCapabilityClassifierConfig = ActionCapabilityClassifierConfig()
+    player_narration_rights: NarrationRightsClassifierConfig = NarrationRightsClassifierConfig()
 
     def for_use_case(self, use_case: ClassifierUseCase) -> ClassifierUseCaseConfig:
         if use_case is ClassifierUseCase.STATE_DISPATCH:
@@ -66,6 +79,7 @@ class ClassifierConfig(ClassifierUseCaseConfig):
             ClassifierUseCase.ADVANCEMENT: self.advancement,
             ClassifierUseCase.ACTION: self.action,
             ClassifierUseCase.ACTION_CAPABILITY: self.action_capability,
+            ClassifierUseCase.PLAYER_NARRATION_RIGHTS: self.player_narration_rights,
         }[use_case]
 
     def enabled_use_cases(self) -> tuple[ClassifierUseCaseConfig, ...]:

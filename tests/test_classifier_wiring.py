@@ -214,8 +214,9 @@ def test_advancement_thresholds_are_independent_nested_settings(monkeypatch):
 
 @pytest.mark.parametrize("state_mode", ["off", "shadow"])
 @pytest.mark.parametrize("action_mode", ["off", "shadow"])
+@pytest.mark.parametrize("narration_mode", ["off", "shadow"])
 def test_cli_state_and_advancement_share_executor_and_close_one_backend(
-    tmp_path, monkeypatch, state_mode, action_mode
+    tmp_path, monkeypatch, state_mode, action_mode, narration_mode
 ):
     import masterclaw.cli as cli
 
@@ -256,6 +257,7 @@ def test_cli_state_and_advancement_share_executor_and_close_one_backend(
             "mode": state_mode,
             "advancement": {"mode": "shadow"},
             "action_capability": {"mode": action_mode},
+            "player_narration_rights": {"mode": narration_mode},
         },
     )
     assert cli._serve(configured) == 0
@@ -267,7 +269,29 @@ def test_cli_state_and_advancement_share_executor_and_close_one_backend(
         assert observer._executor is state_executor
     else:
         assert observer is None
+    narration_decider = captured["narration_rights_decider"]
+    if narration_mode == "shadow":
+        assert narration_decider._classifier._executor is state_executor
+        assert narration_decider._baseline is captured["narration_text_port"]
+    else:
+        assert narration_decider is captured["narration_text_port"]
     assert closes == ["backend"]
+
+
+def test_narration_rights_config_is_independent_and_alone_enables_runtime(monkeypatch):
+    assert settings().classifier.player_narration_rights.mode is ClassifierMode.OFF
+    monkeypatch.setenv("MASTERCLAW_CLASSIFIER__PLAYER_NARRATION_RIGHTS__MODE", "shadow")
+    monkeypatch.setenv("MASTERCLAW_CLASSIFIER__PLAYER_NARRATION_RIGHTS__ALLOW_THRESHOLD", "0.85")
+    monkeypatch.setenv("MASTERCLAW_CLASSIFIER__PLAYER_NARRATION_RIGHTS__DENY_THRESHOLD", "0.15")
+    configured = settings()
+    policy = configured.classifier.for_use_case(ClassifierUseCase.PLAYER_NARRATION_RIGHTS)
+    assert policy.allow_threshold == 0.85 and policy.deny_threshold == 0.15
+    assert configured.classifier.mode is ClassifierMode.OFF
+    assert configured.classifier.advancement.mode is ClassifierMode.OFF
+    assert configured.classifier.action_capability.mode is ClassifierMode.OFF
+    runtime = create_semantic_classifier(configured)
+    assert runtime is not None
+    asyncio.run(runtime.aclose())
 
 
 def test_action_capability_has_independent_config_and_can_enable_runtime_alone(monkeypatch):
