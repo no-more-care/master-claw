@@ -216,3 +216,29 @@ agreement rates. Observation runs only for the durable commit owner. Replay and 
 do not observe; a crash/cancellation after commit can lose one sample without affecting the
 committed draft. Thus counts describe observed fresh commits, not every generated candidate
 or a guaranteed complete census. This sidecar neither changes acceptance nor writes prose.
+
+### State-dispatch v2: draft revision conflict
+
+`state_dispatch.v2` retains the command choice and adds `new_world_conflict` to the
+same single request only in world-editing collecting/review scenarios. The positive
+polarity means a current affirmative request for a separate/new/another world, not
+an edit of the open draft. Negated, quoted/reported, hypothetical/conditional, OOC,
+question and ambiguous messages belong to the false rubric. No additional context,
+provider call, use case, configuration, or routing authority is introduced.
+
+The noul reference is the unchanged legacy detailed-request predicate, explicitly
+tagged `reference_kinds.new_world_conflict=legacy_heuristic`. Its agreement is agreement
+with a heuristic/branch policy, **not semantic accuracy or human-reviewed gold**.
+Question aggregates separate tagged references from untagged references. Command
+reference semantics are unchanged; row-level agreement means all comparable references
+agree and therefore may include this heuristic. Taxonomy v1/v2 remain distinct report
+groups; do not compare their aggregate agreement rates as equal-label accuracy samples.
+
+Only messages that reach state dispatch are observed. The independent pre-router
+`is_world_creation_request` guard is unchanged and may bypass both models. Offline
+RU/EN fixtures record desired semantics separately from actual predicate/pre-router
+results, including existing false positives (for example, `Create a new world?`
+currently bypasses the router). These fixtures do not fabricate runtime gold labels.
+State checkpoint and committed world-revision replay invoke no classifier. A future
+active conflict policy would require a typed permit bound to canonical world/workspace
+revisions; transient observations must not block a revision or substitute that permit.

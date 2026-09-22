@@ -1,12 +1,17 @@
 from __future__ import annotations
 
 import logging
-import re
 
 from masterclaw.app.decision_checkpoints import run_checkpointed_decision
 from masterclaw.app.handlers.types import WorldWorkspaceStage
 from masterclaw.app.i18n import tr
 from masterclaw.app.scenarios import normalize_phrase
+from masterclaw.app.world_intent import (
+    _NEW_WORLD_REQUEST_PATTERNS as _NEW_WORLD_REQUEST_PATTERNS,
+)
+from masterclaw.app.world_intent import (
+    _is_detailed_new_world_request as _is_detailed_new_world_request,
+)
 from masterclaw.app.world_semantic_observer import capture_public_world_semantics
 from masterclaw.app.world_settings import (
     WORLD_SETTING_DEFAULTS,
@@ -27,31 +32,6 @@ from masterclaw.pipelines.base import PipelineValidationError
 from masterclaw.pipelines.world_intake import WorldCreationBrief
 
 logger = logging.getLogger(__name__)
-
-
-_NEW_WORLD_REQUEST_PATTERNS = (
-    re.compile(
-        r"\b(?:создай|создать|создадим|создам)\s+(?:мне\s+)?"
-        r"(?:(?:новый|другой)\s+|еще\s+один\s+)?(?:мир|сеттинг)\b"
-    ),
-    re.compile(
-        r"\b(?:сделай|начни)\s+(?:мне\s+)?"
-        r"(?:(?:новый|другой)\s+|еще\s+один\s+)(?:мир|сеттинг)\b"
-    ),
-    re.compile(
-        r"\b(?:create|design)\s+(?:(?:a|the)\s+)?"
-        r"(?:(?:new|another)\s+)?(?:world|setting)\b"
-    ),
-    re.compile(r"\bmake\s+(?:(?:a|the)\s+)?(?:new|another)\s+(?:world|setting)\b"),
-    re.compile(r"\bstart\s+(?:(?:a|the)\s+)?(?:new|another)\s+(?:world|setting)\b"),
-)
-
-
-def _is_detailed_new_world_request(content: str) -> bool:
-    """Recognize only anchored creation requests, not ordinary edits of the current world."""
-
-    normalized = normalize_phrase(content)
-    return any(pattern.search(normalized) is not None for pattern in _NEW_WORLD_REQUEST_PATTERNS)
 
 
 class WorldManagementHandlers:

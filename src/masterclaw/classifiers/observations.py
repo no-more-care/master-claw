@@ -57,6 +57,7 @@ def numeric_usage(usage: dict[str, JsonValue]) -> dict[str, JsonValue]:
 
 
 ReferenceValue = Identifier | StrictBool | FiniteFloat
+ReferenceKind = Literal["legacy_heuristic"]
 
 
 class ClassifierSkipReason(StrEnum):
@@ -108,6 +109,7 @@ class ClassifierObservation(Contract):
     outcome: Literal["off", "eligible", "uncertain", "blocked", "error"]
     answers: dict[Identifier, AnswerObservation] = Field(default_factory=dict)
     reference: dict[Identifier, ReferenceValue] = Field(default_factory=dict)
+    reference_kinds: dict[Identifier, ReferenceKind] = Field(default_factory=dict)
     agreement: bool | None = None
     decision: Identifier | None = None
     decision_reason: Identifier | None = None

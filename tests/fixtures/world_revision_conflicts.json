@@ -1,0 +1,18 @@
+[
+  {"text":"Create a new world about pirates.","legacy":true,"pre_router":true,"semantic":true},
+  {"text":"Создай новый мир о летающих городах.","legacy":true,"pre_router":true,"semantic":true},
+  {"text":"Design another setting about pirates.","legacy":true,"pre_router":false,"semantic":true},
+  {"text":"Начни другой сеттинг про дирижабли.","legacy":true,"pre_router":false,"semantic":true},
+  {"text":"Do not create a new world; revise this draft.","legacy":true,"pre_router":false,"semantic":false},
+  {"text":"Не создавай новый мир, измени текущий.","legacy":false,"pre_router":false,"semantic":false},
+  {"text":"Не надо: создай новый мир — это не моя просьба.","legacy":true,"pre_router":false,"semantic":false},
+  {"text":"If we create a new world, pirates could live there.","legacy":true,"pre_router":false,"semantic":false},
+  {"text":"Если создай новый мир было бы командой, что случилось бы?","legacy":true,"pre_router":false,"semantic":false},
+  {"text":"\"Create a new world\"","legacy":true,"pre_router":false,"semantic":false},
+  {"text":"«Создай новый мир»","legacy":true,"pre_router":false,"semantic":false},
+  {"text":"Create a new world?","legacy":true,"pre_router":true,"semantic":false},
+  {"text":"Maybe design another setting someday.","legacy":true,"pre_router":false,"semantic":false},
+  {"text":"[ooc] design another setting","legacy":true,"pre_router":false,"semantic":false},
+  {"text":"Please revise the current draft with more pirates.","legacy":false,"pre_router":false,"semantic":false},
+  {"text":"Добавь дирижабли в текущий мир.","legacy":false,"pre_router":false,"semantic":false}
+]

@@ -99,6 +99,8 @@ def _validate(observation: ClassifierObservation, stage: str) -> None:
     """Strengthen the storage shape with semantic and safe-aggregate-value checks."""
     if stage != f"classifier.{observation.use_case}":
         raise ValueError("stage mismatch")
+    if not set(observation.reference_kinds) <= observation.reference.keys():
+        raise ValueError("reference kind question IDs mismatch")
     if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_.:-]*\.v[1-9][0-9]*", observation.taxonomy_version):
         raise ValueError("unversioned taxonomy")
     private_values = {value for value in (observation.request_id, observation.request_key) if value}
@@ -294,7 +296,9 @@ def _summarize(observations: list[ClassifierObservation]) -> dict[str, object]:
         comparisons = []
         for key, answer in item.answers.items():
             comparison = _comparison(answer, item.reference.get(key))
-            question_rows[(key, answer.type)].append((answer, comparison))
+            question_rows[(key, answer.type, item.reference_kinds.get(key, ""))].append(
+                (answer, comparison)
+            )
             if comparison is not None:
                 comparisons.append(comparison)
         if item.decision is not None and item.decision_reference is not None:
@@ -305,7 +309,7 @@ def _summarize(observations: list[ClassifierObservation]) -> dict[str, object]:
         elif comparisons:
             row_agreements.append(all(comparison[2] for comparison in comparisons))
     questions = []
-    for (key, answer_type), rows in sorted(question_rows.items()):
+    for (key, answer_type, reference_kind), rows in sorted(question_rows.items()):
         comparisons = [comparison for _, comparison in rows if comparison is not None]
         metrics = {
             "question": key,
@@ -316,6 +320,8 @@ def _summarize(observations: list[ClassifierObservation]) -> dict[str, object]:
             "agreement_rate": _rate(sum(value[2] for value in comparisons), len(comparisons)),
             "confusion": _matrix(comparisons),
         }
+        if reference_kind:
+            metrics["reference_kind"] = reference_kind
         if answer_type == "noul":
             metrics["p_true_buckets"] = _buckets(
                 [

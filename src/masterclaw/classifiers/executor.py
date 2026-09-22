@@ -30,6 +30,7 @@ from masterclaw.classifiers.observations import (
     AnswerObservation,
     ClassifierObservation,
     ClassifierSkipReason,
+    ReferenceKind,
     ReferenceValue,
     SkippedClassifierObservation,
     metadata_identifier,
@@ -52,6 +53,7 @@ class SemanticEvaluationContext(Contract):
     use_case: Identifier
     scope: Identifier | None = None
     reference: dict[Identifier, ReferenceValue] = Field(default_factory=dict)
+    reference_kinds: dict[Identifier, ReferenceKind] = Field(default_factory=dict)
     decision_reference: Identifier | None = None
 
 
@@ -137,7 +139,11 @@ class SemanticClassifierExecutor:
                     self._validate_policy_context(request, policy, context)
                 except ValueError:
                     raise ClassifierRequestError("invalid semantic evaluation request") from None
-                attributes.update(request_key=request.request_key, reference=context.reference)
+                attributes.update(
+                    request_key=request.request_key,
+                    reference=context.reference,
+                    reference_kinds=context.reference_kinds,
+                )
                 async with asyncio.timeout(policy.timeout_seconds):
                     response = await self._port.classify(request)
                     try:
@@ -215,6 +221,8 @@ class SemanticClassifierExecutor:
     ) -> None:
         if not set(context.reference) <= request.questions.keys():
             raise ValueError("reference question IDs mismatch")
+        if not set(context.reference_kinds) <= context.reference.keys():
+            raise ValueError("reference kind question IDs mismatch")
         for key, reference in context.reference.items():
             question = request.questions[key]
             if isinstance(question, ChoiceQuestion):

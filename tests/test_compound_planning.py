@@ -283,7 +283,7 @@ def test_compound_routing_shadow_remains_one_state_dispatch_call_and_replay_skip
 
         async def classify(self, request):
             self.calls += 1
-            assert request.taxonomy_version == "state_dispatch.v1"
+            assert request.taxonomy_version == "state_dispatch.v2"
             return ClassificationResponse(
                 request_key=request.request_key,
                 taxonomy_version=request.taxonomy_version,

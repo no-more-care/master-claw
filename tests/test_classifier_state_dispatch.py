@@ -80,7 +80,18 @@ class Classifier:
                         else (1 - self.confidence) / (len(labels) - 1)
                         for label in labels
                     },
-                }
+                },
+                **(
+                    {
+                        "new_world_conflict": {
+                            "type": "noul",
+                            "noul": 0.01,
+                            "probabilities": {"true": 0.01, "false": 0.99},
+                        }
+                    }
+                    if "new_world_conflict" in request.questions
+                    else {}
+                ),
             },
         )
 
