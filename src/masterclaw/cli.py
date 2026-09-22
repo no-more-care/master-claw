@@ -142,6 +142,15 @@ def build_parser() -> argparse.ArgumentParser:
     routing_quality.add_argument("--min-count", type=int, default=2)
     routing_quality.add_argument("--limit", type=int, default=50)
     routing_quality.add_argument("--format", choices=("table", "json"), default="table")
+    calibration = subparsers.add_parser(
+        "classifier-calibration-report", help="Read-only classifier shadow calibration aggregates"
+    )
+    calibration.add_argument("--database", default="data/masterclaw.sqlite3")
+    calibration.add_argument("--since-hours", type=int, default=168)
+    calibration.add_argument("--use-case")
+    calibration.add_argument("--scope")
+    calibration.add_argument("--limit", type=int, default=50)
+    calibration.add_argument("--format", choices=("table", "json"), default="table")
     return parser
 
 
@@ -194,6 +203,27 @@ def main(argv: list[str] | None = None) -> int:
             suite=BenchmarkSuite(args.suite),
         )
         print(json.dumps(report["summaries"], ensure_ascii=False, indent=2))
+        return 0
+    if args.command == "classifier-calibration-report":
+        from masterclaw.classifier_calibration import (
+            SQLiteClassifierSpanSource,
+            classifier_calibration_report,
+            render_classifier_calibration_report,
+        )
+
+        try:
+            report = classifier_calibration_report(
+                SQLiteClassifierSpanSource(args.database),
+                since_hours=args.since_hours,
+                use_case=args.use_case,
+                scope=args.scope,
+                limit=args.limit,
+            )
+        except (ValueError, sqlite3.DatabaseError):
+            raise SystemExit(
+                "classifier calibration report: invalid options or unreadable database"
+            ) from None
+        print(render_classifier_calibration_report(report, args.format))
         return 0
     if args.command == "performance-report":
         from masterclaw.performance import performance_report, render_report

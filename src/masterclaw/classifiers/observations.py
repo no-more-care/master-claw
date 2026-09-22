@@ -71,6 +71,7 @@ class AnswerObservation(Contract):
 class ClassifierObservation(Contract):
     """Persisted as existing stage-span attributes; contains no state, arguments or player IDs."""
 
+    observation_schema_version: Literal["v1"] = "v1"
     use_case: Identifier
     mode: ClassifierMode
     scope: Identifier | None = None

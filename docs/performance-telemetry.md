@@ -96,10 +96,9 @@ configuration/authentication/request/response failures from rate-limit/server/ti
 failures. A handled shadow failure leaves the enclosing span status `ok` because routing succeeds
 using the current router. Cancellation still propagates.
 
-For calibration, query `attributes_json` on spans where `stage = 'classifier.state_dispatch'`.
-The current performance report includes their latency, but its LLM cost summary and the routing
-quality report do not yet aggregate classifier distributions or costs. The durable observations
-are available for that separate reporting work; they are not lost when a model alias changes.
+Classifier calibration is available through the read-only report below. The performance report's
+LLM cost summary and the routing-quality report remain separate; do not add their model-call costs
+to classifier span costs as though these were disjoint billing sources.
 
 Jev reuses `MASTERCLAW_OPENROUTER_API_KEY`, optionally overridden by
 `MASTERCLAW_CLASSIFIER_API_KEY`. Empty credentials fail during startup when shadow is enabled.
@@ -113,3 +112,81 @@ state-dispatch policy. The original flat `MASTERCLAW_CLASSIFIER__MODE`, `__THRES
 `ACTION` have separate policy structures defaulting to off; this change adds no application calls
 for those use cases and no authority modes. The executor evaluates choice confidence plus the
 selected probability, noul distance from uncertainty via its stronger polarity, and score confidence.
+
+## Weekly classifier calibration report
+
+```bash
+masterclaw classifier-calibration-report --database data/masterclaw.sqlite3 --since-hours 168
+masterclaw classifier-calibration-report --since-hours 168 --use-case state_dispatch --scope play --format json
+masterclaw classifier-calibration-report --since-hours 168 --use-case player_narration_rights --limit 50 --format json
+```
+
+This command opens an **existing** SQLite file with `mode=ro`; it never calls `initialize`, applies
+migrations, creates a missing database, loads application settings, constructs a provider, or
+writes gameplay/telemetry. An empty SQLite database or one without `stage_spans` produces an empty
+report. Only `stage LIKE 'classifier.%'` rows within the UTC time window are read. A small query
+port isolates SQLite details from aggregation/rendering. JSON is key-sorted and table order is
+deterministic; no timestamps identifying individual observations are emitted.
+
+New executor spans explicitly serialize `observation_schema_version: "v1"`. The report requires
+this field in the raw attributes, not a Pydantic-inferred default. Rows without it are `legacy`,
+including previously stored generic-shaped observations; unsupported explicit versions are
+`unknown_version`. Invalid JSON/current-v1 contracts, inconsistent primitive distributions,
+unsafe metadata, unversioned taxonomy names and stage/use-case mismatches are `malformed`.
+These categories are separate counts and never enter calibrated rates, latency or usage totals.
+Any syntactically versioned taxonomy is accepted with observation schema v1, including generic
+score use cases; the reporter does not import application adapters or whitelist production tasks.
+The model/provider's reported `version` is a grouping label, not the observation schema version.
+No old rows are rewritten or silently promoted by this command.
+
+Groups separate use case, scope, mode, taxonomy, requested/resolved model, provider/upstream
+provider and resolved version. `--limit` selects groups by descending count, then these dimensions
+lexically; all-window summary totals are computed **before** group limiting. Omitted group count
+is explicit. `--use-case`/`--scope` are exact matches against raw metadata. Parseable rows outside
+those filters are `filtered_out`; unparseable rows cannot be assigned a scope and are counted as
+malformed within the requested time window. Thus scanned = filtered-out + valid + legacy +
+malformed + unknown-version. Group question statistics are never mixed across taxonomy scales.
+
+Metric denominators:
+
+- Outcome rates (`eligible`, `uncertain`, `blocked`, `error`, `off`) divide by all valid matching
+  observations. A handled classifier error counts as an error even when the outer span is `ok`.
+  Error category and transient true/false/null are reported separately; null means unreported.
+- Agreement ignores the stored `agreement` boolean and is recomputed. A successful row contributes
+  once when it has both aggregate decision and explicit decision reference; comparison uses
+  `decision_comparison` when present (e.g. capable→proceed), otherwise `decision`. Without an
+  aggregate pair, a row contributes once if any explicit question reference is comparable, and
+  agrees only if every comparable question agrees. Missing references, references to absent
+  questions, wrong-type/out-of-range references, error/off rows are excluded, not disagreements.
+  The denominator is `comparable_rows`; zero gives null, never a fabricated zero accuracy.
+- Per-question matrices/buckets use only that question's explicit comparable reference. Aggregate
+  ALLOW/DENY is never treated as four noul gold labels. Choice compares declared labels; noul uses
+  p(true) >= .5 against a boolean; score compares numeric values with absolute tolerance 1e-6
+  (and Python's default relative tolerance). Score references must lie within the recorded scale.
+- Latency p50/p95 uses nearest rank (ceil(p*n)) over valid finite nonnegative observation
+  `latency_ms`, including error/off rows; no samples gives null. Raw enclosing span duration is
+  not substituted. Choice selected-probability and confidence buckets are separate; noul reports
+  p(true) buckets only, never treating yes-probability as confidence. Score reports confidence
+  buckets plus score min/max/mean on its own scale. Buckets are [0,.5), [.5,.8), [.8,.9),
+  [.9,.95), [.95,1], with counts and explicit-reference denominators.
+- Cost is counted once per valid span: observation `cost` wins, otherwise numeric `usage.cost`.
+  Nested cost details are never added. Unknown/nonfinite/negative usage costs are missing, not zero
+  samples; `observed_rows`/`missing_rows` expose coverage. Tokens use `input_tokens` before
+  `prompt_tokens`, `output_tokens` before `completion_tokens`; `total_tokens` wins, otherwise total
+  is derived only when both input and output are known. Only finite nonnegative integral values
+  count. Cached/reasoning detail counters are subsets and are not added again. Token sample counts
+  accompany each sum. Usage is never multiplied by question count, joined to `llm_calls`, or
+  deduplicated using request keys: two actual invocations of identical input remain two costs.
+  A cost sum exceeding floating-point range is null (with coverage retained), never Infinity or
+  a report crash. Such anomalous metadata is not usable billing evidence.
+
+Output allowlists aggregate dimensions, stable labels and numeric metrics. It never emits
+request/request-key, trace/event/game/channel/player IDs, raw state/history/messages/context,
+provider error bodies, span operations, or arbitrary usage metadata. Validation failures are
+counted without rendering their values or exception messages.
+
+Weekly: save JSON for the same window/filter set, inspect exclusion and missing-reference/cost
+coverage first, compare model-alias resolution and error/latency/cost changes, then compare
+per-taxonomy distributions and explicit-reference disagreement cases. Use independently reviewed
+examples before changing thresholds. This report is calibration evidence, **not automatic
+threshold promotion**, a safety proof, an authority mode or permission to publish classifier prose.

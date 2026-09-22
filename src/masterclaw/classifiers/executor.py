@@ -85,6 +85,7 @@ class SemanticClassifierExecutor:
     ) -> SemanticEvaluation:
         started = time.perf_counter()
         attributes: dict[str, object] = {
+            "observation_schema_version": "v1",
             "use_case": context.use_case,
             "mode": policy.mode,
             "scope": context.scope,
