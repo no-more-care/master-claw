@@ -6,7 +6,6 @@ from collections.abc import Mapping
 from dataclasses import replace
 
 from masterclaw.app.action_preparation import PreparedAction
-from masterclaw.app.decision_checkpoints import run_checkpointed_decision
 from masterclaw.app.handlers.information import PreparedRoleplay
 from masterclaw.app.handlers.play import (
     PreparedAdvancement,
@@ -14,7 +13,6 @@ from masterclaw.app.handlers.play import (
 )
 from masterclaw.app.handlers.types import FictionContextChangedError
 from masterclaw.app.i18n import tr
-from masterclaw.app.scenarios import SCENARIOS, ScenarioId
 from masterclaw.context.manifests import PipelineName, manifest_for
 from masterclaw.domain.mechanics import OutcomeAuthority
 from masterclaw.domain.models import HandlerResponse, IncomingMessage, OutboundDelivery
@@ -37,55 +35,18 @@ class CompoundPlayHandlers:
         clarification_answer: str | None = None,
     ) -> str | HandlerResponse:
         locale = self._locale(game_id)
-        if self._compound_play_pipeline is None:
+        if not self._compound_planning.available:
             return tr(locale, "conversation_clarification")
-        projections = self._scenario_context_projections(
-            SCENARIOS[ScenarioId.PLAY],
+        snapshot = self._compound_planning.capture(
+            message=message,
             game_id=game_id,
-            channel_id=message.channel_id,
-            player_id=message.author_id,
-            workspace=None,
-            pending=None,
+            replacing_pending=replacing_pending,
+            clarification_answer=clarification_answer,
         )
-        original_request = (
-            str(replacing_pending.payload.get("original_request") or message.content)
-            if replacing_pending is not None
-            else message.content
-        )
-        projections["player_request"] = (
-            original_request
-            if clarification_answer is None
-            else {
-                "original_request": original_request,
-                "pending_question": replacing_pending.prompt,
-                "player_answer": clarification_answer,
-                "prior_answers": replacing_pending.payload.get("clarification_answers", []),
-            }
-        )
+        original_request = snapshot.original_request
         manifest = manifest_for(PipelineName.COMPOUND_PLAY)
-        assembled = self._assemble_context(
-            manifest,
-            projections,
-            game_id=game_id,
-            channel_id=message.channel_id,
-            player_id=message.author_id,
-        )
         try:
-            task = "Decompose this compound play request without resolving it."
-            if clarification_answer is not None:
-                task += (
-                    " Continue the exact original request using the supplied typed pending "
-                    "question and player answer; do not discard either one."
-                )
-            plan = await run_checkpointed_decision(
-                store=self._store,
-                event_id=message.event_id,
-                pipeline_key="compound_play",
-                pipeline=self._compound_play_pipeline,
-                task=task,
-                context=assembled,
-                game_id=game_id,
-            )
+            plan = (await self._compound_planning.plan(snapshot)).plan
         except PipelineValidationError:
             logger.warning("compound_play_invalid event_id=%s", message.event_id, exc_info=True)
             return tr(locale, manifest.on_invalid.value)

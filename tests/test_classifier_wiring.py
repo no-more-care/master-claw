@@ -263,6 +263,10 @@ def test_cli_state_and_advancement_share_executor_and_close_one_backend(
         },
     )
     assert cli._serve(configured) == 0
+    from masterclaw.app.legacy_compound_planning import LegacyCompoundPlanDecider
+
+    assert isinstance(captured["compound_plan_decider"], LegacyCompoundPlanDecider)
+    assert "compound_play_pipeline" not in captured
     state_executor = captured["state_decisions"]._classifier._executor
     advancement_executor = captured["advancement"]._decider._classifier._executor
     assert state_executor is advancement_executor

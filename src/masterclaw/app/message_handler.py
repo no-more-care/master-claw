@@ -6,6 +6,7 @@ from collections.abc import Callable
 from masterclaw.app.action_preparation import ActionCapabilityObserver, ActionPreparationService
 from masterclaw.app.action_service import ActionService
 from masterclaw.app.advancement_coordinator import AdvancementCoordinator
+from masterclaw.app.compound_planning import CompoundPlanDecider, CompoundPlanningCoordinator
 from masterclaw.app.game_service import GameService
 from masterclaw.app.handlers.commands import CommandHandlers
 from masterclaw.app.handlers.compound import CompoundPlayHandlers
@@ -16,6 +17,10 @@ from masterclaw.app.handlers.preparation import PreparationHandlers
 from masterclaw.app.handlers.support import HandlerSupport
 from masterclaw.app.handlers.world_management import WorldManagementHandlers
 from masterclaw.app.i18n import tr
+from masterclaw.app.legacy_compound_planning import (
+    LegacyCompoundPlanDecider,
+    LegacyCompoundPlanningCapture,
+)
 from masterclaw.app.legacy_player_narration_review import LegacyPlayerNarrationReview
 from masterclaw.app.legacy_reserve_recovery import (
     LegacyReserveRecoveryDecider,
@@ -103,6 +108,8 @@ class MessageApplication(
         rules_question_pipeline: BoundedJsonPipeline[ConversationReply] | None = None,
         roleplay_reply_pipeline: BoundedJsonPipeline[ConversationReply] | None = None,
         compound_play_pipeline: BoundedJsonPipeline[CompoundPlayPlan] | None = None,
+        compound_plan_decider: CompoundPlanDecider | None = None,
+        compound_planning: CompoundPlanningCoordinator | None = None,
         advancement_intake_pipeline: BoundedJsonPipeline[AdvancementRequest] | None = None,
         game_configuration_pipeline: BoundedJsonPipeline[GameConfigurationRequest] | None = None,
         roll_confirmation_pipeline: BoundedJsonPipeline[RollConfirmationRequest] | None = None,
@@ -180,7 +187,28 @@ class MessageApplication(
         self._scene_question_pipeline = scene_question_pipeline
         self._rules_question_pipeline = rules_question_pipeline
         self._roleplay_reply_pipeline = roleplay_reply_pipeline
-        self._compound_play_pipeline = compound_play_pipeline
+        if (
+            sum(
+                value is not None
+                for value in (compound_play_pipeline, compound_plan_decider, compound_planning)
+            )
+            > 1
+        ):
+            raise ValueError(
+                "provide compound coordinator, decider or legacy pipeline, not multiple"
+            )
+        if compound_play_pipeline is not None:
+            compound_plan_decider = LegacyCompoundPlanDecider(
+                store=store, pipeline=compound_play_pipeline
+            )
+        self._compound_planning = compound_planning or CompoundPlanningCoordinator(
+            decider=compound_plan_decider,
+            capture=LegacyCompoundPlanningCapture(
+                context=context,
+                project_scenario=self._scenario_context_projections,
+                capture_context=self._capture_context_inputs,
+            ),
+        )
         self._advancement_intake_pipeline = advancement_intake_pipeline
         self._game_configuration_pipeline = game_configuration_pipeline
         self._roll_confirmation_pipeline = roll_confirmation_pipeline

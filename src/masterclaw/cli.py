@@ -17,6 +17,7 @@ from masterclaw.app.advancement_safety_classifier import (
     ShadowAdvancementSafetyDecider,
 )
 from masterclaw.app.legacy_advancement_safety import LegacyAdvancementSafetyDecider
+from masterclaw.app.legacy_compound_planning import LegacyCompoundPlanDecider
 from masterclaw.app.legacy_player_narration_review import LegacyPlayerNarrationReview
 from masterclaw.app.legacy_reserve_recovery import LegacyReserveRecoveryDecider
 from masterclaw.app.message_handler import MessageApplication
@@ -404,7 +405,9 @@ def _serve(settings: Settings) -> int:
         scene_question_pipeline=create_scene_question_pipeline(reasoning_completion()),
         rules_question_pipeline=create_rules_question_pipeline(reasoning_completion()),
         roleplay_reply_pipeline=create_roleplay_reply_pipeline(completion(ModelRole.NARRATIVE)),
-        compound_play_pipeline=create_compound_play_pipeline(reasoning_completion()),
+        compound_plan_decider=LegacyCompoundPlanDecider(
+            store=store, pipeline=create_compound_play_pipeline(reasoning_completion())
+        ),
         advancement_intake_pipeline=create_advancement_intake_pipeline(reasoning_completion()),
         game_configuration_pipeline=create_game_configuration_pipeline(state_completion()),
         roll_confirmation_pipeline=create_roll_confirmation_pipeline(state_completion()),
